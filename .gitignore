@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+.vscode/
+Facturas_Emitidas/*.pdf
+*.xlsx
+# No ignoramos los excel si queremos que se suban inicialmente, 
+# pero luego Railway los manejará en su filesystem.
+# De momento los dejamos para que el sistema tenga datos al arrancar.
