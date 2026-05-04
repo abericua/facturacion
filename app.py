@@ -312,6 +312,18 @@ def void_invoice(invoice_num):
             return True
     return False
 
+@st.cache_data(ttl=60)
+def load_sales():
+    if os.path.exists(SALES_FILE):
+        try:
+            df = pd.read_excel(SALES_FILE)
+            if not df.empty:
+                # Asegurar que FECHA sea datetime
+                df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
+                return df.sort_values(by='FECHA', ascending=False)
+        except: pass
+    return pd.DataFrame()
+
 # --- INTERFAZ DE LOGIN ---
 if not st.session_state.logged_in:
     st.markdown("""
@@ -399,9 +411,9 @@ with st.sidebar:
 # TABS PRINCIPALES
 # Restringir pestañas según el rol
 if st.session_state.user_data['rol'] == 'admin':
-    tab1, tab2, tab3 = st.tabs(["🛒 Facturación de Productos", "🛑 Gestión de Anulaciones", "📦 Inventario de Stock"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🛒 Facturación", "🛑 Anulaciones", "📦 Inventario", "📊 Historial"])
 else:
-    tab1, = st.tabs(["🛒 Facturación de Productos"])
+    tab1, = st.tabs(["🛒 Facturación"])
     st.info(f"Sesión activa: {st.session_state.user_data['nombre']} (Vendedor)")
 
 with tab1:
@@ -667,6 +679,64 @@ if st.session_state.user_data['rol'] == 'admin':
                     </div>
                 </div>
             """, unsafe_allow_html=True)
+
+if st.session_state.user_data['rol'] == 'admin':
+    with tab4:
+        st.markdown("<h2 style='color:#1e3a8a;'>📊 Historial de Ventas Corporativas</h2>", unsafe_allow_html=True)
+        
+        df_sales = load_sales()
+        
+        if df_sales.empty:
+            st.warning("No hay registros de ventas todavía.")
+        else:
+            # Filtros de Historial
+            c_h1, c_h2, c_h3 = st.columns([2, 1, 1])
+            with c_h1:
+                search_hist = st.text_input("🔍 Buscar por Cliente o Producto", placeholder="Nombre...")
+            with c_h2:
+                clients_list = ["TODOS"] + sorted(df_sales['CLIENTE'].dropna().unique().tolist())
+                filter_client = st.selectbox("Filtrar por Cliente", clients_list)
+            with c_h3:
+                inv_list = ["TODAS"] + sorted(df_sales['NRO_FACTURA'].astype(str).unique().tolist())
+                filter_inv = st.selectbox("Filtrar por Nro Factura", inv_list)
+            
+            # Aplicar filtros
+            df_hist = df_sales.copy()
+            if search_hist:
+                df_hist = df_hist[
+                    df_hist['CLIENTE'].str.contains(search_hist, case=False, na=False) |
+                    df_hist['DESCRIPCION'].str.contains(search_hist, case=False, na=False)
+                ]
+            if filter_client != "TODOS":
+                df_hist = df_hist[df_hist['CLIENTE'] == filter_client]
+            if filter_inv != "TODAS":
+                df_hist = df_hist[df_hist['NRO_FACTURA'].astype(str) == filter_inv]
+            
+            # Resumen del Historial Filtrado
+            total_gs = df_hist['PRECIO GS'].sum()
+            total_usd = df_hist['PRECIO USD'].sum()
+            
+            r1, r2, r3 = st.columns(3)
+            r1.metric("Ventas Registradas", len(df_hist))
+            r2.metric("Total Gs.", f"₲ {total_gs:,.0f}".replace(",", "."))
+            r3.metric("Total USD", f"$ {total_usd:,.2f}")
+            
+            st.divider()
+            
+            # Mostrar tabla
+            st.dataframe(
+                df_hist[['FECHA', 'NRO_FACTURA', 'CLIENTE', 'DESCRIPCION', 'PRECIO GS', 'PRECIO USD', 'VENDEDOR', 'FORMA PAGO']],
+                use_container_width=True,
+                hide_index=True
+            )
+            
+            # Botón para descargar el Excel completo
+            st.download_button(
+                label="📥 Exportar Historial Completo (Excel)",
+                data=open(SALES_FILE, 'rb'),
+                file_name=f"HISTORIAL_VENTAS_SOLPRO_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
         st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
         if st.button("🔄 Actualizar Inventario", key="refresh_inv"):
