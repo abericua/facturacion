@@ -558,8 +558,18 @@ with tab1:
                     update_inventory(sales_to_log)
                     
                     st.success(f"✅ Factura {nro_factura} emitida y registrada.")
+                    
+                    # Botón para descarga inmediata
+                    with open(pdf_path, "rb") as f:
+                        st.download_button(
+                            label="📥 DESCARGAR FACTURA PDF",
+                            data=f,
+                            file_name=pdf_filename,
+                            mime="application/pdf"
+                        )
+                    
+                    st.info("Haga clic arriba para guardar el archivo. Luego puede limpiar los campos para una nueva factura.")
                     st.session_state.factura_items = []
-                    st.rerun()
 
 if st.session_state.user_data['rol'] == 'admin':
     with tab2:
