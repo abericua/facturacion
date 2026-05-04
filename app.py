@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import json
 import hashlib
+import requests
 from datetime import datetime
 from pdf_generator import generate_invoice_pdf
 
@@ -324,6 +325,26 @@ def load_sales():
         except: pass
     return pd.DataFrame()
 
+def call_ai(prompt, system_prompt, api_url):
+    try:
+        payload = {
+            "model": "local-model", 
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7
+        }
+        # Limpiar la URL por si acaso
+        api_url = api_url.strip().rstrip('/')
+        response = requests.post(f"{api_url}/chat/completions", json=payload, timeout=30)
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            return f"Error de IA ({response.status_code}): {response.text}"
+    except Exception as e:
+        return f"Error de conexión: {str(e)}. Verifica que el túnel de la PC Madre esté activo."
+
 # --- INTERFAZ DE LOGIN ---
 if not st.session_state.logged_in:
     st.markdown("""
@@ -399,6 +420,13 @@ with st.sidebar:
     st.divider()
     if st.button("🔄 SINCRONIZAR EXCEL (STOCK)"):
         st.cache_data.clear()
+        st.success("Datos sincronizados!")
+
+    if st.session_state.user_data['rol'] == 'admin':
+        st.divider()
+        st.header("🤖 SOLPRO AI Config")
+        ai_url = st.text_input("URL de LM Studio (Túnel)", value="http://localhost:1234/v1", help="Pega aquí la URL de Ngrok o Cloudflare")
+        st.cache_data.clear()
         st.success("¡Datos sincronizados!")
         st.rerun()
 
@@ -411,7 +439,7 @@ with st.sidebar:
 # TABS PRINCIPALES
 # Restringir pestañas según el rol
 if st.session_state.user_data['rol'] == 'admin':
-    tab1, tab2, tab3, tab4 = st.tabs(["🛒 Facturación", "🛑 Anulaciones", "📦 Inventario", "📊 Historial"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🛒 Facturación", "🛑 Anulaciones", "📦 Inventario", "📊 Historial", "🤖 Asistente AI"])
 else:
     tab1, = st.tabs(["🛒 Facturación"])
     st.info(f"Sesión activa: {st.session_state.user_data['nombre']} (Vendedor)")
@@ -742,3 +770,40 @@ if st.session_state.user_data['rol'] == 'admin':
         if st.button("🔄 Actualizar Inventario", key="refresh_inv"):
             st.cache_data.clear()
             st.rerun()
+
+if st.session_state.user_data['rol'] == 'admin':
+    with tab5:
+        st.markdown("<h2 style='color:#1e3a8a;'>?? Asistente Inteligente SOLPRO</h2>", unsafe_allow_html=True)
+        st.info("Este asistente est� conectado a tu **PC Madre**. Puede analizar ventas, stock y ayudarte con decisiones de negocio.")
+        
+        # Historial de chat en session_state
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+            
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+                
+        if prompt := st.chat_input("�En qu� puedo ayudarte hoy?"):
+            st.session_state.chat_history.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+                
+            with st.chat_message("assistant"):
+                # Preparar Contexto
+                df_p = load_products()
+                df_s = load_sales()
+                
+                contexto = f"""
+                Eres el asistente de gesti�n de SOLPRO. 
+                DATOS ACTUALES:
+                - Productos en cat�logo: {len(df_p) if not df_p.empty else 0}
+                - Ventas registradas: {len(df_s) if not df_s.empty else 0}
+                - Productos con bajo stock (<5): {len(df_p[df_p['STOCK'] < 5]) if not df_p.empty else 0}
+                - �ltima venta: {df_s.iloc[0]['CLIENTE'] if not df_s.empty else 'Ninguna'}
+                """
+                
+                with st.spinner("Pensando..."):
+                    respuesta = call_ai(prompt, contexto, ai_url)
+                    st.markdown(respuesta)
+                    st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
