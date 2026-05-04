@@ -7,8 +7,8 @@ import requests
 from datetime import datetime
 from pdf_generator import generate_invoice_pdf
 
-# ConfiguraciÃÂ³n de pÃÂ¡gina
-st.set_page_config(page_title="SOLPRO - FacturaciÃÂ³n Corporativa", layout="wide", page_icon="Ã°ÂÂÂ")
+# ConfiguraciÃ³n de pÃ¡gina
+st.set_page_config(page_title="SOLPRO - FacturaciÃ³n Corporativa", layout="wide", page_icon="ð")
 
 # Estilos Corporativos Premium
 st.markdown("""
@@ -76,7 +76,7 @@ st.markdown("""
         background-color: #fff !important;
     }
 
-    /* Etiquetas mÃÂ¡s legibles */
+    /* Etiquetas mÃ¡s legibles */
     label p {
         font-size: 15px !important;
         font-weight: 600 !important;
@@ -84,7 +84,7 @@ st.markdown("""
         margin-bottom: 8px !important;
     }
 
-    /* Fix para Selectbox - Sin truncado y MenÃÂº Adaptable */
+    /* Fix para Selectbox - Sin truncado y MenÃº Adaptable */
     div[data-testid="stSelectbox"] [data-baseweb="select"] div {
         white-space: normal !important;
         text-overflow: initial !important;
@@ -137,7 +137,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Rutas de archivos dinÃÂ¡micas (compatibles con Local y Servidor)
+# Rutas de archivos dinÃ¡micas (compatibles con Local y Servidor)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PRODUCTS_FILE = os.path.join(BASE_DIR, "LISTA DE PRECIOS DE VENTA.xlsx")
 SALES_FILE = os.path.join(BASE_DIR, "VENTAS TOTALES 2026.xlsx")
@@ -149,7 +149,7 @@ LOGO_FILE = os.path.join(BASE_DIR, "factura solpro 2026.png")
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-# --- SEGURIDAD Y SESIÃÂN ---
+# --- SEGURIDAD Y SESIÃN ---
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -180,7 +180,7 @@ def load_products():
         df_final['CODIGO'] = df.iloc[:, 0].astype(str)
         df_final['LINEA'] = df.iloc[:, 1].astype(str)
         df_final['DESCRIPCION'] = df.iloc[:, 2].astype(str)
-        df_final['PRECIO'] = df.iloc[:, 3].astype(str) # No forzar a numÃÂ©rico porque tiene letras (Gs., U$D)
+        df_final['PRECIO'] = df.iloc[:, 3].astype(str) # No forzar a numÃ©rico porque tiene letras (Gs., U$D)
         
         if len(df.columns) >= 6:
             df_final['STOCK'] = pd.to_numeric(df.iloc[:, 5], errors='coerce').fillna(0)
@@ -207,7 +207,7 @@ def load_clients():
                     all_clients[c['nombre'].upper()] = c
         except: pass
         
-    # 2. Extraer desde Excel de Ventas (histÃÂ³rico)
+    # 2. Extraer desde Excel de Ventas (histÃ³rico)
     if os.path.exists(SALES_FILE):
         try:
             df_sales = pd.read_excel(SALES_FILE)
@@ -248,7 +248,7 @@ def save_client(client_data):
     st.cache_data.clear() # Forzar recarga de clientes
 
 def update_inventory(sales_list):
-    """Actualiza el stock en el archivo de precios basÃÂ¡ndose en las ventas."""
+    """Actualiza el stock en el archivo de precios basÃ¡ndose en las ventas."""
     if os.path.exists(PRODUCTS_FILE):
         # Leer el archivo original (manteniendo formato de columnas original)
         df = pd.read_excel(PRODUCTS_FILE)
@@ -260,14 +260,14 @@ def update_inventory(sales_list):
 
         for sale in sales_list:
             codigo = sale['COD_PRODUCTO']
-            # Buscar en la primera columna (donde estÃÂ¡n los IDs)
+            # Buscar en la primera columna (donde estÃ¡n los IDs)
             mask = df.iloc[start_row:, 0].astype(str).str.strip() == str(codigo).strip()
             if mask.any():
                 idx = df[mask].index[0]
-                # Column6 es el stock (ÃÂ­ndice 5)
+                # Column6 es el stock (Ã­ndice 5)
                 # Si no existe la columna 6, crearla
                 if len(df.columns) < 6:
-                    # Asegurar que existan columnas hasta el ÃÂ­ndice 5
+                    # Asegurar que existan columnas hasta el Ã­ndice 5
                     for col_idx in range(len(df.columns), 6):
                         df[f'Column{col_idx+1}'] = 0
                 
@@ -343,7 +343,7 @@ def call_ai(prompt, system_prompt, api_url):
         else:
             return f"Error de IA ({response.status_code}): {response.text}"
     except Exception as e:
-        return f"Error de conexiÃÂ³n: {str(e)}. Verifica que el tÃÂºnel de la PC Madre estÃÂ© activo."
+        return f"Error de conexiÃ³n: {str(e)}. Verifica que el tÃºnel de la PC Madre estÃ© activo."
 
 # --- INTERFAZ DE LOGIN ---
 if not st.session_state.logged_in:
@@ -355,8 +355,8 @@ if not st.session_state.logged_in:
     
     with st.form("login_form"):
         user_input = st.text_input("Usuario")
-        pass_input = st.text_input("ContraseÃÂ±a", type="password")
-        submit = st.form_submit_button("INICIAR SESIÃÂN", use_container_width=True)
+        pass_input = st.text_input("ContraseÃ±a", type="password")
+        submit = st.form_submit_button("INICIAR SESIÃN", use_container_width=True)
         
         if submit:
             users = load_users()
@@ -386,7 +386,7 @@ with st.container():
     with col_r:
         st.markdown(f"""
             <div class="header-container">
-                <div style="font-size: 28px; font-weight: 700;">SISTEMA DE GESTIÃÂN DE VENTAS 2026</div>
+                <div style="font-size: 28px; font-weight: 700;">SISTEMA DE GESTIÃN DE VENTAS 2026</div>
                 <div style="text-align: right;">
                     <span style="opacity: 0.8;">Fecha: {datetime.now().strftime('%d/%m/%Y')}</span><br>
                     <span style="font-weight: 600;">SOL PRO Professional</span>
@@ -394,9 +394,9 @@ with st.container():
             </div>
         """, unsafe_allow_html=True)
 
-# SIDEBAR PARA CONFIGURACIÃÂN Y CLIENTES
+# SIDEBAR PARA CONFIGURACIÃN Y CLIENTES
 with st.sidebar:
-    st.header("Ã°ÂÂÂ¤ SelecciÃÂ³n de Cliente")
+    st.header("ð¤ SelecciÃ³n de Cliente")
     clients = load_clients()
     client_names = ["-- NUEVO CLIENTE --"] + [c['nombre'] for c in clients]
     selected_client_name = st.selectbox("Buscar Cliente", client_names)
@@ -405,44 +405,44 @@ with st.sidebar:
     if selected_client_name != "-- NUEVO CLIENTE --":
         selected_client_data = next(c for c in clients if c['nombre'] == selected_client_name)
 
-    nombre = st.text_input("RazÃÂ³n Social", value=selected_client_data['nombre'] if selected_client_data else "")
+    nombre = st.text_input("RazÃ³n Social", value=selected_client_data['nombre'] if selected_client_data else "")
     ruc = st.text_input("RUC / C.I.", value=selected_client_data['ruc'] if selected_client_data else "")
-    direccion = st.text_input("DirecciÃÂ³n", value=selected_client_data['direccion'] if selected_client_data else "")
-    telefono = st.text_input("TelÃÂ©fono", value=selected_client_data['telefono'] if selected_client_data else "")
+    direccion = st.text_input("DirecciÃ³n", value=selected_client_data['direccion'] if selected_client_data else "")
+    telefono = st.text_input("TelÃ©fono", value=selected_client_data['telefono'] if selected_client_data else "")
     
     st.divider()
-    st.header("Ã¢ÂÂÃ¯Â¸Â ConfiguraciÃÂ³n")
+    st.header("âï¸ ConfiguraciÃ³n")
     vendedor = st.text_input("Vendedor", value=st.session_state.user_data['nombre'])
     nro_factura = st.text_input("Nro. Factura (Siguiente)", value=get_next_invoice_number())
-    condicion = st.radio("CondiciÃÂ³n", ["CONTADO", "CRÃÂDITO"], horizontal=True)
+    condicion = st.radio("CondiciÃ³n", ["CONTADO", "CRÃDITO"], horizontal=True)
     moneda = st.radio("Moneda", ["PYG", "USD"], horizontal=True)
 
     st.divider()
-    if st.button("Ã°ÂÂÂ SINCRONIZAR EXCEL (STOCK)"):
+    if st.button("ð SINCRONIZAR EXCEL (STOCK)"):
         st.cache_data.clear()
         st.success("Datos sincronizados!")
 
     if st.session_state.user_data['rol'] == 'admin':
         st.divider()
-        st.header("Ã°ÂÂ¤Â SOLPRO AI Config")
-        ai_url = st.text_input("URL de LM Studio (TÃÂºnel)", value="http://localhost:1234/v1", help="Pega aquÃÂ­ la URL de Ngrok o Cloudflare")
+        st.header("ð¤ SOLPRO AI Config")
+        ai_url = st.text_input("URL de LM Studio (TÃºnel)", value="http://localhost:1234/v1", help="Pega aquÃ­ la URL de Ngrok o Cloudflare")
         st.cache_data.clear()
-        st.success("ÃÂ¡Datos sincronizados!")
+        st.success("Â¡Datos sincronizados!")
         st.rerun()
 
     st.divider()
-    if st.button("Ã°ÂÂÂª CERRAR SESIÃÂN"):
+    if st.button("ðª CERRAR SESIÃN"):
         st.session_state.logged_in = False
         st.session_state.user_data = None
         st.rerun()
 
 # TABS PRINCIPALES
-# Restringir pestaÃÂ±as segÃÂºn el rol
+# Restringir pestaÃ±as segÃºn el rol
 if st.session_state.user_data['rol'] == 'admin':
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Ã°ÂÂÂ FacturaciÃÂ³n", "Ã°ÂÂÂ Anulaciones", "Ã°ÂÂÂ¦ Inventario", "Ã°ÂÂÂ Historial", "Ã°ÂÂ¤Â Asistente AI"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["ð FacturaciÃ³n", "ð Anulaciones", "ð¦ Inventario", "ð Historial", "ð¤ Asistente AI"])
 else:
-    tab1, = st.tabs(["Ã°ÂÂÂ FacturaciÃÂ³n"])
-    st.info(f"SesiÃÂ³n activa: {st.session_state.user_data['nombre']} (Vendedor)")
+    tab1, = st.tabs(["ð FacturaciÃ³n"])
+    st.info(f"SesiÃ³n activa: {st.session_state.user_data['nombre']} (Vendedor)")
 
 with tab1:
     df_products = load_products()
@@ -450,7 +450,7 @@ with tab1:
     st.markdown("""
         <div style="display: flex; background: #1e3a8a; color: white; padding: 10px; border-radius: 8px 8px 0 0; font-weight: bold; margin-bottom: 10px;">
             <div style="flex: 0.5;">CANT.</div>
-            <div style="flex: 3;">PRODUCTO / DESCRIPCIÃÂN</div>
+            <div style="flex: 3;">PRODUCTO / DESCRIPCIÃN</div>
             <div style="flex: 0.8;">STOCK</div>
             <div style="flex: 1.5;">PRECIO UNIT.</div>
             <div style="flex: 1;">TOTAL</div>
@@ -472,7 +472,7 @@ with tab1:
             cant = st.number_input("n", min_value=1, value=item['cant'], key=f"cant_{i}", label_visibility="collapsed")
         
         with c2:
-            search_term = st.text_input("s", key=f"search_{i}", placeholder="CÃÂ³digo o Nombre...", label_visibility="collapsed")
+            search_term = st.text_input("s", key=f"search_{i}", placeholder="CÃ³digo o Nombre...", label_visibility="collapsed")
             
             filtered = df_products[
                 df_products['DESCRIPCION'].str.contains(search_term, case=False, na=False) |
@@ -486,19 +486,19 @@ with tab1:
                 
                 stock_actual = int(df_products.loc[selected_idx, 'STOCK'])
                 st.markdown(
-                    f"<div style='background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:4px 10px;margin:2px 0;font-size:13px;color:#166534;'>Ã°ÂÂÂ¦ Stock disponible: <b>{stock_actual}</b></div>",
+                    f"<div style='background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:4px 10px;margin:2px 0;font-size:13px;color:#166534;'>ð¦ Stock disponible: <b>{stock_actual}</b></div>",
                     unsafe_allow_html=True
                 )
                 if cant > stock_actual and stock_actual > 0:
-                    st.error(f"Ã¢ÂÂ Ã¯Â¸Â Cantidad supera stock (Disp: {stock_actual})")
+                    st.error(f"â ï¸ Cantidad supera stock (Disp: {stock_actual})")
 
-                if st.button(f"Ã¢ÂÂ Seleccionar", key=f"btn_sel_{i}"):
+                if st.button(f"â Seleccionar", key=f"btn_sel_{i}"):
                     # Guardar en session_state directamente (no solo en item local)
                     st.session_state.factura_items[i]['desc'] = df_products.loc[selected_idx, 'DESCRIPCION']
                     st.session_state.factura_items[i]['codigo'] = df_products.loc[selected_idx, 'CODIGO']
                     st.rerun()
             
-            desc = st.text_area("d", value=st.session_state.factura_items[i]['desc'], key=f"desc_{i}", height=60, label_visibility="collapsed", placeholder="DescripciÃÂ³n del producto...")
+            desc = st.text_area("d", value=st.session_state.factura_items[i]['desc'], key=f"desc_{i}", height=60, label_visibility="collapsed", placeholder="DescripciÃ³n del producto...")
 
         
         with c_stock_col:
@@ -514,7 +514,7 @@ with tab1:
                         unsafe_allow_html=True
                     )
             else:
-                st.markdown("<div style='padding:8px 6px;text-align:center;color:#94a3b8;font-size:13px;margin-top:6px;'>Ã¢ÂÂ</div>", unsafe_allow_html=True)
+                st.markdown("<div style='padding:8px 6px;text-align:center;color:#94a3b8;font-size:13px;margin-top:6px;'>â</div>", unsafe_allow_html=True)
 
         with c3:
             precio = st.number_input("p", value=item['precio'], key=f"precio_{i}", format="%.2f", label_visibility="collapsed")
@@ -524,7 +524,7 @@ with tab1:
             st.markdown(f"<div style='padding-top: 10px; font-weight: bold;'>{subtotal:,.0f}</div>", unsafe_allow_html=True)
         
         with c5:
-            if st.button("Ã¢ÂÂ", key=f"del_{i}"):
+            if st.button("â", key=f"del_{i}"):
                 items_to_remove.append(i)
         
         item['cant'] = cant
@@ -542,14 +542,14 @@ with tab1:
 
     c_foot1, c_foot2 = st.columns([2, 1])
     with c_foot1:
-        if st.button("Ã¢ÂÂ AGREGAR OTRO PRODUCTO"):
+        if st.button("â AGREGAR OTRO PRODUCTO"):
             st.session_state.factura_items.append({"cant": 1, "desc": "", "precio": 0.0, "codigo": ""})
             st.rerun()
 
     st.divider()
     col_sum1, col_sum2 = st.columns([2, 1])
     with col_sum2:
-        total_str = f"{moneda} {total_factura:,.2f}" if moneda=="USD" else f"Ã¢ÂÂ² {total_factura:,.0f}"
+        total_str = f"{moneda} {total_factura:,.2f}" if moneda=="USD" else f"â² {total_factura:,.0f}"
         st.markdown(f"""
             <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid #1e3a8a; text-align: center;">
                 <span style="font-size: 14px; color: #64748b;">TOTAL A FACTURAR</span><br>
@@ -559,9 +559,9 @@ with tab1:
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button("Ã°ÂÂÂ¨Ã¯Â¸Â EMITIR FACTURA Y REGISTRAR EN VENTAS TOTALES"):
+        if st.button("ð¨ï¸ EMITIR FACTURA Y REGISTRAR EN VENTAS TOTALES"):
             if not nombre or not ruc or not nro_factura or not st.session_state.factura_items:
-                st.error("Ã¢ÂÂ Ã¯Â¸Â Error: Complete los datos del cliente y agregue productos.")
+                st.error("â ï¸ Error: Complete los datos del cliente y agregue productos.")
             else:
                 with st.spinner("Generando PDF y actualizando planilla..."):
                     client_obj = {"nombre": nombre, "ruc": ruc, "direccion": direccion, "telefono": telefono}
@@ -591,18 +591,18 @@ with tab1:
                             "VENDEDOR": vendedor,
                             "FORMA PAGO": condicion,
                             "COD_PRODUCTO": it.get('codigo', ''),
-                            "LINEA": "FACTURACIÃÂN",
+                            "LINEA": "FACTURACIÃN",
                             "_CANT_NUM": it['cant'] # Auxiliar para inventario
                         })
                     log_sales(sales_to_log)
                     update_inventory(sales_to_log)
                     
-                    st.success(f"Ã¢ÂÂ Factura {nro_factura} emitida y registrada.")
+                    st.success(f"â Factura {nro_factura} emitida y registrada.")
                     
-                    # BotÃÂ³n para descarga inmediata
+                    # BotÃ³n para descarga inmediata
                     with open(pdf_path, "rb") as f:
                         st.download_button(
-                            label="Ã°ÂÂÂ¥ DESCARGAR FACTURA PDF",
+                            label="ð¥ DESCARGAR FACTURA PDF",
                             data=f,
                             file_name=pdf_filename,
                             mime="application/pdf"
@@ -613,19 +613,19 @@ with tab1:
 
 if st.session_state.user_data['rol'] == 'admin':
     with tab2:
-        st.header("Ã°ÂÂÂ MÃÂ³dulo de AnulaciÃÂ³n")
-        st.info("Utilice este mÃÂ³dulo para marcar una factura como ANULADA en el registro central.")
+        st.header("ð MÃ³dulo de AnulaciÃ³n")
+        st.info("Utilice este mÃ³dulo para marcar una factura como ANULADA en el registro central.")
         with st.container():
             st.markdown('<div class="card">', unsafe_allow_html=True)
-            inv_void = st.text_input("NÃÂºmero de Factura a Anular", placeholder="Ej: 0501")
-            if st.button("CONFIRMAR ANULACIÃÂN DEFINITIVA"):
+            inv_void = st.text_input("NÃºmero de Factura a Anular", placeholder="Ej: 0501")
+            if st.button("CONFIRMAR ANULACIÃN DEFINITIVA"):
                 if inv_void:
                     if void_invoice(inv_void):
-                        st.success(f"Ã¢ÂÂ La factura {inv_void} ha sido anulada con ÃÂ©xito.")
+                        st.success(f"â La factura {inv_void} ha sido anulada con Ã©xito.")
                     else:
-                        st.error("Ã¢ÂÂ No se encontrÃÂ³ la factura en el registro.")
+                        st.error("â No se encontrÃ³ la factura en el registro.")
                 else:
-                    st.warning("Ingrese un nÃÂºmero vÃÂ¡lido.")
+                    st.warning("Ingrese un nÃºmero vÃ¡lido.")
             st.markdown('</div>', unsafe_allow_html=True)
 
     with tab3:
@@ -633,16 +633,16 @@ if st.session_state.user_data['rol'] == 'admin':
 
         st.markdown("""
             <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;'>
-                <h3 style='margin:0; color:#1e3a8a;'>Ã°ÂÂÂ¦ Stock Disponible</h3>
+                <h3 style='margin:0; color:#1e3a8a;'>ð¦ Stock Disponible</h3>
             </div>
         """, unsafe_allow_html=True)
 
         col_search, col_line = st.columns([2, 1])
         with col_search:
-            filtro = st.text_input("Ã°ÂÂÂ Buscar producto...", placeholder="Nombre o cÃÂ³digo...", label_visibility="visible")
+            filtro = st.text_input("ð Buscar producto...", placeholder="Nombre o cÃ³digo...", label_visibility="visible")
         with col_line:
             lineas = ["TODAS"] + sorted(df_inv['LINEA'].dropna().unique().tolist())
-            filtro_linea = st.selectbox("LÃÂ­nea", lineas)
+            filtro_linea = st.selectbox("LÃ­nea", lineas)
 
         # Aplicar filtros
         df_show = df_inv.copy()
@@ -654,15 +654,15 @@ if st.session_state.user_data['rol'] == 'admin':
         if filtro_linea != "TODAS":
             df_show = df_show[df_show['LINEA'] == filtro_linea]
 
-        # MÃÂ©tricas resumen
+        # MÃ©tricas resumen
         total_prods = len(df_show)
         con_stock = (df_show['STOCK'] > 0).sum()
         sin_stock = (df_show['STOCK'] == 0).sum()
 
         m1, m2, m3 = st.columns(3)
         m1.metric("Total Productos", total_prods)
-        m2.metric("Ã¢ÂÂ Con Stock", con_stock)
-        m3.metric("Ã¢ÂÂ Ã¯Â¸Â Sin Stock", sin_stock)
+        m2.metric("â Con Stock", con_stock)
+        m3.metric("â ï¸ Sin Stock", sin_stock)
 
         st.divider()
 
@@ -670,9 +670,9 @@ if st.session_state.user_data['rol'] == 'admin':
         st.markdown("""
             <div style="display:flex; background:#1e3a8a; color:white; padding:10px 8px;
                         border-radius:8px 8px 0 0; font-weight:bold; font-size:13px;">
-                <div style="flex:1;">CÃÂDIGO</div>
-                <div style="flex:1;">LÃÂNEA</div>
-                <div style="flex:4;">DESCRIPCIÃÂN</div>
+                <div style="flex:1;">CÃDIGO</div>
+                <div style="flex:1;">LÃNEA</div>
+                <div style="flex:4;">DESCRIPCIÃN</div>
                 <div style="flex:1; text-align:center;">STOCK</div>
             </div>
         """, unsafe_allow_html=True)
@@ -710,17 +710,17 @@ if st.session_state.user_data['rol'] == 'admin':
 
 if st.session_state.user_data['rol'] == 'admin':
     with tab4:
-        st.markdown("<h2 style='color:#1e3a8a;'>Ã°ÂÂÂ Historial de Ventas Corporativas</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color:#1e3a8a;'>ð Historial de Ventas Corporativas</h2>", unsafe_allow_html=True)
         
         df_sales = load_sales()
         
         if df_sales.empty:
-            st.warning("No hay registros de ventas todavÃÂ­a.")
+            st.warning("No hay registros de ventas todavÃ­a.")
         else:
             # Filtros de Historial
             c_h1, c_h2, c_h3 = st.columns([2, 1, 1])
             with c_h1:
-                search_hist = st.text_input("Ã°ÂÂÂ Buscar por Cliente o Producto", placeholder="Nombre...")
+                search_hist = st.text_input("ð Buscar por Cliente o Producto", placeholder="Nombre...")
             with c_h2:
                 clients_list = ["TODOS"] + sorted(df_sales['CLIENTE'].dropna().unique().tolist())
                 filter_client = st.selectbox("Filtrar por Cliente", clients_list)
@@ -746,7 +746,7 @@ if st.session_state.user_data['rol'] == 'admin':
             
             r1, r2, r3 = st.columns(3)
             r1.metric("Ventas Registradas", len(df_hist))
-            r2.metric("Total Gs.", f"Ã¢ÂÂ² {total_gs:,.0f}".replace(",", "."))
+            r2.metric("Total Gs.", f"â² {total_gs:,.0f}".replace(",", "."))
             r3.metric("Total USD", f"$ {total_usd:,.2f}")
             
             st.divider()
@@ -758,23 +758,23 @@ if st.session_state.user_data['rol'] == 'admin':
                 hide_index=True
             )
             
-            # BotÃÂ³n para descargar el Excel completo
+            # BotÃ³n para descargar el Excel completo
             st.download_button(
-                label="Ã°ÂÂÂ¥ Exportar Historial Completo (Excel)",
+                label="ð¥ Exportar Historial Completo (Excel)",
                 data=open(SALES_FILE, 'rb'),
                 file_name=f"HISTORIAL_VENTAS_SOLPRO_{datetime.now().strftime('%Y%m%d')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
         st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
-        if st.button("Ã°ÂÂÂ Actualizar Inventario", key="refresh_inv"):
+        if st.button("ð Actualizar Inventario", key="refresh_inv"):
             st.cache_data.clear()
             st.rerun()
 
 if st.session_state.user_data['rol'] == 'admin':
     with tab5:
         st.markdown("<h2 style='color:#1e3a8a;'>?? Asistente Inteligente SOLPRO</h2>", unsafe_allow_html=True)
-        st.info("Este asistente estÃ¡ conectado a tu **PC Madre**. Puede analizar ventas, stock y ayudarte con decisiones de negocio.")
+        st.info("Este asistente está conectado a tu **PC Madre**. Puede analizar ventas, stock y ayudarte con decisiones de negocio.")
         
         # Historial de chat en session_state
         if "chat_history" not in st.session_state:
@@ -784,7 +784,7 @@ if st.session_state.user_data['rol'] == 'admin':
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
                 
-        if prompt := st.chat_input("Â¿En quÃ© puedo ayudarte hoy?"):
+        if prompt := st.chat_input("¿En qué puedo ayudarte hoy?"):
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
@@ -795,12 +795,12 @@ if st.session_state.user_data['rol'] == 'admin':
                 df_s = load_sales()
                 
                 contexto = f"""
-                Eres el asistente de gestiÃ³n de SOLPRO. 
+                Eres el asistente de gestión de SOLPRO. 
                 DATOS ACTUALES:
-                - Productos en catÃ¡logo: {len(df_p) if not df_p.empty else 0}
+                - Productos en catálogo: {len(df_p) if not df_p.empty else 0}
                 - Ventas registradas: {len(df_s) if not df_s.empty else 0}
                 - Productos con bajo stock (<5): {len(df_p[df_p['STOCK'] < 5]) if not df_p.empty else 0}
-                - Ãltima venta: {df_s.iloc[0]['CLIENTE'] if not df_s.empty else 'Ninguna'}
+                - Última venta: {df_s.iloc[0]['CLIENTE'] if not df_s.empty else 'Ninguna'}
                 """
                 
                 with st.spinner("Pensando..."):
