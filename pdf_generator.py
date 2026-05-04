@@ -11,11 +11,11 @@ def format_money(val, moneda):
 
 def numero_a_letras(n, moneda):
     if moneda == "PYG":
-        return f"TOTAL A PAGAR: {num2words(int(n), lang='es').upper()} GUARANÃES.-"
+        return f"TOTAL A PAGAR: {num2words(int(n), lang='es').upper()} GUARANÃÂES.-"
     else:
         entero = int(n)
         decimal = int(round((n - entero) * 100))
-        return f"TOTAL A PAGAR: {num2words(entero, lang='es').upper()} CON {decimal:02d}/100 DÃLARES AMERICANOS.-"
+        return f"TOTAL A PAGAR: {num2words(entero, lang='es').upper()} CON {decimal:02d}/100 DÃÂLARES AMERICANOS.-"
 
 def generate_invoice_pdf(data, output_path):
     """
@@ -24,11 +24,11 @@ def generate_invoice_pdf(data, output_path):
     productos: lista de dicts con:
         c (cantidad), d (descripcion), p (precio unit), t (total)
     """
-    # Usar ruta dinÃ¡mica
+    # Usar ruta dinÃÂ¡mica
     base_path = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(base_path, "factura solpro 2026.png")
     
-    # TamaÃ±o basado en el original (ajustado por factor 0.28)
+    # TamaÃÂ±o basado en el original (ajustado por factor 0.28)
     w, h = 2362 * 0.28, 2180 * 0.28
     
     c = canvas.Canvas(output_path, pagesize=(w, h))
@@ -43,7 +43,7 @@ def generate_invoice_pdf(data, output_path):
     c.setFont("Helvetica", 11)
     c.drawString(135, 444, data['fecha'])
     
-    # CondiciÃ³n X
+    # CondiciÃÂ³n X
     c.drawString(556 if data['condicion'] == "CONTADO" else 624, 444, "X")
 
     c.drawString(145, 424, data['nombre'].upper())

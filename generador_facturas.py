@@ -38,23 +38,23 @@ class FacturadorApp:
         ttk.Label(frame_header, text="Moneda:").grid(row=0, column=4, sticky="w", padx=10)
         ttk.Combobox(frame_header, textvariable=self.moneda, values=["PYG", "USD"], width=5, state="readonly").grid(row=0, column=5, padx=5, pady=2, sticky="w")
 
-        ttk.Label(frame_header, text="Nombre/Razón Social:").grid(row=1, column=0, sticky="w")
+        ttk.Label(frame_header, text="Nombre/RazÃ³n Social:").grid(row=1, column=0, sticky="w")
         ttk.Entry(frame_header, textvariable=self.nombre, width=50).grid(row=1, column=1, columnspan=3, padx=5, pady=2, sticky="w")
 
-        ttk.Label(frame_header, text="RUC o C.I. Nº:").grid(row=2, column=0, sticky="w")
+        ttk.Label(frame_header, text="RUC o C.I. NÂº:").grid(row=2, column=0, sticky="w")
         ttk.Entry(frame_header, textvariable=self.ruc, width=20).grid(row=2, column=1, padx=5, pady=2, sticky="w")
         
-        ttk.Label(frame_header, text="Teléfono:").grid(row=2, column=2, sticky="w", padx=10)
+        ttk.Label(frame_header, text="TelÃ©fono:").grid(row=2, column=2, sticky="w", padx=10)
         ttk.Entry(frame_header, textvariable=self.telefono, width=20).grid(row=2, column=3, padx=5, pady=2, sticky="w")
 
-        ttk.Label(frame_header, text="Dirección:").grid(row=3, column=0, sticky="w")
+        ttk.Label(frame_header, text="DirecciÃ³n:").grid(row=3, column=0, sticky="w")
         ttk.Entry(frame_header, textvariable=self.direccion, width=50).grid(row=3, column=1, columnspan=3, padx=5, pady=2, sticky="w")
 
-        ttk.Label(frame_header, text="Condición:").grid(row=4, column=0, sticky="w")
+        ttk.Label(frame_header, text="CondiciÃ³n:").grid(row=4, column=0, sticky="w")
         cond_frame = ttk.Frame(frame_header)
         cond_frame.grid(row=4, column=1, columnspan=2, sticky="w")
         ttk.Radiobutton(cond_frame, text="CONTADO", variable=self.condicion, value="CONTADO").pack(side="left", padx=5)
-        ttk.Radiobutton(cond_frame, text="CRÉDITO", variable=self.condicion, value="CREDITO").pack(side="left", padx=5)
+        ttk.Radiobutton(cond_frame, text="CRÃDITO", variable=self.condicion, value="CREDITO").pack(side="left", padx=5)
 
         frame_prod = ttk.LabelFrame(main_frame, text=" Detalle de Ventas ", padding="10")
         frame_prod.pack(fill="both", expand=True, pady=5)
@@ -74,11 +74,11 @@ class FacturadorApp:
         self.in_cant = tk.StringVar(); self.in_desc = tk.StringVar(); self.in_precio = tk.StringVar()
         ttk.Label(input_frame, text="Cant:").pack(side="left")
         ttk.Entry(input_frame, textvariable=self.in_cant, width=7).pack(side="left", padx=5)
-        ttk.Label(input_frame, text="Descripción:").pack(side="left")
+        ttk.Label(input_frame, text="DescripciÃ³n:").pack(side="left")
         ttk.Entry(input_frame, textvariable=self.in_desc, width=30).pack(side="left", padx=5)
         ttk.Label(input_frame, text="Precio:").pack(side="left")
         ttk.Entry(input_frame, textvariable=self.in_precio, width=12).pack(side="left", padx=5)
-        ttk.Button(input_frame, text="Añadir Item", command=self.add_item).pack(side="left", padx=10)
+        ttk.Button(input_frame, text="AÃ±adir Item", command=self.add_item).pack(side="left", padx=10)
         ttk.Button(input_frame, text="Borrar Todo", command=self.clear_items).pack(side="left")
 
         ttk.Button(main_frame, text="GUARDAR FACTURA PDF", command=self.generate_pdf).pack(pady=10, ipady=5)
@@ -94,7 +94,7 @@ class FacturadorApp:
             self.productos.append({'c': c, 'd': d, 'p': p, 't': t})
             self.tree.insert("", "end", values=(f"{c:g}", d, self.format_money(p), self.format_money(t)))
             self.in_cant.set(""); self.in_desc.set(""); self.in_precio.set("")
-        except: messagebox.showerror("Error", "Datos numéricos inválidos.")
+        except: messagebox.showerror("Error", "Datos numÃ©ricos invÃ¡lidos.")
 
     def clear_items(self):
         self.productos = []
@@ -102,10 +102,10 @@ class FacturadorApp:
 
     def numero_a_letras(self, n):
         if self.moneda.get() == "PYG":
-            return f"TOTAL A PAGAR: {num2words(int(n), lang='es').upper()} GUARANÍES.-"
+            return f"TOTAL A PAGAR: {num2words(int(n), lang='es').upper()} GUARANÃES.-"
         else:
             entero = int(n); decimal = int(round((n - entero) * 100))
-            return f"TOTAL A PAGAR: {num2words(entero, lang='es').upper()} CON {decimal:02d}/100 DÓLARES AMERICANOS.-"
+            return f"TOTAL A PAGAR: {num2words(entero, lang='es').upper()} CON {decimal:02d}/100 DÃLARES AMERICANOS.-"
 
     def generate_pdf(self):
         if not self.nro_factura.get() or not self.nombre.get():
@@ -123,14 +123,14 @@ class FacturadorApp:
         c = canvas.Canvas(pdf_path, pagesize=(w, h))
         c.drawImage(os.path.join(base_path, "factura solpro 2026.png"), 0, 0, width=w, height=h)
 
-        # --- CABECERA (Ajustada según PDF de prueba) ---
+        # --- CABECERA (Ajustada segÃºn PDF de prueba) ---
         c.setFont("Courier-Bold", 14)
         c.drawString(450, 488, self.nro_factura.get()) # Bajado de 515 a 488
 
         c.setFont("Helvetica", 11)
         c.drawString(135, 444, self.fecha.get()) # Bajado de 473 a 444
         
-        # Condición X
+        # CondiciÃ³n X
         c.drawString(556 if self.condicion.get() == "CONTADO" else 624, 444, "X")
 
         c.drawString(145, 424, self.nombre.get().upper()) # Bajado de 453 a 424
@@ -148,7 +148,7 @@ class FacturadorApp:
             c.drawRightString(625, y, self.format_money(p['t']))
             total_suma += p['t']; y -= 18.5
 
-        # --- TOTALES (Ajustados a las líneas inferiores) ---
+        # --- TOTALES (Ajustados a las lÃ­neas inferiores) ---
         c.drawRightString(625, 102, self.format_money(total_suma)) # Bajado de 105 a 102
         c.setFont("Helvetica-Bold", 12)
         c.drawRightString(625, 80, self.format_money(total_suma)) # Bajado de 85 a 80
