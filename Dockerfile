@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.10-slim-bookworm
 
 # Evitar que Python genere archivos .pyc y habilitar logs en tiempo real
 ENV PYTHONDONTWRITEBYTECODE 1
