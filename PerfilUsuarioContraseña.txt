@@ -1,0 +1,4 @@
+Perfil	Usuario	Contraseña
+
+	admin		admin123
+	vendedor1	vendedor123

@@ -1,0 +1,12 @@
+.git
+.gitignore
+__pycache__
+.venv
+.vscode
+.antigravity
+*.pyc
+*.pyo
+*.pyd
+.db
+.DS_Store
+Facturas_Emitidas/*.pdf
