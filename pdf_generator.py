@@ -53,7 +53,7 @@ def generate_invoice_pdf(data, output_path):
         # Descripción
         c.drawString(73, y, p['d'])
         # Precio Unitario
-        c.drawRightString(479, y, format_money(float(p['p']), moneda))
+        c.drawRightString(535, y, format_money(float(p['p']), moneda))
         # Valor de Venta (10%)
         c.drawRightString(658, y, format_money(float(p['t']), moneda))
         total_suma += float(p['t'])
@@ -67,7 +67,7 @@ def generate_invoice_pdf(data, output_path):
     c.setFont("Helvetica-Bold", 12)
     c.drawRightString(658, 63, format_money(total_suma, moneda))   # Total bold (opcional si hay cuadro)
 
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont("Helvetica", 8)
     total_letras = numero_a_letras(total_suma, moneda)
     palabras = total_letras.replace("TOTAL A PAGAR: ", "")
     c.drawString(200, 63, palabras)                                # Total en letras

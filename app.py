@@ -680,6 +680,9 @@ with tab1:
                         'desc': row['DESCRIPCION'],
                         'precio': float(row['PRECIO'])
                     })
+                    # Sincronizar estado interno de los widgets para que muestren el valor actualizado
+                    st.session_state[f"desc_{i}"] = row['DESCRIPCION']
+                    st.session_state[f"precio_{i}"] = float(row['PRECIO'])
                     st.rerun()
 
             desc = st.text_area("d", value=item['desc'], key=f"desc_{i}", height=60, label_visibility="collapsed")
