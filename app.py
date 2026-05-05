@@ -406,10 +406,6 @@ if not st.session_state.get('logged_in', False):
         with open(REDESIGN_FILE, "r", encoding="utf-8") as f:
             html_content = f.read()
         
-        # Inyectar el script de puente (bridge) y ajustar el tipo de input
-        # Cambiamos type="email" por type="text" para permitir nombres de usuario como 'admin'
-        html_content = html_content.replace('type="email"', 'type="text"')
-        
         login_bridge = """
         <script>
         document.addEventListener('DOMContentLoaded', function() {
