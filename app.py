@@ -408,38 +408,70 @@ if not st.session_state.get('logged_in', False):
         
         login_bridge = """
         <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('loginForm');
-            if (form) {
-                form.addEventListener('submit', function(e) {
+        // Función de diagnóstico inmediata
+        (function() {
+            console.log("SOLPRO Login Bridge cargado");
+            
+            const attemptLogin = () => {
+                const form = document.getElementById('loginForm');
+                const btn = document.querySelector('.btn');
+                
+                if (!form || !btn) {
+                    setTimeout(attemptLogin, 100);
+                    return;
+                }
+
+                form.onsubmit = function(e) {
                     e.preventDefault();
-                    const user = document.getElementById('email').value;
-                    const pass = document.getElementById('password').value;
-                    const encodedPass = btoa(pass);
+                    console.log("Formulario enviado");
                     
-                    // Intentar obtener la URL base de la página principal de forma segura
-                    const params = "?u=" + encodeURIComponent(user) + "&p=" + encodeURIComponent(encodedPass);
-                    
-                    // Intentar redirección absoluta usando el referrer
-                    let targetUrl = "";
                     try {
-                        // Intentar obtener la URL limpia (sin parámetros anteriores) del referrer
-                        const ref = document.referrer;
-                        if (ref) {
-                            targetUrl = ref.split('?')[0].split('#')[0];
+                        const user = document.getElementById('email').value;
+                        const pass = document.getElementById('password').value;
+                        
+                        if (!user || !pass) {
+                            alert("Por favor, ingresa usuario y contraseña");
+                            return false;
                         }
-                    } catch(e) {}
 
-                    if (!targetUrl || targetUrl === "null") {
-                        // Fallback a la raíz del sitio si estamos en el mismo dominio
-                        targetUrl = "/";
+                        btn.innerText = "ENTRANDO...";
+                        btn.style.opacity = "0.7";
+                        
+                        // Codificación Base64 básica
+                        const encodedPass = btoa(pass);
+                        const params = "?u=" + encodeURIComponent(user) + "&p=" + encodeURIComponent(encodedPass);
+                        
+                        // Intentar obtener la URL de destino de varias formas
+                        let target = "";
+                        try {
+                            target = window.top.location.origin + window.top.location.pathname;
+                        } catch(e) {
+                            target = document.referrer.split('?')[0];
+                        }
+                        
+                        if (!target || target === "null" || target.includes("streamlit.app")) {
+                            target = window.location.origin; // Fallback
+                        }
+                        
+                        console.log("Redirigiendo a:", target + params);
+                        window.top.location.href = target + params;
+                        
+                        // Fallback de seguridad si el href falla
+                        setTimeout(() => {
+                            window.top.location.replace(target + params);
+                        }, 500);
+
+                    } catch(err) {
+                        alert("Error en el login: " + err.message);
+                        btn.innerText = "ENTRAR AL SISTEMA";
+                        btn.style.opacity = "1";
                     }
-
-                    // Forzar la redirección en la ventana superior (la de Streamlit)
-                    window.top.location.href = targetUrl + params;
-                });
-            }
-        });
+                    return false;
+                };
+            };
+            
+            attemptLogin();
+        })();
         </script>
         """
         html_content = html_content.replace("</body>", login_bridge + "</body>")
