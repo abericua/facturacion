@@ -429,9 +429,24 @@ if not st.session_state.get('logged_in', False):
     .sp-stat-l { font-family:'IBM Plex Sans',sans-serif; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(242,237,224,.32); }
     .sp-divv   { width:1px; height:28px; background:rgba(255,255,255,.09); align-self:center; }
 
-    /* Panel derecho — card */
-    .sp-right { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:3rem 2.5rem; }
-    .sp-card  { background:rgba(14,12,8,.65); border:1px solid rgba(245,188,0,.18); border-radius:24px; padding:2.5rem 2.3rem 2rem; width:100%; max-width:420px; box-shadow:0 24px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(245,188,0,.08); }
+    /* Panel derecho — la COLUMNA ENTERA es la card */
+    [data-testid="column"]:nth-child(2) > div:first-child {
+        min-height: 100vh;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 3rem 2.5rem !important;
+    }
+    [data-testid="column"]:nth-child(2) > div:first-child > div:first-child {
+        background: rgba(14,12,8,.65);
+        border: 1px solid rgba(245,188,0,.18);
+        border-radius: 24px;
+        padding: 2.5rem 2.3rem 2rem;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 24px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(245,188,0,.08);
+    }
     .sp-card-logo { display:flex; align-items:center; gap:12px; padding-bottom:1.4rem; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:1.6rem; }
     .sp-card-logo img { width:44px; border-radius:50%; filter:drop-shadow(0 0 8px rgba(245,188,0,.55)); }
     .sp-card-name { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; color:#F2EDE0; letter-spacing:.04em; }
@@ -501,19 +516,15 @@ if not st.session_state.get('logged_in', False):
 
     with col_right:
         st.markdown(f"""
-        <div class="sp-right">
-          <div class="sp-card">
-            <div class="sp-card-logo">
-                {logo_tag_sm}
-                <div>
-                    <div class="sp-card-name">SOLPRO</div>
-                    <span class="sp-card-sub">Facturación</span>
-                </div>
+        <div class="sp-card-logo">
+            {logo_tag_sm}
+            <div>
+                <div class="sp-card-name">SOLPRO</div>
+                <span class="sp-card-sub">Facturación</span>
             </div>
-            <div class="sp-form-title">SOLPRO Facturación</div>
-            <div class="sp-form-sub">Ingresa tus credenciales para continuar</div>
-          </div>
         </div>
+        <div class="sp-form-title">SOLPRO Facturación</div>
+        <div class="sp-form-sub">Ingresa tus credenciales para continuar</div>
         """, unsafe_allow_html=True)
 
         with st.form("solpro_login_form"):
