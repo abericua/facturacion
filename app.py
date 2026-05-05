@@ -626,17 +626,37 @@ with tab1:
         c1, c2, c_stock, c3, c4, c5 = st.columns([0.5, 3, 0.8, 1.5, 1, 0.3])
         with c1: cant = st.number_input("n", min_value=1, value=item['cant'], key=f"cant_{i}", label_visibility="collapsed")
         with c2:
-            search = st.text_input("s", key=f"search_{i}", placeholder="Buscar...", label_visibility="collapsed")
-            filtered = df_products[df_products['DESCRIPCION'].str.contains(search, case=False, na=False) | df_products['CODIGO'].str.contains(search, case=False, na=False)] if search else pd.DataFrame()
-            if not filtered.empty:
-                sel_idx = st.selectbox("p", filtered.index, format_func=lambda x: f"{df_products.loc[x, 'CODIGO']} - {df_products.loc[x, 'DESCRIPCION']}", key=f"suggest_{i}", label_visibility="collapsed")
-                if st.button("✓ SELECCIONAR", key=f"btn_sel_{i}"):
+            # Preparar opciones del catálogo completo
+            all_options = ["--- BUSCAR PRODUCTO ---"] + [f"{row['CODIGO']} | {row['DESCRIPCION']}" for _, row in df_products.iterrows()]
+            
+            # Buscar el valor actual para mantener la selección si ya existe
+            current_idx = 0
+            if item.get('codigo'):
+                match_str = next((opt for opt in all_options if opt.startswith(f"{item['codigo']} |")), None)
+                if match_str:
+                    current_idx = all_options.index(match_str)
+            
+            # Selector inteligente con búsqueda integrada
+            selected_prod = st.selectbox(
+                "Producto",
+                options=all_options,
+                index=current_idx,
+                key=f"prod_sel_{i}",
+                label_visibility="collapsed"
+            )
+            
+            # Si el usuario cambia la selección
+            if selected_prod != "--- BUSCAR PRODUCTO ---":
+                cod_sel = selected_prod.split(" | ")[0]
+                if cod_sel != item.get('codigo'):
+                    row = df_products[df_products['CODIGO'] == cod_sel].iloc[0]
                     st.session_state.factura_items[i].update({
-                        'desc': df_products.loc[sel_idx, 'DESCRIPCION'], 
-                        'codigo': df_products.loc[sel_idx, 'CODIGO'],
-                        'precio': float(df_products.loc[sel_idx, 'PRECIO'])
+                        'codigo': row['CODIGO'],
+                        'desc': row['DESCRIPCION'],
+                        'precio': float(row['PRECIO'])
                     })
                     st.rerun()
+
             desc = st.text_area("d", value=item['desc'], key=f"desc_{i}", height=60, label_visibility="collapsed")
         
         with c_stock:
@@ -725,21 +745,25 @@ if st.session_state.user_data['rol'] == 'admin':
 
     with tab4:
         st.header("📊 HISTORIAL DE VENTAS")
+        
+        # Botón de reporte movido al inicio para mayor visibilidad
+        if os.path.exists(SALES_FILE):
+            st.info("💡 Desde aquí puedes exportar el reporte completo de ventas acumulado en formato Excel.")
+            with open(SALES_FILE, "rb") as f:
+                st.download_button(
+                    label="📥 EXPORTAR REPORTE DE VENTAS COMPLETO (EXCEL)",
+                    data=f,
+                    file_name="VENTAS_TOTALES_2026.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
+                )
+            st.divider()
+
         df_s = load_sales()
         if not df_s.empty:
             r1, r2 = st.columns(2)
             r1.metric("TOTAL GS", f"{df_s['PRECIO GS'].sum():,.0f}")
             r2.metric("TOTAL USD", f"{df_s['PRECIO USD'].sum():,.2f}")
-            
-            # Botón para descargar la planilla de ventas completa
-            if os.path.exists(SALES_FILE):
-                with open(SALES_FILE, "rb") as f:
-                    st.download_button(
-                        label="📥 DESCARGAR PLANILLA DE VENTAS COMPLETA (EXCEL)",
-                        data=f,
-                        file_name="VENTAS_TOTALES_2026.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
             
             st.dataframe(df_s, use_container_width=True, hide_index=True)
         else:
