@@ -592,7 +592,18 @@ with st.sidebar:
 
     st.divider()
     st.header("⚙️ Configuración")
-    vendedor = st.text_input("Vendedor", value=st.session_state.user_data['nombre'])
+    
+    # Lista de vendedores desde usuarios.json
+    all_users = load_users()
+    vendedor_names = [u['nombre'] for u in all_users]
+    current_user_name = st.session_state.user_data['nombre']
+    
+    # Selector de vendedor
+    vendedor = st.selectbox(
+        "Vendedor", 
+        options=vendedor_names,
+        index=vendedor_names.index(current_user_name) if current_user_name in vendedor_names else 0
+    )
     nro_factura = st.text_input("Nro. Factura", value=get_next_invoice_number())
     condicion = st.radio("Condición", ["CONTADO", "CRÉDITO"], horizontal=True)
     moneda = st.radio("Moneda", ["PYG", "USD"], horizontal=True)
