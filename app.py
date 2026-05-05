@@ -738,16 +738,33 @@ with tab1:
                         "productos": [{"c": it['cant'], "d": it['desc'], "p": it['precio'], "t": it['total']} for it in st.session_state.factura_items]
                     }, pdf_path)
                     
-                    sales_log = []
+                    inventory_log = []
+                    descripciones = []
+                    codigos = []
                     for it in st.session_state.factura_items:
-                        sales_log.append({
-                            "FECHA": datetime.now(), "DESCRIPCION": f"{it['cant']} {it['desc']}", "CLIENTE": nombre,
-                            "PRECIO GS": it['total'] if moneda == "PYG" else None, "PRECIO USD": it['total'] if moneda == "USD" else None,
-                            "NRO_FACTURA": nro_factura, "VENDEDOR": vendedor, "FORMA PAGO": condicion,
-                            "COD_PRODUCTO": it.get('codigo', ''), "LINEA": "CORP", "_CANT_NUM": it['cant']
+                        descripciones.append(f"{it['cant']} {it['desc']}")
+                        if it.get('codigo'):
+                            codigos.append(str(it['codigo']))
+                        inventory_log.append({
+                            "COD_PRODUCTO": it.get('codigo', ''),
+                            "_CANT_NUM": it['cant']
                         })
+                    
+                    sales_log = [{
+                        "FECHA": datetime.now(),
+                        "DESCRIPCION": ", ".join(descripciones),
+                        "CLIENTE": nombre,
+                        "PRECIO GS": total_factura if moneda == "PYG" else None,
+                        "PRECIO USD": total_factura if moneda == "USD" else None,
+                        "NRO_FACTURA": nro_factura,
+                        "VENDEDOR": vendedor,
+                        "FORMA PAGO": condicion,
+                        "COD_PRODUCTO": ", ".join(codigos),
+                        "LINEA": "CORP"
+                    }]
+                    
                     log_sales(sales_log)
-                    update_inventory(sales_log)
+                    update_inventory(inventory_log)
                     st.success(f"Factura {nro_factura} emitida")
                     with open(pdf_path, "rb") as f: st.download_button("📥 DESCARGAR PDF", f, pdf_path, "application/pdf")
                     st.session_state.factura_items = []
