@@ -180,7 +180,6 @@ PRODUCTS_FILE = os.path.join(BASE_DIR, "LISTA DE PRECIOS DE VENTA.xlsx")
 SALES_FILE = os.path.join(BASE_DIR, "VENTAS TOTALES 2026.xlsx")
 CLIENTS_FILE = os.path.join(BASE_DIR, "clientes.json")
 USERS_FILE = os.path.join(BASE_DIR, "usuarios.json")
-REDESIGN_FILE = os.path.join(BASE_DIR, "solpro-login-redesign.html")
 OUTPUT_DIR = os.path.join(BASE_DIR, "Facturas_Emitidas")
 # CAMBIO DE LOGO A VERSIÓN CORPORATIVA
 LOGO_FILE = os.path.join(BASE_DIR, "LOGO  2D FONDO NEGRO 2026.png")
@@ -399,114 +398,141 @@ def call_ai(prompt, system_prompt, api_url):
 
 # --- INTERFAZ DE LOGIN ---
 if not st.session_state.get('logged_in', False):
-    import streamlit.components.v1 as components
-    
-    # Cargar HTML de rediseño
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+    #MainMenu, header, footer {visibility: hidden;}
+    .block-container {padding: 0 !important; margin: 0 !important; max-width: 100% !important;}
+    .stApp {background: #08090c !important;}
+    section[data-testid="stSidebar"] {display: none !important;}
+    div[data-testid="stVerticalBlock"] > div:first-child {padding: 0 !important;}
+
+    /* Panel izquierdo */
+    .sp-left {
+        min-height: 100vh; padding: 4rem 3rem;
+        background: linear-gradient(135deg, rgba(245,188,0,.07) 0%, transparent 60%);
+        border-right: 1px solid rgba(255,255,255,.07);
+        display: flex; flex-direction: column; justify-content: center;
+    }
+    .sp-logo { display:flex; align-items:center; gap:14px; margin-bottom:2.5rem; }
+    .sp-logo img { width:72px; border-radius:50%; filter:drop-shadow(0 0 16px rgba(245,188,0,.5)); }
+    .sp-logo-name { font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:700; color:#F2EDE0; letter-spacing:.04em; }
+    .sp-logo-tag  { font-size:.6rem; letter-spacing:.28em; text-transform:uppercase; color:#F5BC00; display:block; margin-top:3px; font-family:'IBM Plex Sans',sans-serif; }
+    .sp-hl { font-family:'Space Grotesk',sans-serif; font-size:2.4rem; font-weight:700; color:#F2EDE0; line-height:1.1; margin-bottom:1rem; }
+    .sp-hl span { color:#F5BC00; }
+    .sp-desc { font-family:'IBM Plex Sans',sans-serif; font-size:.93rem; color:rgba(242,237,224,.6); line-height:1.75; max-width:340px; margin-bottom:2rem; font-weight:300; }
+    .sp-pill { display:inline-flex; align-items:center; gap:9px; background:rgba(245,188,0,.06); border:1px solid rgba(245,188,0,.18); border-radius:50px; padding:.4rem .9rem; margin-bottom:8px; }
+    .sp-pill-dot { width:5px; height:5px; border-radius:50%; background:#F5BC00; flex-shrink:0; }
+    .sp-pill-txt { font-family:'IBM Plex Sans',sans-serif; font-size:.77rem; color:rgba(242,237,224,.65); }
+    .sp-stats { display:flex; gap:2rem; margin-top:2rem; }
+    .sp-stat-v { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; color:#F2EDE0; }
+    .sp-stat-l { font-family:'IBM Plex Sans',sans-serif; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(242,237,224,.32); }
+    .sp-divv   { width:1px; height:28px; background:rgba(255,255,255,.09); align-self:center; }
+
+    /* Panel derecho — card */
+    .sp-right { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:3rem 2.5rem; }
+    .sp-card  { background:rgba(14,12,8,.65); border:1px solid rgba(245,188,0,.18); border-radius:24px; padding:2.5rem 2.3rem 2rem; width:100%; max-width:420px; box-shadow:0 24px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(245,188,0,.08); }
+    .sp-card-logo { display:flex; align-items:center; gap:12px; padding-bottom:1.4rem; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:1.6rem; }
+    .sp-card-logo img { width:44px; border-radius:50%; filter:drop-shadow(0 0 8px rgba(245,188,0,.55)); }
+    .sp-card-name { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; color:#F2EDE0; letter-spacing:.04em; }
+    .sp-card-sub  { font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; color:#F5BC00; display:block; margin-top:2px; font-family:'IBM Plex Sans',sans-serif; }
+    .sp-form-title { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; color:#F2EDE0; margin-bottom:.25rem; }
+    .sp-form-sub   { font-family:'IBM Plex Sans',sans-serif; font-size:.82rem; color:rgba(242,237,224,.35); margin-bottom:1.6rem; font-weight:300; }
+
+    /* Inputs nativos de Streamlit — estilo SOLPRO */
+    .stTextInput label p { font-family:'IBM Plex Sans',sans-serif !important; font-size:.72rem !important; font-weight:500 !important; color:rgba(242,237,224,.65) !important; letter-spacing:.06em !important; text-transform:uppercase !important; }
+    .stTextInput input { background:rgba(245,188,0,.04) !important; border:1px solid rgba(255,255,255,.10) !important; border-radius:9px !important; color:#F2EDE0 !important; font-family:'IBM Plex Sans',sans-serif !important; }
+    .stTextInput input:focus { border-color:#F5BC00 !important; box-shadow:0 0 0 3px rgba(245,188,0,.11) !important; }
+    .stTextInput input::placeholder { color:rgba(242,237,224,.3) !important; }
+    .stForm { background:transparent !important; border:none !important; padding:0 !important; }
+    .stForm [data-testid="stFormSubmitButton"] button {
+        width:100% !important; background:linear-gradient(135deg,#F5BC00,#BF9000) !important;
+        color:#0C0800 !important; font-family:'Space Grotesk',sans-serif !important;
+        font-size:.88rem !important; font-weight:700 !important; letter-spacing:.08em !important;
+        text-transform:uppercase !important; border:none !important; border-radius:9px !important;
+        padding:.82rem !important; box-shadow:0 0 26px rgba(245,188,0,.30) !important;
+        margin-top:.5rem !important;
+    }
+    .stForm [data-testid="stFormSubmitButton"] button:hover {
+        box-shadow:0 0 46px rgba(245,188,0,.55) !important;
+        transform:translateY(-1px) !important; filter:brightness(1.05) !important;
+    }
+    .stCheckbox label p { font-family:'IBM Plex Sans',sans-serif !important; font-size:.77rem !important; color:rgba(242,237,224,.35) !important; font-weight:400 !important; }
+    div[data-testid="stAlert"] { border-radius:9px !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    logo_b64 = ""
     try:
-        with open(REDESIGN_FILE, "r", encoding="utf-8") as f:
-            html_content = f.read()
-        
-        login_bridge = """
-        <script>
-        // Función de diagnóstico inmediata
-        (function() {
-            console.log("SOLPRO Login Bridge cargado");
-            
-            const attemptLogin = () => {
-                const form = document.getElementById('loginForm');
-                const btn = document.querySelector('.btn');
-                
-                if (!form || !btn) {
-                    setTimeout(attemptLogin, 100);
-                    return;
-                }
+        import base64 as _b64
+        with open(LOGO_FILE, "rb") as _f:
+            logo_b64 = _b64.b64encode(_f.read()).decode()
+    except: pass
 
-                form.onsubmit = function(e) {
-                    e.preventDefault();
-                    console.log("Formulario enviado");
-                    
-                    try {
-                        const user = document.getElementById('email').value;
-                        const pass = document.getElementById('password').value;
-                        
-                        if (!user || !pass) {
-                            alert("Por favor, ingresa usuario y contraseña");
-                            return false;
-                        }
+    logo_tag_lg = f'<img src="data:image/png;base64,{logo_b64}">' if logo_b64 else ""
+    logo_tag_sm = f'<img src="data:image/png;base64,{logo_b64}">' if logo_b64 else ""
 
-                        btn.innerText = "ENTRANDO...";
-                        btn.style.opacity = "0.7";
-                        
-                        // Codificación Base64 básica
-                        const encodedPass = btoa(pass);
-                        const params = "?u=" + encodeURIComponent(user) + "&p=" + encodeURIComponent(encodedPass);
-                        
-                        // Intentar obtener la URL de destino de varias formas
-                        let target = "";
-                        try {
-                            target = window.top.location.origin + window.top.location.pathname;
-                        } catch(e) {
-                            target = document.referrer.split('?')[0];
-                        }
-                        
-                        if (!target || target === "null" || target.includes("streamlit.app")) {
-                            target = window.location.origin; // Fallback
-                        }
-                        
-                        console.log("Redirigiendo a:", target + params);
-                        window.top.location.href = target + params;
-                        
-                        // Fallback de seguridad si el href falla
-                        setTimeout(() => {
-                            window.top.location.replace(target + params);
-                        }, 500);
+    col_left, col_right = st.columns([1, 1], gap="small")
 
-                    } catch(err) {
-                        alert("Error en el login: " + err.message);
-                        btn.innerText = "ENTRAR AL SISTEMA";
-                        btn.style.opacity = "1";
-                    }
-                    return false;
-                };
-            };
-            
-            attemptLogin();
-        })();
-        </script>
-        """
-        html_content = html_content.replace("</body>", login_bridge + "</body>")
-        
-        # Estilo para que el login sea pantalla completa y oculte Streamlit
-        st.markdown("""
-            <style>
-            #MainMenu {visibility: hidden;}
-            header {visibility: hidden;}
-            footer {visibility: hidden;}
-            .block-container {padding: 0 !important; margin: 0 !important; max-width: 100% !important;}
-            iframe {position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; border: none; z-index: 9999;}
-            </style>
+    with col_left:
+        st.markdown(f"""
+        <div class="sp-left">
+            <div class="sp-logo">
+                {logo_tag_lg}
+                <div>
+                    <div class="sp-logo-name">SOLPRO</div>
+                    <span class="sp-logo-tag">Soluciones Profesionales</span>
+                </div>
+            </div>
+            <div class="sp-hl">Facturación<br>profesional,<br><span>sin complicaciones</span></div>
+            <div class="sp-desc">Genera, administra y envía facturas electrónicas en segundos. Control total de tus ingresos, clientes y reportes fiscales.</div>
+            <div><div class="sp-pill"><div class="sp-pill-dot"></div><span class="sp-pill-txt">Facturas electrónicas en segundos</span></div></div>
+            <div><div class="sp-pill"><div class="sp-pill-dot"></div><span class="sp-pill-txt">Gestión de clientes y productos</span></div></div>
+            <div><div class="sp-pill"><div class="sp-pill-dot"></div><span class="sp-pill-txt">Reportes fiscales automáticos</span></div></div>
+            <div class="sp-stats">
+                <div class="sp-stat"><div class="sp-stat-v">+12K</div><div class="sp-stat-l">Facturas</div></div>
+                <div class="sp-divv"></div>
+                <div class="sp-stat"><div class="sp-stat-v">99.9%</div><div class="sp-stat-l">Disponibilidad</div></div>
+                <div class="sp-divv"></div>
+                <div class="sp-stat"><div class="sp-stat-v">24/7</div><div class="sp-stat-l">Soporte</div></div>
+            </div>
+        </div>
         """, unsafe_allow_html=True)
-        
-        components.html(html_content, height=1200, scrolling=False)
-    except Exception as e:
-        st.error(f"Error al cargar el rediseño del login: {e}")
-        # Fallback al login básico si falla la carga del archivo
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align: center; color: #f1c232; margin-bottom: 30px;'>SOLPRO ACCESS</h1>", unsafe_allow_html=True)
-        with st.form("login_form"):
-            user_input = st.text_input("Usuario")
-            pass_input = st.text_input("Contraseña", type="password")
-            if st.form_submit_button("INICIAR SESIÓN"):
-                users = load_users()
-                hashed_input = hashlib.sha256(pass_input.encode()).hexdigest()
-                user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == hashed_input), None)
-                if user_found:
-                    st.session_state.logged_in = True
-                    st.session_state.user_data = user_found
-                    st.rerun()
-                else: st.error("Credenciales incorrectas")
-        st.markdown("</div>", unsafe_allow_html=True)
-    
+
+    with col_right:
+        st.markdown(f"""
+        <div class="sp-right">
+          <div class="sp-card">
+            <div class="sp-card-logo">
+                {logo_tag_sm}
+                <div>
+                    <div class="sp-card-name">SOLPRO</div>
+                    <span class="sp-card-sub">Facturación</span>
+                </div>
+            </div>
+            <div class="sp-form-title">SOLPRO Facturación</div>
+            <div class="sp-form-sub">Ingresa tus credenciales para continuar</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.form("solpro_login_form"):
+            user_input = st.text_input("Usuario", placeholder="admin")
+            pass_input = st.text_input("Contraseña", type="password", placeholder="••••••••")
+            st.checkbox("Mantener sesión iniciada")
+            submitted = st.form_submit_button("Entrar al sistema")
+
+        if submitted:
+            users = load_users()
+            hashed_input = hashlib.sha256(pass_input.encode()).hexdigest()
+            user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == hashed_input), None)
+            if user_found:
+                st.session_state.logged_in = True
+                st.session_state.user_data = user_found
+                st.rerun()
+            else:
+                st.error("Credenciales incorrectas. Verifica tu usuario y contraseña.")
+
     st.stop()
 
 # --- HEADER CORPORATIVO ---
