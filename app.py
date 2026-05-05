@@ -329,11 +329,17 @@ def update_inventory(sales_list):
         start_row = 1 if not df.empty and str(df.iloc[0, 0]).strip() == 'ID REF' else 0
         for sale in sales_list:
             codigo = sale['COD_PRODUCTO']
-            mask = df.iloc[start_row:, 0].astype(str).str.strip() == str(codigo).strip()
-            if mask.any():
-                idx = df[mask].index[0]
+            # Buscar el código en la primera columna, asegurando alineación de índices
+            full_mask = df.iloc[:, 0].astype(str).str.strip() == str(codigo).strip()
+            # Filtrar para ignorar la fila de cabecera si es necesario
+            if start_row > 0:
+                full_mask.iloc[0:start_row] = False
+            
+            if full_mask.any():
+                idx = full_mask[full_mask].index[0]
                 if len(df.columns) < 6:
-                    for col_idx in range(len(df.columns), 6): df[f'Column{col_idx+1}'] = 0
+                    for col_idx in range(len(df.columns), 6): 
+                        df[f'Column{col_idx+1}'] = 0
                 try:
                     current_stock = pd.to_numeric(df.iloc[idx, 5], errors='coerce')
                     if pd.isna(current_stock): current_stock = 0
