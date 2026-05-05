@@ -37,22 +37,22 @@ def generate_invoice_pdf(data, output_path):
         c.drawImage(template_path, 0, 0, width=w, height=h)
     
     # --- CABECERA ---
-    c.setFont("Courier-Bold", 14)
-    c.drawString(450, 488, data['nro_factura'])
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(435, 478, data['nro_factura'])
 
     c.setFont("Helvetica", 11)
-    c.drawString(135, 444, data['fecha'])
+    c.drawString(135, 432, data['fecha'])
     
     # Condición X
-    c.drawString(556 if data['condicion'] == "CONTADO" else 624, 444, "X")
+    c.drawString(556 if data['condicion'] == "CONTADO" else 624, 432, "X")
 
-    c.drawString(145, 424, data['nombre'].upper())
-    c.drawString(100, 404, data['ruc'])
-    c.drawString(465, 404, data['telefono'])
-    c.drawString(100, 384, data['direccion'].upper())
+    c.drawString(145, 412, data['nombre'].upper())
+    c.drawString(100, 393, data['ruc'])
+    c.drawString(465, 393, data['telefono'])
+    c.drawString(100, 373, data['direccion'].upper())
 
     # --- PRODUCTOS ---
-    y = 352
+    y = 341
     total_suma = 0
     moneda = data['moneda']
     
@@ -66,17 +66,17 @@ def generate_invoice_pdf(data, output_path):
         y -= 18.5
 
     # --- TOTALES ---
-    c.drawRightString(625, 102, format_money(total_suma, moneda))
+    c.drawRightString(625, 96, format_money(total_suma, moneda))
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(625, 80, format_money(total_suma, moneda))
+    c.drawRightString(625, 75, format_money(total_suma, moneda))
     
     c.setFont("Helvetica-Bold", 10)
-    c.drawString(50, 60, numero_a_letras(total_suma, moneda))
+    c.drawString(50, 55, numero_a_letras(total_suma, moneda))
 
     iva_10 = total_suma / 11
     c.setFont("Helvetica", 10)
-    c.drawRightString(460, 38, format_money(iva_10, moneda))
-    c.drawRightString(590, 38, format_money(iva_10, moneda))
+    c.drawRightString(460, 34, format_money(iva_10, moneda))
+    c.drawRightString(590, 34, format_money(iva_10, moneda))
 
     c.save()
     return output_path

@@ -202,29 +202,46 @@ if 'user_data' not in st.session_state:
     st.session_state.user_data = None
 
 # Funciones de carga
+def clean_price(price_str):
+    if pd.isna(price_str): return 0.0
+    price_str = str(price_str).upper()
+    # Remover símbolos comunes y espacios
+    for s in ["GS.", "U$D", "GS", "USD", ".", " ", "$"]:
+        price_str = price_str.replace(s, "")
+    # Reemplazar coma por punto para decimales si los hay
+    price_str = price_str.replace(",", ".")
+    try:
+        return float(price_str)
+    except:
+        return 0.0
+
 @st.cache_data(ttl=60)
 def load_products():
     if os.path.exists(PRODUCTS_FILE):
         df = pd.read_excel(PRODUCTS_FILE)
-        df.columns = [str(c).strip().upper() for c in df.columns]
-        
-        if 'STOCK' in df.columns:
-            df = df.rename(columns={'STOCK': 'STOCK_V'})
+        # Buscar la fila real de cabecera para evitar problemas si hay filas vacías al inicio
+        start_row = 0
+        for i in range(min(len(df), 10)):
+            if "ID REF" in str(df.iloc[i, 0]).upper():
+                start_row = i + 1
+                break
         
         df_final = pd.DataFrame()
-        df_final['CODIGO'] = df.iloc[:, 0].astype(str)
-        df_final['LINEA'] = df.iloc[:, 1].astype(str)
-        df_final['DESCRIPCION'] = df.iloc[:, 2].astype(str)
-        df_final['PRECIO'] = df.iloc[:, 3].astype(str)
+        df_final['CODIGO'] = df.iloc[start_row:, 0].astype(str).str.strip()
+        df_final['LINEA'] = df.iloc[start_row:, 1].astype(str).str.strip()
+        df_final['DESCRIPCION'] = df.iloc[start_row:, 2].astype(str).str.strip()
         
+        # Limpieza de precio
+        df_final['PRECIO'] = df.iloc[start_row:, 3].apply(clean_price)
+        
+        # Manejo de Stock (Columna 5)
         if len(df.columns) >= 6:
-            df_final['STOCK'] = pd.to_numeric(df.iloc[:, 5], errors='coerce').fillna(0)
+            df_final['STOCK'] = pd.to_numeric(df.iloc[start_row:, 5], errors='coerce').fillna(0)
         else:
             df_final['STOCK'] = 0
             
-        mask_ref = df_final['CODIGO'].str.contains('ID REF|CODIGO', case=False, na=False)
-        df_final = df_final[~mask_ref].reset_index(drop=True)
-        
+        # Limpieza de nans y cabeceras residuales
+        df_final = df_final[df_final['CODIGO'] != 'nan'].reset_index(drop=True)
         return df_final
     return pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO', 'STOCK'])
 
@@ -291,8 +308,14 @@ def update_inventory(sales_list):
 
 def log_sales(sales_list):
     if os.path.exists(SALES_FILE):
-        df = pd.read_excel(SALES_FILE)
-        df = pd.concat([df, pd.DataFrame(sales_list)], ignore_index=True)
+        try:
+            df = pd.read_excel(SALES_FILE)
+            df = pd.concat([df, pd.DataFrame(sales_list)], ignore_index=True)
+            df.to_excel(SALES_FILE, index=False)
+        except Exception as e:
+            st.error(f"Error al actualizar la planilla: {e}")
+    else:
+        df = pd.DataFrame(sales_list)
         df.to_excel(SALES_FILE, index=False)
 
 def get_next_invoice_number():
@@ -444,7 +467,11 @@ with tab1:
             if not filtered.empty:
                 sel_idx = st.selectbox("p", filtered.index, format_func=lambda x: f"{df_products.loc[x, 'CODIGO']} - {df_products.loc[x, 'DESCRIPCION']}", key=f"suggest_{i}", label_visibility="collapsed")
                 if st.button("✓ SELECCIONAR", key=f"btn_sel_{i}"):
-                    st.session_state.factura_items[i].update({'desc': df_products.loc[sel_idx, 'DESCRIPCION'], 'codigo': df_products.loc[sel_idx, 'CODIGO']})
+                    st.session_state.factura_items[i].update({
+                        'desc': df_products.loc[sel_idx, 'DESCRIPCION'], 
+                        'codigo': df_products.loc[sel_idx, 'CODIGO'],
+                        'precio': float(df_products.loc[sel_idx, 'PRECIO'])
+                    })
                     st.rerun()
             desc = st.text_area("d", value=item['desc'], key=f"desc_{i}", height=60, label_visibility="collapsed")
         
@@ -533,13 +560,26 @@ if st.session_state.user_data['rol'] == 'admin':
         st.dataframe(df_f, use_container_width=True, hide_index=True)
 
     with tab4:
-        st.header("📊 HISTORIAL")
+        st.header("📊 HISTORIAL DE VENTAS")
         df_s = load_sales()
         if not df_s.empty:
             r1, r2 = st.columns(2)
             r1.metric("TOTAL GS", f"{df_s['PRECIO GS'].sum():,.0f}")
             r2.metric("TOTAL USD", f"{df_s['PRECIO USD'].sum():,.2f}")
+            
+            # Botón para descargar la planilla de ventas completa
+            if os.path.exists(SALES_FILE):
+                with open(SALES_FILE, "rb") as f:
+                    st.download_button(
+                        label="📥 DESCARGAR PLANILLA DE VENTAS COMPLETA (EXCEL)",
+                        data=f,
+                        file_name="VENTAS_TOTALES_2026.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+            
             st.dataframe(df_s, use_container_width=True, hide_index=True)
+        else:
+            st.info("No hay ventas registradas aún en 2026.")
 
     with tab5:
         st.header("🤖 ASISTENTE AI")
