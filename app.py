@@ -419,19 +419,24 @@ if not st.session_state.get('logged_in', False):
                     
                     // Intentar obtener la URL base de la página principal de forma segura
                     const params = "?u=" + encodeURIComponent(user) + "&p=" + encodeURIComponent(encodedPass);
-                    let baseUrl = "";
-                    try {
-                        baseUrl = window.parent.location.origin + window.parent.location.pathname;
-                    } catch(e) {
-                        // Si falla por CORS, usar el referrer (URL que cargó el iframe)
-                        baseUrl = document.referrer.split('?')[0];
-                    }
                     
-                    if (!baseUrl || baseUrl === "null") {
-                        baseUrl = window.location.origin; // Último recurso
+                    // Intentar redirección absoluta usando el referrer
+                    let targetUrl = "";
+                    try {
+                        // Intentar obtener la URL limpia (sin parámetros anteriores) del referrer
+                        const ref = document.referrer;
+                        if (ref) {
+                            targetUrl = ref.split('?')[0].split('#')[0];
+                        }
+                    } catch(e) {}
+
+                    if (!targetUrl || targetUrl === "null") {
+                        // Fallback a la raíz del sitio si estamos en el mismo dominio
+                        targetUrl = "/";
                     }
 
-                    window.top.location.href = baseUrl + params;
+                    // Forzar la redirección en la ventana superior (la de Streamlit)
+                    window.top.location.href = targetUrl + params;
                 });
             }
         });
