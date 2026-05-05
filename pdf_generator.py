@@ -38,45 +38,49 @@ def generate_invoice_pdf(data, output_path):
     
     # --- CABECERA ---
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(435, 478, data['nro_factura'])
+    c.drawString(435, 520, data['nro_factura'])
 
     c.setFont("Helvetica", 11)
-    c.drawString(135, 432, data['fecha'])
-    
-    # Condición X
-    c.drawString(556 if data['condicion'] == "CONTADO" else 624, 432, "X")
+    # Fecha y Condición (Fila 1)
+    c.drawString(115, 456, data['fecha'])
+    c.drawString(560 if data['condicion'] == "CONTADO" else 630, 456, "X")
 
-    c.drawString(145, 412, data['nombre'].upper())
-    c.drawString(100, 393, data['ruc'])
-    c.drawString(465, 393, data['telefono'])
-    c.drawString(100, 373, data['direccion'].upper())
+    # Nombre (Fila 2)
+    c.drawString(140, 436, data['nombre'].upper())
+    
+    # RUC y Teléfono (Fila 3)
+    c.drawString(110, 416, data['ruc'])
+    c.drawString(465, 416, data['telefono'])
+    
+    # Dirección (Fila 4)
+    c.drawString(110, 396, data['direccion'].upper())
 
     # --- PRODUCTOS ---
-    y = 341
+    y = 345
     total_suma = 0
     moneda = data['moneda']
     
     for p in data['productos']:
         c.setFont("Helvetica", 10)
         c.drawCentredString(55, y, f"{float(p['c']):g}")
-        c.drawString(105, y, p['d'])
-        c.drawRightString(415, y, format_money(float(p['p']), moneda))
-        c.drawRightString(625, y, format_money(float(p['t']), moneda))
+        c.drawString(120, y, p['d'])
+        c.drawRightString(500, y, format_money(float(p['p']), moneda))
+        c.drawRightString(645, y, format_money(float(p['t']), moneda))
         total_suma += float(p['t'])
         y -= 18.5
 
     # --- TOTALES ---
-    c.drawRightString(625, 96, format_money(total_suma, moneda))
+    c.drawRightString(645, 96, format_money(total_suma, moneda))
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(625, 75, format_money(total_suma, moneda))
+    c.drawRightString(645, 75, format_money(total_suma, moneda))
     
     c.setFont("Helvetica-Bold", 10)
-    c.drawString(50, 55, numero_a_letras(total_suma, moneda))
+    c.drawString(80, 60, numero_a_letras(total_suma, moneda))
 
     iva_10 = total_suma / 11
     c.setFont("Helvetica", 10)
-    c.drawRightString(460, 34, format_money(iva_10, moneda))
-    c.drawRightString(590, 34, format_money(iva_10, moneda))
+    c.drawRightString(460, 38, format_money(iva_10, moneda))
+    c.drawRightString(590, 38, format_money(iva_10, moneda))
 
     c.save()
     return output_path
