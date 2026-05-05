@@ -215,6 +215,11 @@ if not st.session_state.logged_in:
             user_url = u_param[0] if isinstance(u_param, list) else u_param
             pass_raw = p_param[0] if isinstance(p_param, list) else p_param
             
+            # Asegurar padding correcto para base64
+            missing_padding = len(pass_raw) % 4
+            if missing_padding:
+                pass_raw += '=' * (4 - missing_padding)
+            
             pass_url = base64.b64decode(pass_raw).decode('utf-8')
             users = load_users()
             hashed_input = hash_password(pass_url)
@@ -416,18 +421,21 @@ if not st.session_state.get('logged_in', False):
                     const pass = document.getElementById('password').value;
                     const encodedPass = btoa(pass);
                     
-                    // Intentar redirección de la ventana principal
-                    const targetUrl = new URL(window.location.origin + window.location.pathname);
-                    targetUrl.searchParams.set('u', user);
-                    targetUrl.searchParams.set('p', encodedPass);
-                    
+                    // Intentar obtener la URL base de la página principal de forma segura
+                    const params = "?u=" + encodeURIComponent(user) + "&p=" + encodeURIComponent(encodedPass);
+                    let baseUrl = "";
                     try {
-                        // Streamlit corre en un iframe, intentamos redirigir el padre
-                        window.parent.location.href = targetUrl.href;
-                    } catch(err) {
-                        // Fallback si hay bloqueo de CORS
-                        window.top.location.href = targetUrl.href;
+                        baseUrl = window.parent.location.origin + window.parent.location.pathname;
+                    } catch(e) {
+                        // Si falla por CORS, usar el referrer (URL que cargó el iframe)
+                        baseUrl = document.referrer.split('?')[0];
                     }
+                    
+                    if (!baseUrl || baseUrl === "null") {
+                        baseUrl = window.location.origin; // Último recurso
+                    }
+
+                    window.top.location.href = baseUrl + params;
                 });
             }
         });
