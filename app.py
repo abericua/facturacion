@@ -205,20 +205,33 @@ if 'user_data' not in st.session_state:
 
 # --- MANEJO DE LOGIN POR URL ---
 if not st.session_state.logged_in:
-    params = st.query_params
-    if "u" in params and "p" in params:
+    # Usamos get() para manejar parámetros de forma segura
+    u_param = st.query_params.get("u")
+    p_param = st.query_params.get("p")
+    
+    if u_param and p_param:
         try:
-            user_url = params["u"]
-            pass_url = base64.b64decode(params["p"]).decode('utf-8')
+            # En algunas versiones de Streamlit los parámetros pueden venir como listas
+            user_url = u_param[0] if isinstance(u_param, list) else u_param
+            pass_raw = p_param[0] if isinstance(p_param, list) else p_param
+            
+            pass_url = base64.b64decode(pass_raw).decode('utf-8')
             users = load_users()
             hashed_input = hash_password(pass_url)
             user_found = next((u for u in users if u['usuario'] == user_url and u['password'] == hashed_input), None)
+            
             if user_found:
                 st.session_state.logged_in = True
                 st.session_state.user_data = user_found
+                # Limpiar parámetros de la URL para que no se vean
                 st.query_params.clear()
                 st.rerun()
-        except: pass
+            else:
+                # Si falló el login, mostramos un error temporal (opcional)
+                st.error("Credenciales de URL inválidas")
+        except Exception as e:
+            # st.error(f"Error procesando login: {e}")
+            pass
 
 # Funciones de carga
 def clean_price(price_str):
@@ -388,8 +401,10 @@ if not st.session_state.get('logged_in', False):
         with open(REDESIGN_FILE, "r", encoding="utf-8") as f:
             html_content = f.read()
         
-        # Inyectar el script de puente (bridge)
-        # Esto redirige la ventana PADRE (Streamlit) con los parámetros u y p
+        # Inyectar el script de puente (bridge) y ajustar el tipo de input
+        # Cambiamos type="email" por type="text" para permitir nombres de usuario como 'admin'
+        html_content = html_content.replace('type="email"', 'type="text"')
+        
         login_bridge = """
         <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -400,16 +415,18 @@ if not st.session_state.get('logged_in', False):
                     const user = document.getElementById('email').value;
                     const pass = document.getElementById('password').value;
                     const encodedPass = btoa(pass);
+                    
+                    // Intentar redirección de la ventana principal
+                    const targetUrl = new URL(window.location.origin + window.location.pathname);
+                    targetUrl.searchParams.set('u', user);
+                    targetUrl.searchParams.set('p', encodedPass);
+                    
                     try {
-                        const url = new URL(window.parent.location.href);
-                        url.searchParams.set('u', user);
-                        url.searchParams.set('p', encodedPass);
-                        window.parent.location.href = url.href;
+                        // Streamlit corre en un iframe, intentamos redirigir el padre
+                        window.parent.location.href = targetUrl.href;
                     } catch(err) {
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('u', user);
-                        url.searchParams.set('p', encodedPass);
-                        window.location.href = url.href;
+                        // Fallback si hay bloqueo de CORS
+                        window.top.location.href = targetUrl.href;
                     }
                 });
             }
