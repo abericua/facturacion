@@ -576,6 +576,14 @@ with st.sidebar:
     direccion = st.text_input("Dirección", value=sel_data['direccion'] if sel_data else "")
     telefono = st.text_input("Teléfono", value=sel_data['telefono'] if sel_data else "")
     
+    if st.button("💾 GUARDAR / ACTUALIZAR DATOS"):
+        if nombre:
+            save_client({"nombre": nombre, "ruc": ruc, "direccion": direccion, "telefono": telefono})
+            st.success(f"Cliente {nombre} guardado!")
+            st.rerun()
+        else:
+            st.error("Ingresa al menos el nombre")
+
     st.divider()
     st.header("⚙️ Configuración")
     vendedor = st.text_input("Vendedor", value=st.session_state.user_data['nombre'])
