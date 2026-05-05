@@ -32,14 +32,14 @@ def generate_invoice_pdf(data, output_path):
     c.drawString(435, 520, data['nro_factura'])
 
     c.setFont("Helvetica", 11)
-    c.drawString(115, 456, data['fecha'])
+    c.drawString(190, 456, data['fecha'])
     x_cond = 533 if data['condicion'] == "CONTADO" else 601
     c.drawString(x_cond, 456, "X")
 
-    c.drawString(140, 436, data['nombre'].upper())
-    c.drawString(110, 416, data['ruc'])
-    c.drawString(465, 416, data['telefono'])
-    c.drawString(110, 396, data['direccion'].upper())
+    c.drawString(220, 436, data['nombre'].upper())
+    c.drawString(120, 416, data['ruc'])
+    c.drawString(470, 416, data['telefono'])
+    c.drawString(120, 396, data['direccion'].upper())
 
     # PRODUCTOS
     y = 345
@@ -53,29 +53,29 @@ def generate_invoice_pdf(data, output_path):
         # Descripción
         c.drawString(73, y, p['d'])
         # Precio Unitario
-        c.drawRightString(535, y, format_money(float(p['p']), moneda))
+        c.drawRightString(405, y, format_money(float(p['p']), moneda))
         # Valor de Venta (10%)
-        c.drawRightString(658, y, format_money(float(p['t']), moneda))
+        c.drawRightString(615, y, format_money(float(p['t']), moneda))
         total_suma += float(p['t'])
         y -= 18.5
 
     # TOTALES
     c.setFont("Helvetica", 10)
-    c.drawRightString(658, 95, format_money(total_suma, moneda))   # Sub-Totales
-    c.drawRightString(658, 82, format_money(total_suma, moneda))   # TOTAL A PAGAR
+    c.drawRightString(615, 100, format_money(total_suma, moneda))  # Sub-Totales
+    c.drawRightString(615, 82, format_money(total_suma, moneda))   # TOTAL A PAGAR
 
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(658, 63, format_money(total_suma, moneda))   # Total bold (opcional si hay cuadro)
+    c.drawRightString(615, 63, format_money(total_suma, moneda))   # Total bold (opcional si hay cuadro)
 
     c.setFont("Helvetica", 8)
     total_letras = numero_a_letras(total_suma, moneda)
     palabras = total_letras.replace("TOTAL A PAGAR: ", "")
-    c.drawString(200, 63, palabras)                                # Total en letras
+    c.drawString(40, 63, palabras)                                 # Total en letras
 
     iva_10 = total_suma / 11
     c.setFont("Helvetica", 10)
     c.drawRightString(445, 50, format_money(iva_10, moneda))       # IVA 10%
-    c.drawRightString(658, 50, format_money(iva_10, moneda))       # Total IVA
+    c.drawRightString(615, 50, format_money(iva_10, moneda))       # Total IVA
 
     c.save()
     return output_path
