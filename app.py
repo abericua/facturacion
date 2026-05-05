@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import json
 import hashlib
+import base64
 import requests
 from datetime import datetime
 from pdf_generator import generate_invoice_pdf
@@ -179,6 +180,7 @@ PRODUCTS_FILE = os.path.join(BASE_DIR, "LISTA DE PRECIOS DE VENTA.xlsx")
 SALES_FILE = os.path.join(BASE_DIR, "VENTAS TOTALES 2026.xlsx")
 CLIENTS_FILE = os.path.join(BASE_DIR, "clientes.json")
 USERS_FILE = os.path.join(BASE_DIR, "usuarios.json")
+REDESIGN_FILE = os.path.join(BASE_DIR, "solpro-login-redesign.html")
 OUTPUT_DIR = os.path.join(BASE_DIR, "Facturas_Emitidas")
 # CAMBIO DE LOGO A VERSIÓN CORPORATIVA
 LOGO_FILE = os.path.join(BASE_DIR, "LOGO  2D FONDO NEGRO 2026.png")
@@ -200,6 +202,23 @@ if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_data' not in st.session_state:
     st.session_state.user_data = None
+
+# --- MANEJO DE LOGIN POR URL ---
+if not st.session_state.logged_in:
+    params = st.query_params
+    if "u" in params and "p" in params:
+        try:
+            user_url = params["u"]
+            pass_url = base64.b64decode(params["p"]).decode('utf-8')
+            users = load_users()
+            hashed_input = hash_password(pass_url)
+            user_found = next((u for u in users if u['usuario'] == user_url and u['password'] == hashed_input), None)
+            if user_found:
+                st.session_state.logged_in = True
+                st.session_state.user_data = user_found
+                st.query_params.clear()
+                st.rerun()
+        except: pass
 
 # Funciones de carga
 def clean_price(price_str):
@@ -361,25 +380,75 @@ def call_ai(prompt, system_prompt, api_url):
     except Exception as e: return f"Error de conexión: {str(e)}"
 
 # --- INTERFAZ DE LOGIN ---
-if not st.session_state.logged_in:
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown("<h1 style='text-align: center; color: #f1c232; margin-bottom: 30px;'>SOLPRO ACCESS</h1>", unsafe_allow_html=True)
+if not st.session_state.get('logged_in', False):
+    import streamlit.components.v1 as components
     
-    with st.form("login_form"):
-        user_input = st.text_input("Usuario")
-        pass_input = st.text_input("Contraseña", type="password")
-        submit = st.form_submit_button("INICIAR SESIÓN")
+    # Cargar HTML de rediseño
+    try:
+        with open(REDESIGN_FILE, "r", encoding="utf-8") as f:
+            html_content = f.read()
         
-        if submit:
-            users = load_users()
-            hashed_input = hash_password(pass_input)
-            user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == hashed_input), None)
-            if user_found:
-                st.session_state.logged_in = True
-                st.session_state.user_data = user_found
-                st.rerun()
-            else: st.error("Credenciales incorrectas")
-    st.markdown("</div>", unsafe_allow_html=True)
+        # Inyectar el script de puente (bridge)
+        # Esto redirige la ventana PADRE (Streamlit) con los parámetros u y p
+        login_bridge = """
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const user = document.getElementById('email').value;
+                    const pass = document.getElementById('password').value;
+                    const encodedPass = btoa(pass);
+                    try {
+                        const url = new URL(window.parent.location.href);
+                        url.searchParams.set('u', user);
+                        url.searchParams.set('p', encodedPass);
+                        window.parent.location.href = url.href;
+                    } catch(err) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('u', user);
+                        url.searchParams.set('p', encodedPass);
+                        window.location.href = url.href;
+                    }
+                });
+            }
+        });
+        </script>
+        """
+        html_content = html_content.replace("</body>", login_bridge + "</body>")
+        
+        # Estilo para que el login sea pantalla completa y oculte Streamlit
+        st.markdown("""
+            <style>
+            #MainMenu {visibility: hidden;}
+            header {visibility: hidden;}
+            footer {visibility: hidden;}
+            .block-container {padding: 0 !important; margin: 0 !important; max-width: 100% !important;}
+            iframe {position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; border: none; z-index: 9999;}
+            </style>
+        """, unsafe_allow_html=True)
+        
+        components.html(html_content, height=1200, scrolling=False)
+    except Exception as e:
+        st.error(f"Error al cargar el rediseño del login: {e}")
+        # Fallback al login básico si falla la carga del archivo
+        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #f1c232; margin-bottom: 30px;'>SOLPRO ACCESS</h1>", unsafe_allow_html=True)
+        with st.form("login_form"):
+            user_input = st.text_input("Usuario")
+            pass_input = st.text_input("Contraseña", type="password")
+            if st.form_submit_button("INICIAR SESIÓN"):
+                users = load_users()
+                hashed_input = hashlib.sha256(pass_input.encode()).hexdigest()
+                user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == hashed_input), None)
+                if user_found:
+                    st.session_state.logged_in = True
+                    st.session_state.user_data = user_found
+                    st.rerun()
+                else: st.error("Credenciales incorrectas")
+        st.markdown("</div>", unsafe_allow_html=True)
+    
     st.stop()
 
 # --- HEADER CORPORATIVO ---
