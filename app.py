@@ -387,7 +387,11 @@ def load_sales():
             df = pd.read_excel(SALES_FILE)
             if not df.empty:
                 df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
-                return df.sort_values(by='FECHA', ascending=False)
+                df['NRO_FACTURA_NUM'] = pd.to_numeric(df['NRO_FACTURA'], errors='coerce')
+                # Ordenar por fecha (mas actual primero) y luego por número de factura
+                df = df.sort_values(by=['FECHA', 'NRO_FACTURA_NUM'], ascending=[False, False])
+                df = df.drop(columns=['NRO_FACTURA_NUM'])
+                return df
         except: pass
     return pd.DataFrame()
 
@@ -616,6 +620,8 @@ with st.sidebar:
         st.divider()
         st.header("🤖 AI TUNNEL")
         ai_url = st.text_input("Endpoint URL", value="http://localhost:1234/v1")
+    else:
+        ai_url = "http://localhost:1234/v1"
 
     st.divider()
     if st.button("🚪 CERRAR SESIÓN"):
@@ -624,10 +630,8 @@ with st.sidebar:
         st.rerun()
 
 # --- TABS PRINCIPALES ---
-if st.session_state.user_data['rol'] == 'admin':
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🛒 FACTURACIÓN", "🚫 ANULAR", "📦 STOCK", "📊 HISTORIAL", "🤖 AI"])
-else:
-    tab1, = st.tabs(["🛒 FACTURACIÓN"])
+# Todos los roles ven las 5 pestañas
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🛒 FACTURACIÓN", "🚫 ANULAR", "📦 STOCK", "📊 HISTORIAL", "🤖 AI"])
 
 with tab1:
     df_products = load_products()
@@ -769,7 +773,7 @@ with tab1:
                     with open(pdf_path, "rb") as f: st.download_button("📥 DESCARGAR PDF", f, pdf_path, "application/pdf")
                     st.session_state.factura_items = []
 
-if st.session_state.user_data['rol'] == 'admin':
+if True:
     with tab2:
         st.header("🚫 ANULACIONES")
         inv_v = st.text_input("Nro Factura", placeholder="0000")
@@ -784,9 +788,29 @@ if st.session_state.user_data['rol'] == 'admin':
         m2.metric("STOCK POSITIVO", (df_i['STOCK'] > 0).sum())
         m3.metric("AGOTADOS", (df_i['STOCK'] == 0).sum())
         
-        filtro = st.text_input("🔍 Filtrar Inventario", placeholder="Código o Nombre...")
-        df_f = df_i[df_i['DESCRIPCION'].str.contains(filtro, case=False, na=False) | df_i['CODIGO'].str.contains(filtro, case=False, na=False)] if filtro else df_i
-        st.dataframe(df_f, use_container_width=True, hide_index=True)
+        st.markdown("<h3 style='margin-top: 20px; color: #f8fafc;'>PRODUCTOS EN STOCK</h3>", unsafe_allow_html=True)
+        filtro = st.text_input("🔍 Filtrar Inventario", placeholder="Buscar por código o nombre...")
+        
+        # Filtrar stock positivo
+        df_stock = df_i[df_i['STOCK'] > 0]
+        if filtro:
+            df_stock = df_stock[df_stock['DESCRIPCION'].str.contains(filtro, case=False, na=False) | df_stock['CODIGO'].str.contains(filtro, case=False, na=False)]
+        
+        if not df_stock.empty:
+            for _, row in df_stock.iterrows():
+                st.markdown(f'''
+                    <div style="background: #161b22; padding: 15px 25px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; border-left: 4px solid #f1c232;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="color: #f1c232; font-size: 14px; font-weight: 700; background: rgba(241, 194, 50, 0.1); padding: 4px 10px; border-radius: 4px;">{row["CODIGO"]}</div>
+                            <div style="color: #f8fafc; font-size: 16px; font-weight: 600; font-family: 'Raleway', sans-serif;">{row["DESCRIPCION"]}</div>
+                        </div>
+                        <div style="color: #f1c232; font-size: 26px; font-weight: 800; font-family: 'Raleway', sans-serif; text-align: right;">
+                            {int(row["STOCK"])} <span style="color: #94a3b8; font-size: 14px; font-weight: 600; font-family: 'Source Sans Pro', sans-serif;">UNID.</span>
+                        </div>
+                    </div>
+                ''', unsafe_allow_html=True)
+        else:
+            st.info("No hay productos con stock actualmente.")
 
     with tab4:
         st.header("📊 HISTORIAL DE VENTAS")
