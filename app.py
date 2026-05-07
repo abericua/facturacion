@@ -820,13 +820,14 @@ if True:
             
             all_inventory_options = ["--- SELECCIONAR PRODUCTO ---"] + [f"{row['CODIGO']} | {row['DESCRIPCION']}" for _, row in df_i.iterrows()]
             prod_to_load = st.selectbox("Producto a cargar", options=all_inventory_options, key="load_inv_prod")
-            cant_to_load = st.number_input("Cantidad a sumar", min_value=1, value=1, step=1, key="load_inv_cant")
+            cant_to_load = st.number_input("Cantidad a modificar (usa un número negativo para restar)", value=1, step=1, key="load_inv_cant")
             
-            if st.button("CARGAR STOCK"):
+            if st.button("💾 Actualizar Stock", key="btn_add_inv"):
                 if prod_to_load != "--- SELECCIONAR PRODUCTO ---":
                     cod_load = prod_to_load.split(" | ")[0]
                     if add_inventory(cod_load, cant_to_load):
-                        st.success(f"Se sumaron {cant_to_load} unidades a {prod_to_load.split(' | ')[1]}.")
+                        accion = "sumaron" if cant_to_load > 0 else "restaron"
+                        st.success(f"✅ Se {accion} {abs(cant_to_load)} unidades al producto {cod_load}.")
                         st.rerun()
                     else:
                         st.error("Hubo un problema al actualizar el inventario.")
