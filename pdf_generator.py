@@ -29,7 +29,7 @@ def generate_invoice_pdf(data, output_path):
 
     # CABECERA
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(435, 520, data['nro_factura'])
+    c.drawString(550, 490, data['nro_factura'])
 
     c.setFont("Helvetica", 11)
     c.drawString(190, 456, data['fecha'])

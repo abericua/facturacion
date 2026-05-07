@@ -348,6 +348,30 @@ def update_inventory(sales_list):
         df.to_excel(PRODUCTS_FILE, index=False)
         st.cache_data.clear()
 
+def add_inventory(codigo, cantidad_a_sumar):
+    if os.path.exists(PRODUCTS_FILE):
+        df = pd.read_excel(PRODUCTS_FILE)
+        start_row = 1 if not df.empty and str(df.iloc[0, 0]).strip() == 'ID REF' else 0
+        
+        full_mask = df.iloc[:, 0].astype(str).str.strip() == str(codigo).strip()
+        if start_row > 0:
+            full_mask.iloc[0:start_row] = False
+        
+        if full_mask.any():
+            idx = full_mask[full_mask].index[0]
+            if len(df.columns) < 6:
+                for col_idx in range(len(df.columns), 6): 
+                    df[f'Column{col_idx+1}'] = 0
+            try:
+                current_stock = pd.to_numeric(df.iloc[idx, 5], errors='coerce')
+                if pd.isna(current_stock): current_stock = 0
+                df.iloc[idx, 5] = current_stock + cantidad_a_sumar
+            except: pass
+            df.to_excel(PRODUCTS_FILE, index=False)
+            st.cache_data.clear()
+            return True
+    return False
+
 def log_sales(sales_list):
     if os.path.exists(SALES_FILE):
         try:
@@ -755,7 +779,7 @@ with tab1:
                         })
                     
                     sales_log = [{
-                        "FECHA": datetime.now(),
+                        "FECHA": datetime.now().strftime("%d-%m-%Y"),
                         "DESCRIPCION": ", ".join(descripciones),
                         "CLIENTE": nombre,
                         "PRECIO GS": total_factura if moneda == "PYG" else None,
@@ -789,7 +813,28 @@ if True:
         m3.metric("AGOTADOS", (df_i['STOCK'] == 0).sum())
         
         st.markdown("<h3 style='margin-top: 20px; color: #f8fafc;'>PRODUCTOS EN STOCK</h3>", unsafe_allow_html=True)
+        
+        # --- CARGA DE NUEVO INVENTARIO ---
+        with st.expander("➕ CARGAR NUEVO INVENTARIO", expanded=False):
+            st.markdown("Selecciona el producto y la cantidad a sumar al stock existente.")
+            
+            all_inventory_options = ["--- SELECCIONAR PRODUCTO ---"] + [f"{row['CODIGO']} | {row['DESCRIPCION']}" for _, row in df_i.iterrows()]
+            prod_to_load = st.selectbox("Producto a cargar", options=all_inventory_options, key="load_inv_prod")
+            cant_to_load = st.number_input("Cantidad a sumar", min_value=1, value=1, step=1, key="load_inv_cant")
+            
+            if st.button("CARGAR STOCK"):
+                if prod_to_load != "--- SELECCIONAR PRODUCTO ---":
+                    cod_load = prod_to_load.split(" | ")[0]
+                    if add_inventory(cod_load, cant_to_load):
+                        st.success(f"Se sumaron {cant_to_load} unidades a {prod_to_load.split(' | ')[1]}.")
+                        st.rerun()
+                    else:
+                        st.error("Hubo un problema al actualizar el inventario.")
+                else:
+                    st.warning("Por favor, selecciona un producto.")
+        
         filtro = st.text_input("🔍 Filtrar Inventario", placeholder="Buscar por código o nombre...")
+
         
         # Filtrar stock positivo
         df_stock = df_i[df_i['STOCK'] > 0]
@@ -837,6 +882,43 @@ if True:
             st.dataframe(df_s, use_container_width=True, hide_index=True)
         else:
             st.info("No hay ventas registradas aún en 2026.")
+            
+        st.divider()
+        st.markdown("<h3 style='margin-top: 20px; color: #f8fafc;'>🗄️ REPOSITORIO DE FACTURAS PDF</h3>", unsafe_allow_html=True)
+        st.markdown("Todas las facturas emitidas se guardan automáticamente aquí.")
+        
+        pdf_files = []
+        if os.path.exists(OUTPUT_DIR):
+            pdf_files = [f for f in os.listdir(OUTPUT_DIR) if f.endswith('.pdf')]
+            
+        if pdf_files:
+            filtro_pdf = st.text_input("🔍 Buscar factura en PDF (por número o fecha)", placeholder="Ej: 0501 o 20260507", key="pdf_search")
+            
+            # Ordenar archivos (los más recientes primero)
+            pdf_files.sort(reverse=True)
+            
+            for pdf in pdf_files:
+                if filtro_pdf.lower() in pdf.lower() or not filtro_pdf:
+                    pdf_path = os.path.join(OUTPUT_DIR, pdf)
+                    st.markdown(f'''
+                        <div style="background: #161b22; padding: 15px 25px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; border-left: 4px solid #f1c232;">
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div style="color: #f8fafc; font-size: 16px; font-weight: 600; font-family: 'Raleway', sans-serif;">📄 {pdf}</div>
+                            </div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                    
+                    # El botón de descarga tiene que ir nativo de Streamlit
+                    with open(pdf_path, "rb") as f:
+                        st.download_button(
+                            label="📥 DESCARGAR ESTA FACTURA", 
+                            data=f, 
+                            file_name=pdf, 
+                            mime="application/pdf", 
+                            key=f"dl_{pdf}"
+                        )
+        else:
+            st.info("Aún no se han generado facturas en PDF.")
 
     with tab5:
         st.header("🤖 ASISTENTE AI")
