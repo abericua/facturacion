@@ -418,6 +418,21 @@ def void_invoice(invoice_num):
         df = pd.read_excel(SALES_FILE)
         mask = df['NRO_FACTURA'].astype(str) == str(invoice_num)
         if mask.any():
+            row_idx = mask[mask].index[0]
+            if df.loc[row_idx, 'DESCRIPCION'] == "ANULADA":
+                return False
+                
+            if 'RAW_ITEMS' in df.columns:
+                raw_items_str = df.loc[row_idx, 'RAW_ITEMS']
+                if pd.notna(raw_items_str) and str(raw_items_str).strip():
+                    try:
+                        import json
+                        items_to_restore = json.loads(raw_items_str)
+                        for item in items_to_restore:
+                            add_inventory(item['COD_PRODUCTO'], item['_CANT_NUM'])
+                    except Exception as e:
+                        print(f"Error restoring inventory: {e}")
+            
             df.loc[mask, ['DESCRIPCION', 'PRECIO GS', 'PRECIO USD']] = ["ANULADA", 0, 0]
             df.to_excel(SALES_FILE, index=False)
             return True
@@ -811,6 +826,7 @@ with tab1:
                         "productos": [{"c": it['cant'], "d": it['desc'], "p": it['precio'], "t": it['total']} for it in st.session_state.factura_items]
                     }, pdf_path)
                     
+                    import json
                     sales_log = [{
                         "FECHA": datetime.now().strftime("%d-%m-%Y"),
                         "DESCRIPCION": ", ".join(descripciones),
@@ -821,7 +837,8 @@ with tab1:
                         "VENDEDOR": vendedor,
                         "FORMA PAGO": condicion,
                         "COD_PRODUCTO": ", ".join(codigos),
-                        "LINEA": "CORP"
+                        "LINEA": "CORP",
+                        "RAW_ITEMS": json.dumps(inventory_log)
                     }]
                     
                     log_sales(sales_log)
