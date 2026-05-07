@@ -348,6 +348,25 @@ def update_inventory(sales_list):
         df.to_excel(PRODUCTS_FILE, index=False)
         st.cache_data.clear()
 
+def validate_stock(sales_list):
+    if not os.path.exists(PRODUCTS_FILE): return True, ""
+    df = pd.read_excel(PRODUCTS_FILE)
+    start_row = 1 if not df.empty and str(df.iloc[0, 0]).strip() == 'ID REF' else 0
+    for sale in sales_list:
+        codigo = sale['COD_PRODUCTO']
+        cant_solicitada = sale.get('_CANT_NUM', 0)
+        full_mask = df.iloc[:, 0].astype(str).str.strip() == str(codigo).strip()
+        if start_row > 0: full_mask.iloc[0:start_row] = False
+        if full_mask.any():
+            idx = full_mask[full_mask].index[0]
+            try:
+                current_stock = pd.to_numeric(df.iloc[idx, 5], errors='coerce')
+                if pd.isna(current_stock): current_stock = 0
+                if cant_solicitada > current_stock:
+                    return False, f"⚠️ Stock insuficiente para {codigo}. Disponible: {current_stock}, Solicitado: {cant_solicitada}"
+            except: pass
+    return True, ""
+
 def add_inventory(codigo, cantidad_a_sumar):
     if os.path.exists(PRODUCTS_FILE):
         df = pd.read_excel(PRODUCTS_FILE)
@@ -764,15 +783,6 @@ with tab1:
             if not nombre or not ruc or not nro_factura or not st.session_state.factura_items: st.error("Faltan datos")
             else:
                 with st.spinner("Procesando..."):
-                    save_client({"nombre": nombre, "ruc": ruc, "direccion": direccion, "telefono": telefono})
-                    pdf_path = os.path.join(OUTPUT_DIR, f"Factura_{nro_factura}_{datetime.now().strftime('%Y%m%d')}.pdf")
-                    generate_invoice_pdf({
-                        "nro_factura": nro_factura, "fecha": datetime.now().strftime("%d/%m/%Y"),
-                        "nombre": nombre, "ruc": ruc, "direccion": direccion, "telefono": telefono,
-                        "condicion": condicion, "moneda": moneda,
-                        "productos": [{"c": it['cant'], "d": it['desc'], "p": it['precio'], "t": it['total']} for it in st.session_state.factura_items]
-                    }, pdf_path)
-                    
                     inventory_log = []
                     descripciones = []
                     codigos = []
@@ -784,6 +794,22 @@ with tab1:
                             "COD_PRODUCTO": it.get('codigo', ''),
                             "_CANT_NUM": it['cant']
                         })
+                    
+                    # --- VALIDACION DE STOCK EN TIEMPO REAL ---
+                    is_valid, error_msg = validate_stock(inventory_log)
+                    if not is_valid:
+                        st.error(error_msg)
+                        st.stop()
+                    # ------------------------------------------
+
+                    save_client({"nombre": nombre, "ruc": ruc, "direccion": direccion, "telefono": telefono})
+                    pdf_path = os.path.join(OUTPUT_DIR, f"Factura_{nro_factura}_{datetime.now().strftime('%Y%m%d')}.pdf")
+                    generate_invoice_pdf({
+                        "nro_factura": nro_factura, "fecha": datetime.now().strftime("%d/%m/%Y"),
+                        "nombre": nombre, "ruc": ruc, "direccion": direccion, "telefono": telefono,
+                        "condicion": condicion, "moneda": moneda,
+                        "productos": [{"c": it['cant'], "d": it['desc'], "p": it['precio'], "t": it['total']} for it in st.session_state.factura_items]
+                    }, pdf_path)
                     
                     sales_log = [{
                         "FECHA": datetime.now().strftime("%d-%m-%Y"),
