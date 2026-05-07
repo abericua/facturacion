@@ -161,7 +161,6 @@ st.markdown("""
         font-weight: 800 !important;
     }
     
-    /* Login Form Fix */
     .login-container {
         max-width: 450px;
         margin: 100px auto;
@@ -170,6 +169,51 @@ st.markdown("""
         border-radius: 4px;
         border-top: 5px solid var(--solpro-gold);
         box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
+    /* Responsive Mobile Design */
+    .responsive-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    @media (max-width: 768px) {
+        .header-container {
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 15px !important;
+            padding: 20px !important;
+        }
+        
+        .login-container {
+            margin: 30px 10px !important;
+            padding: 30px 20px !important;
+        }
+        
+        .responsive-flex {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+        }
+        
+        .responsive-flex > div:last-child {
+            width: 100% !important;
+            text-align: left !important;
+            padding-top: 10px !important;
+            border-top: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        
+        .total-display-container {
+            padding: 20px !important;
+            text-align: left !important;
+        }
+        .total-display-value {
+            font-size: 28px !important;
+        }
+        
+        h1 { font-size: 1.5rem !important; }
+        h2 { font-size: 1.2rem !important; }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -694,7 +738,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["🛒 FACTURACIÓN", "🚫 ANULAR", "�
 with tab1:
     df_products = load_products()
     st.markdown("""
-        <div style="display: flex; background: #161b22; color: #f1c232; padding: 15px; border-radius: 2px; font-weight: 800; border: 1px solid #1e293b; margin-bottom: 20px; font-size: 12px; letter-spacing: 1px;">
+        <div class="responsive-hide" style="display: flex; background: #161b22; color: #f1c232; padding: 15px; border-radius: 2px; font-weight: 800; border: 1px solid #1e293b; margin-bottom: 20px; font-size: 12px; letter-spacing: 1px;">
             <div style="flex: 0.5;">CANT.</div>
             <div style="flex: 3;">PRODUCTO / DESCRIPCIÓN</div>
             <div style="flex: 0.8;">DISP.</div>
@@ -781,9 +825,9 @@ with tab1:
     with col_sum2:
         total_str = f"{moneda} {total_factura:,.2f}" if moneda=="USD" else f"₲ {total_factura:,.0f}"
         st.markdown(f"""
-            <div style="background: #161b22; padding: 25px; border: 2px solid #f1c232; text-align: center;">
+            <div class="total-display-container" style="background: linear-gradient(135deg, #1e293b 0%, #0b0f19 100%); padding: 30px; border-radius: 8px; border: 1px solid #334155; margin-top: 30px; margin-bottom: 30px; text-align: right; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
                 <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Total de Operación</div>
-                <div style="font-size: 36px; font-weight: 800; color: #f1c232;">{total_str}</div>
+                <div class="total-display-value" style="font-size: 36px; font-weight: 800; color: #f1c232;">{total_str}</div>
             </div>
         """, unsafe_allow_html=True)
         
@@ -898,7 +942,7 @@ if True:
         if not df_stock.empty:
             for _, row in df_stock.iterrows():
                 st.markdown(f'''
-                    <div style="background: #161b22; padding: 15px 25px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; border-left: 4px solid #f1c232;">
+                    <div class="responsive-flex" style="background: #161b22; padding: 15px 25px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #1e293b; border-left: 4px solid #f1c232;">
                         <div style="display: flex; align-items: center; gap: 20px;">
                             <div style="color: #f1c232; font-size: 14px; font-weight: 700; background: rgba(241, 194, 50, 0.1); padding: 4px 10px; border-radius: 4px;">{row["CODIGO"]}</div>
                             <div style="color: #f8fafc; font-size: 16px; font-weight: 600; font-family: 'Raleway', sans-serif;">{row["DESCRIPCION"]}</div>
@@ -993,7 +1037,7 @@ if True:
                 if filtro_pdf.lower() in pdf.lower() or not filtro_pdf:
                     pdf_path = os.path.join(OUTPUT_DIR, pdf)
                     st.markdown(f'''
-                        <div style="background: #161b22; padding: 15px 25px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; border-left: 4px solid #f1c232;">
+                        <div class="responsive-flex" style="background: #161b22; padding: 15px 25px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #1e293b; border-left: 4px solid #f1c232;">
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <div style="color: #f8fafc; font-size: 16px; font-weight: 600; font-family: 'Raleway', sans-serif;">📄 {pdf}</div>
                             </div>
