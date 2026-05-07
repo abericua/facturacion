@@ -753,6 +753,13 @@ with tab1:
             </div>
         """, unsafe_allow_html=True)
         
+        if 'invoice_generated' in st.session_state:
+            st.success(f"Factura {st.session_state.invoice_nro} emitida")
+            try:
+                with open(st.session_state.invoice_pdf_path, "rb") as f: 
+                    st.download_button("📥 DESCARGAR PDF", f, os.path.basename(st.session_state.invoice_pdf_path), "application/pdf", key="dl_btn_after_gen")
+            except Exception: pass
+
         if st.button("⚡ GENERAR FACTURA Y REGISTRAR"):
             if not nombre or not ruc or not nro_factura or not st.session_state.factura_items: st.error("Faltan datos")
             else:
@@ -793,9 +800,12 @@ with tab1:
                     
                     log_sales(sales_log)
                     update_inventory(inventory_log)
-                    st.success(f"Factura {nro_factura} emitida")
-                    with open(pdf_path, "rb") as f: st.download_button("📥 DESCARGAR PDF", f, pdf_path, "application/pdf")
-                    st.session_state.factura_items = []
+                    
+                    st.session_state.invoice_generated = True
+                    st.session_state.invoice_nro = nro_factura
+                    st.session_state.invoice_pdf_path = pdf_path
+                    st.session_state.factura_items = [{"cant": 1, "desc": "", "precio": 0.0, "codigo": ""}]
+                    st.rerun()
 
 if True:
     with tab2:
