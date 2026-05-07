@@ -921,6 +921,44 @@ if True:
             st.info("No hay ventas registradas aún en 2026.")
             
         st.divider()
+        st.markdown("<h3 style='margin-top: 20px; color: #f8fafc;'>🔄 REGENERAR PDF ANTIGUO</h3>", unsafe_allow_html=True)
+        st.write("Si una venta del historial no tiene PDF, escribe su Nro de Factura para generarlo de nuevo:")
+        col_reg1, col_reg2 = st.columns(2)
+        with col_reg1:
+            regen_nro = st.text_input("Nro de Factura a regenerar", placeholder="Ej: 0502", key="regen_input")
+        with col_reg2:
+            st.write("")
+            st.write("")
+            if st.button("📄 GENERAR PDF"):
+                if regen_nro and not df_s.empty:
+                    match = df_s[df_s['NRO_FACTURA'].astype(str) == str(regen_nro)]
+                    if not match.empty:
+                        row = match.iloc[0]
+                        fecha = row['FECHA']
+                        cliente = row['CLIENTE']
+                        desc = str(row['DESCRIPCION'])
+                        moneda = "USD" if pd.notna(row['PRECIO USD']) else "PYG"
+                        total = float(row['PRECIO USD']) if moneda == "USD" else float(row['PRECIO GS'])
+                        condicion = str(row['FORMA PAGO'])
+                        
+                        pdf_path = os.path.join(OUTPUT_DIR, f"Factura_{regen_nro}_{str(fecha).replace('-','')}_Historica.pdf")
+                        
+                        try:
+                            from pdf_generator import generate_invoice_pdf
+                            generate_invoice_pdf({
+                                "nro_factura": str(regen_nro), "fecha": str(fecha).replace('-', '/'),
+                                "nombre": str(cliente), "ruc": "", "direccion": "", "telefono": "",
+                                "condicion": condicion, "moneda": moneda,
+                                "productos": [{"c": 1, "d": desc, "p": total, "t": total}]
+                            }, pdf_path)
+                            st.success(f"Factura {regen_nro} generada exitosamente. Revisa el repositorio de abajo.")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error al generar: {e}")
+                    else:
+                        st.error("No se encontró ese número de factura en el historial.")
+
+        st.divider()
         st.markdown("<h3 style='margin-top: 20px; color: #f8fafc;'>🗄️ REPOSITORIO DE FACTURAS PDF</h3>", unsafe_allow_html=True)
         st.markdown("Todas las facturas emitidas se guardan automáticamente aquí.")
         
