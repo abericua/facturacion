@@ -488,7 +488,11 @@ def load_sales():
         try:
             df = pd.read_excel(SALES_FILE)
             if not df.empty:
+                # Asegurar que FECHA sea datetime
                 df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
+                # Eliminar filas donde la fecha no se pudo convertir
+                df = df.dropna(subset=['FECHA'])
+                
                 df['NRO_FACTURA_NUM'] = pd.to_numeric(df['NRO_FACTURA'], errors='coerce')
                 # Ordenar por fecha (mas actual primero) y luego por número de factura
                 df = df.sort_values(by=['FECHA', 'NRO_FACTURA_NUM'], ascending=[False, False])
@@ -872,7 +876,7 @@ with tab1:
                     
                     import json
                     sales_log = [{
-                        "FECHA": datetime.now().strftime("%d-%m-%Y"),
+                        "FECHA": datetime.now().replace(hour=0, minute=0, second=0, microsecond=0),
                         "DESCRIPCION": ", ".join(descripciones),
                         "CLIENTE": nombre,
                         "PRECIO GS": total_factura if moneda == "PYG" else None,
@@ -977,7 +981,14 @@ if True:
             r1.metric("TOTAL GS", f"{df_s['PRECIO GS'].sum():,.0f}")
             r2.metric("TOTAL USD", f"{df_s['PRECIO USD'].sum():,.2f}")
             
-            st.dataframe(df_s, use_container_width=True, hide_index=True)
+            st.dataframe(
+                df_s, 
+                use_container_width=True, 
+                hide_index=True,
+                column_config={
+                    "FECHA": st.column_config.DateColumn("FECHA", format="DD/MM/YYYY")
+                }
+            )
         else:
             st.info("No hay ventas registradas aún en 2026.")
             
@@ -1002,12 +1013,15 @@ if True:
                         total = float(row['PRECIO USD']) if moneda == "USD" else float(row['PRECIO GS'])
                         condicion = str(row['FORMA PAGO'])
                         
-                        pdf_path = os.path.join(OUTPUT_DIR, f"Factura_{regen_nro}_{str(fecha).replace('-','')}_Historica.pdf")
+                        fecha_file = fecha.strftime("%Y%m%d") if hasattr(fecha, 'strftime') else str(fecha).replace('-', '').replace(':', '').replace(' ', '')
+                        pdf_path = os.path.join(OUTPUT_DIR, f"Factura_{regen_nro}_{fecha_file}_Historica.pdf")
                         
                         try:
+                            # Asegurar formato string para el PDF si fecha es datetime
+                            fecha_str = fecha.strftime("%d/%m/%Y") if hasattr(fecha, 'strftime') else str(fecha).replace('-', '/')
                             from pdf_generator import generate_invoice_pdf
                             generate_invoice_pdf({
-                                "nro_factura": str(regen_nro), "fecha": str(fecha).replace('-', '/'),
+                                "nro_factura": str(regen_nro), "fecha": fecha_str,
                                 "nombre": str(cliente), "ruc": "", "direccion": "", "telefono": "",
                                 "condicion": condicion, "moneda": moneda,
                                 "productos": [{"c": 1, "d": desc, "p": total, "t": total}]
