@@ -220,12 +220,31 @@ st.markdown("""
 
 # Rutas de archivos dinámicas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# --- CONFIGURACIÓN DE PERSISTENCIA (RAILWAY) ---
+# En Railway, montaremos un volumen en /app/data para que los archivos no se borren al desplegar.
+PERSISTENT_DIR = "/app/data"
+if os.path.exists(PERSISTENT_DIR):
+    DATA_DIR = PERSISTENT_DIR
+else:
+    DATA_DIR = BASE_DIR
+
 PRODUCTS_FILE = os.path.join(BASE_DIR, "LISTA DE PRECIOS DE VENTA.xlsx")
-SALES_FILE = os.path.join(BASE_DIR, "VENTAS TOTALES 2026.xlsx")
-CLIENTS_FILE = os.path.join(BASE_DIR, "clientes.json")
+SALES_FILE = os.path.join(DATA_DIR, "VENTAS TOTALES 2026.xlsx")
+CLIENTS_FILE = os.path.join(DATA_DIR, "clientes.json")
 USERS_FILE = os.path.join(BASE_DIR, "usuarios.json")
-OUTPUT_DIR = os.path.join(BASE_DIR, "Facturas_Emitidas")
-# CAMBIO DE LOGO A VERSIÓN CORPORATIVA
+OUTPUT_DIR = os.path.join(DATA_DIR, "Facturas_Emitidas")
+
+# Inicialización de carpeta de datos si es persistente
+if DATA_DIR != BASE_DIR:
+    import shutil
+    # Solo copiamos si el archivo NO existe en el volumen para evitar sobrescribir datos nuevos con viejos
+    for f in ["VENTAS TOTALES 2026.xlsx", "clientes.json"]:
+        dest = os.path.join(DATA_DIR, f)
+        src = os.path.join(BASE_DIR, f)
+        if not os.path.exists(dest) and os.path.exists(src):
+            shutil.copy2(src, dest)
+
 LOGO_FILE = os.path.join(BASE_DIR, "LOGO  2D FONDO NEGRO 2026.png")
 
 if not os.path.exists(OUTPUT_DIR):
