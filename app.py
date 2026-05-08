@@ -4,6 +4,7 @@ import os
 import json
 import hashlib
 import base64
+import io
 import requests
 from datetime import datetime, date
 from pdf_generator import generate_invoice_pdf
@@ -1026,13 +1027,30 @@ if True:
     with tab4:
         st.header("📊 HISTORIAL DE VENTAS")
         
-        # Botón de reporte movido al inicio para mayor visibilidad
+        # Botón de reporte generado en memoria para asegurar formato limpio
         if os.path.exists(SALES_FILE):
             st.info("💡 Desde aquí puedes exportar el reporte completo de ventas acumulado en formato Excel.")
-            with open(SALES_FILE, "rb") as f:
+            
+            # Generar el Excel en un buffer de memoria
+            buffer = io.BytesIO()
+            df_export = load_sales()
+            
+            if not df_export.empty:
+                # Asegurar que la fecha no tenga horas antes de pasar a ExcelWriter
+                df_export['FECHA'] = pd.to_datetime(df_export['FECHA']).dt.date
+                
+                with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                    df_export.to_excel(writer, index=False, sheet_name='Ventas')
+                    workbook  = writer.book
+                    worksheet = writer.sheets['Ventas']
+                    
+                    # Formato de fecha estricto dd/mm/yyyy
+                    date_format = workbook.add_format({'num_format': 'dd/mm/yyyy'})
+                    worksheet.set_column('A:A', 15, date_format)
+                
                 st.download_button(
                     label="📥 EXPORTAR REPORTE DE VENTAS COMPLETO (EXCEL)",
-                    data=f,
+                    data=buffer.getvalue(),
                     file_name="VENTAS_TOTALES_2026.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True
