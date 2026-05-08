@@ -488,9 +488,9 @@ def load_sales():
         try:
             df = pd.read_excel(SALES_FILE)
             if not df.empty:
-                # Asegurar que FECHA sea datetime
-                df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
-                # Eliminar filas donde la fecha no se pudo convertir
+                # Asegurar que FECHA sea datetime (dayfirst=True para formato DD-MM-YYYY)
+                df['FECHA'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
+                # Eliminar solo filas que realmente no tienen fecha (NaN en el Excel original)
                 df = df.dropna(subset=['FECHA'])
                 
                 df['NRO_FACTURA_NUM'] = pd.to_numeric(df['NRO_FACTURA'], errors='coerce')
