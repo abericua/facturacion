@@ -4,3 +4,4 @@ openpyxl
 reportlab
 num2words
 requests
+xlsxwriter

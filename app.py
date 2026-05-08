@@ -5,7 +5,7 @@ import json
 import hashlib
 import base64
 import requests
-from datetime import datetime
+from datetime import datetime, date
 from pdf_generator import generate_invoice_pdf
 
 # Configuración de página
@@ -222,12 +222,8 @@ st.markdown("""
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # --- CONFIGURACIÓN DE PERSISTENCIA (RAILWAY) ---
-# En Railway, montaremos un volumen en /app/data para que los archivos no se borren al desplegar.
 PERSISTENT_DIR = "/app/data"
-if os.path.exists(PERSISTENT_DIR):
-    DATA_DIR = PERSISTENT_DIR
-else:
-    DATA_DIR = BASE_DIR
+DATA_DIR = PERSISTENT_DIR if os.path.exists(PERSISTENT_DIR) else BASE_DIR
 
 PRODUCTS_FILE = os.path.join(BASE_DIR, "LISTA DE PRECIOS DE VENTA.xlsx")
 SALES_FILE = os.path.join(DATA_DIR, "VENTAS TOTALES 2026.xlsx")
@@ -238,27 +234,46 @@ OUTPUT_DIR = os.path.join(DATA_DIR, "Facturas_Emitidas")
 # Inicialización de carpeta de datos si es persistente
 if DATA_DIR != BASE_DIR:
     import shutil
-    # Solo copiamos si el archivo NO existe en el volumen para evitar sobrescribir datos nuevos con viejos
     for f in ["VENTAS TOTALES 2026.xlsx", "clientes.json"]:
         dest = os.path.join(DATA_DIR, f)
         src = os.path.join(BASE_DIR, f)
         if not os.path.exists(dest) and os.path.exists(src):
             shutil.copy2(src, dest)
 
-# --- MANTENIMIENTO AUTOMÁTICO DE FORMATO EXCEL ---
-if os.path.exists(SALES_FILE):
-    try:
-        df_fix = pd.read_excel(SALES_FILE)
-        if not df_fix.empty:
-            # Convertir a datetime para asegurar que al guardar se use el formato nativo de Excel
-            df_fix['FECHA'] = pd.to_datetime(df_fix['FECHA'], dayfirst=True, errors='coerce')
-            df_fix.to_excel(SALES_FILE, index=False)
-    except: pass
-
 LOGO_FILE = os.path.join(BASE_DIR, "LOGO  2D FONDO NEGRO 2026.png")
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
+
+# --- MANTENIMIENTO DE EMERGENCIA (REPARACIÓN DE FECHAS CORRUPTAS) ---
+def emergency_data_fix():
+    if os.path.exists(SALES_FILE):
+        try:
+            df = pd.read_excel(SALES_FILE)
+            needs_fix = False
+            
+            # Si detectamos facturas recientes con meses incoherentes (ej: mes 8 o 9 cuando estamos en mayo)
+            for idx, row in df.iterrows():
+                try:
+                    current_date = pd.to_datetime(row['FECHA'])
+                    if row['NRO_FACTURA'] >= 270 and current_date.month > 5:
+                        df.at[idx, 'FECHA'] = date(2026, 5, 8)
+                        needs_fix = True
+                except: pass
+            
+            if needs_fix:
+                # Usar guardado limpio con XlsxWriter
+                df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
+                writer = pd.ExcelWriter(SALES_FILE, engine='xlsxwriter')
+                df.to_excel(writer, sheet_name='Ventas', index=False)
+                workbook = writer.book
+                worksheet = writer.sheets['Ventas']
+                date_format = workbook.add_format({'num_format': 'dd/mm/yyyy'})
+                worksheet.set_column('A:A', 15, date_format)
+                writer.close()
+        except Exception: pass
+
+emergency_data_fix()
 
 # --- SEGURIDAD Y SESIÓN ---
 def hash_password(password):
@@ -469,12 +484,32 @@ def log_sales(sales_list):
         try:
             df = pd.read_excel(SALES_FILE)
             df = pd.concat([df, pd.DataFrame(sales_list)], ignore_index=True)
-            df.to_excel(SALES_FILE, index=False)
         except Exception as e:
-            st.error(f"Error al actualizar la planilla: {e}")
+            st.error(f"Error al leer la planilla: {e}")
+            return
     else:
         df = pd.DataFrame(sales_list)
-        df.to_excel(SALES_FILE, index=False)
+    
+    try:
+        # Asegurar que la columna FECHA sea datetime para que XlsxWriter la reconozca
+        df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
+        
+        # Guardar usando XlsxWriter para forzar el formato de visualización
+        writer = pd.ExcelWriter(SALES_FILE, engine='xlsxwriter')
+        df.to_excel(writer, index=False, sheet_name='Ventas')
+        
+        workbook  = writer.book
+        worksheet = writer.sheets['Ventas']
+        
+        # Definir el formato de fecha (DD/MM/YYYY) sin horas
+        date_format = workbook.add_format({'num_format': 'dd/mm/yyyy'})
+        
+        # Aplicar el formato a la columna A (FECHA)
+        worksheet.set_column('A:A', 15, date_format)
+        
+        writer.close()
+    except Exception as e:
+        st.error(f"Error al guardar la planilla: {e}")
 
 def get_next_invoice_number():
     if os.path.exists(SALES_FILE):
@@ -905,7 +940,7 @@ with tab1:
                     
                     import json
                     sales_log = [{
-                        "FECHA": datetime.now().replace(hour=0, minute=0, second=0, microsecond=0),
+                        "FECHA": date.today(),
                         "DESCRIPCION": ", ".join(descripciones),
                         "CLIENTE": nombre,
                         "PRECIO GS": total_factura if moneda == "PYG" else None,
