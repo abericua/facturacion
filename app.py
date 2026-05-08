@@ -245,6 +245,16 @@ if DATA_DIR != BASE_DIR:
         if not os.path.exists(dest) and os.path.exists(src):
             shutil.copy2(src, dest)
 
+# --- MANTENIMIENTO AUTOMÁTICO DE FORMATO EXCEL ---
+if os.path.exists(SALES_FILE):
+    try:
+        df_fix = pd.read_excel(SALES_FILE)
+        if not df_fix.empty:
+            # Convertir a datetime para asegurar que al guardar se use el formato nativo de Excel
+            df_fix['FECHA'] = pd.to_datetime(df_fix['FECHA'], dayfirst=True, errors='coerce')
+            df_fix.to_excel(SALES_FILE, index=False)
+    except: pass
+
 LOGO_FILE = os.path.join(BASE_DIR, "LOGO  2D FONDO NEGRO 2026.png")
 
 if not os.path.exists(OUTPUT_DIR):
