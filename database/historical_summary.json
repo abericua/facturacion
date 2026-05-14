@@ -1,0 +1,317 @@
+[
+    {
+        "ventas_brutas": 73617273.0,
+        "debito_fiscal": 7361727.0,
+        "credito_fiscal": 11879367.0,
+        "compras_netas": 0.0,
+        "mes": "04",
+        "anio": "2024",
+        "archivo": "ABRIL.pdf"
+    },
+    {
+        "ventas_brutas": 425034533.0,
+        "debito_fiscal": 42503453.0,
+        "credito_fiscal": 29567972.0,
+        "compras_netas": 294455590.0,
+        "mes": "08",
+        "anio": "2024",
+        "archivo": "AGOSTO.pdf"
+    },
+    {
+        "ventas_brutas": 170822505.0,
+        "debito_fiscal": 17082251.0,
+        "credito_fiscal": 23544689.0,
+        "compras_netas": 0.0,
+        "mes": "12",
+        "anio": "2024",
+        "archivo": "DICIEMBRE.pdf"
+    },
+    {
+        "ventas_brutas": 136298071.0,
+        "debito_fiscal": 13629808.0,
+        "credito_fiscal": 10289246.0,
+        "compras_netas": 98026432.0,
+        "mes": "01",
+        "anio": "2024",
+        "archivo": "ENERO.pdf"
+    },
+    {
+        "ventas_brutas": 173732777.0,
+        "debito_fiscal": 17373278.0,
+        "credito_fiscal": 17644842.0,
+        "compras_netas": 0.0,
+        "mes": "02",
+        "anio": "2024",
+        "archivo": "FEBRERO.pdf"
+    },
+    {
+        "ventas_brutas": 2291.0,
+        "debito_fiscal": 18261273.0,
+        "credito_fiscal": 16741019.0,
+        "compras_netas": 165018457.0,
+        "mes": "07",
+        "anio": "2024",
+        "archivo": "JULIO.pdf"
+    },
+    {
+        "ventas_brutas": 464332264.0,
+        "debito_fiscal": 12584000.0,
+        "credito_fiscal": 35614546.0,
+        "compras_netas": 356071725.0,
+        "mes": "06",
+        "anio": "2024",
+        "archivo": "JUNIO.pdf"
+    },
+    {
+        "ventas_brutas": 133251816.0,
+        "debito_fiscal": 13325182.0,
+        "credito_fiscal": 13335528.0,
+        "compras_netas": 129415207.0,
+        "mes": "03",
+        "anio": "2024",
+        "archivo": "MARZO.pdf"
+    },
+    {
+        "ventas_brutas": 136755138.0,
+        "debito_fiscal": 13675514.0,
+        "credito_fiscal": 13760690.0,
+        "compras_netas": 136359221.0,
+        "mes": "05",
+        "anio": "2024",
+        "archivo": "MAYO.pdf"
+    },
+    {
+        "ventas_brutas": 663607131.0,
+        "debito_fiscal": 66360713.0,
+        "credito_fiscal": 74405367.0,
+        "compras_netas": 743959135.0,
+        "mes": "11",
+        "anio": "2024",
+        "archivo": "NOVIEMBRE.pdf"
+    },
+    {
+        "ventas_brutas": 235376363.0,
+        "debito_fiscal": 23537636.0,
+        "credito_fiscal": 20866366.0,
+        "compras_netas": 207377949.0,
+        "mes": "10",
+        "anio": "2024",
+        "archivo": "OCTUBRE.pdf"
+    },
+    {
+        "ventas_brutas": 248459059.0,
+        "debito_fiscal": 24845906.0,
+        "credito_fiscal": 20323674.0,
+        "compras_netas": 200761136.0,
+        "mes": "09",
+        "anio": "2024",
+        "archivo": "SEPTIEMBRE.pdf"
+    },
+    {
+        "ventas_brutas": 326735065.0,
+        "debito_fiscal": 32673507.0,
+        "credito_fiscal": 33320474.0,
+        "compras_netas": 0.0,
+        "mes": "04",
+        "anio": "2025",
+        "archivo": "ABRIL.pdf"
+    },
+    {
+        "ventas_brutas": 3821.0,
+        "debito_fiscal": 3821.0,
+        "credito_fiscal": 46489237.0,
+        "compras_netas": 0.0,
+        "mes": "08",
+        "anio": "2025",
+        "archivo": "AGOSTO.pdf"
+    },
+    {
+        "ventas_brutas": 387387520.0,
+        "debito_fiscal": 38738752.0,
+        "credito_fiscal": 24121515.0,
+        "compras_netas": 239929438.0,
+        "mes": "12",
+        "anio": "2025",
+        "archivo": "DICIEMBRE.pdf"
+    },
+    {
+        "ventas_brutas": 340346762.0,
+        "debito_fiscal": 34034676.0,
+        "credito_fiscal": 18875756.0,
+        "compras_netas": 188701547.0,
+        "mes": "01",
+        "anio": "2025",
+        "archivo": "ENERO.pdf"
+    },
+    {
+        "ventas_brutas": 182737323.0,
+        "debito_fiscal": 18273732.0,
+        "credito_fiscal": 10235751.0,
+        "compras_netas": 0.0,
+        "mes": "02",
+        "anio": "2025",
+        "archivo": "FEBRERO.pdf"
+    },
+    {
+        "ventas_brutas": 325702778.0,
+        "debito_fiscal": 32570278.0,
+        "credito_fiscal": 29072091.0,
+        "compras_netas": 0.0,
+        "mes": "07",
+        "anio": "2025",
+        "archivo": "JULIO.pdf"
+    },
+    {
+        "ventas_brutas": 222442185.0,
+        "debito_fiscal": 22244219.0,
+        "credito_fiscal": 20819326.0,
+        "compras_netas": 207003372.0,
+        "mes": "06",
+        "anio": "2025",
+        "archivo": "JUNIO.pdf"
+    },
+    {
+        "ventas_brutas": 344253768.0,
+        "debito_fiscal": 34425377.0,
+        "credito_fiscal": 3321.0,
+        "compras_netas": 330927896.0,
+        "mes": "03",
+        "anio": "2025",
+        "archivo": "MARZO.pdf"
+    },
+    {
+        "ventas_brutas": 165798186.0,
+        "debito_fiscal": 16579819.0,
+        "credito_fiscal": 25697545.0,
+        "compras_netas": 0.0,
+        "mes": "05",
+        "anio": "2025",
+        "archivo": "MAYO.pdf"
+    },
+    {
+        "ventas_brutas": 426010032.0,
+        "debito_fiscal": 42601003.0,
+        "credito_fiscal": 42881770.0,
+        "compras_netas": 42881.0,
+        "mes": "11",
+        "anio": "2025",
+        "archivo": "NOVIEMBRE.pdf"
+    },
+    {
+        "ventas_brutas": 345489857.0,
+        "debito_fiscal": 34548986.0,
+        "credito_fiscal": 39664077.0,
+        "compras_netas": 395450142.0,
+        "mes": "10",
+        "anio": "2025",
+        "archivo": "OCTUBRE.pdf"
+    },
+    {
+        "ventas_brutas": 37301.0,
+        "debito_fiscal": 37301144.0,
+        "credito_fiscal": 39578787.0,
+        "compras_netas": 395768827.0,
+        "mes": "09",
+        "anio": "2025",
+        "archivo": "SEPTIEMBRE.pdf"
+    },
+    {
+        "ventas_brutas": 45577223321.0,
+        "debito_fiscal": 45577223.0,
+        "credito_fiscal": 29974699.0,
+        "compras_netas": 0.0,
+        "mes": "03",
+        "anio": "2026",
+        "archivo": "IVA 3 26 SolPro.pdf"
+    },
+    {
+        "ventas_brutas": 542757733.0,
+        "debito_fiscal": 54275773.0,
+        "credito_fiscal": 50512521.0,
+        "compras_netas": 0.0,
+        "mes": "01",
+        "anio": "2026",
+        "archivo": "IVA ENERO 2026.pdf"
+    },
+    {
+        "ventas_brutas": 238797657.0,
+        "debito_fiscal": 23879766.0,
+        "credito_fiscal": 27913048.0,
+        "compras_netas": 0.0,
+        "mes": "02",
+        "anio": "2026",
+        "archivo": "IVA FEBRERO 2026.pdf"
+    },
+    {
+        "ventas_brutas": 269563680.0,
+        "debito_fiscal": 26956368.0,
+        "credito_fiscal": 26724750.0,
+        "compras_netas": 0.0,
+        "mes": "04",
+        "anio": "2021",
+        "archivo": "Iva abril 2021.PDF"
+    },
+    {
+        "ventas_brutas": 318261534.0,
+        "debito_fiscal": 31826154.0,
+        "credito_fiscal": 22471223.0,
+        "compras_netas": 0.0,
+        "mes": "12",
+        "anio": "2020",
+        "archivo": "Iva diciembre 2020.PDF"
+    },
+    {
+        "ventas_brutas": 207791112.0,
+        "debito_fiscal": 20779111.0,
+        "credito_fiscal": 20652271.0,
+        "compras_netas": 0.0,
+        "mes": "01",
+        "anio": "2021",
+        "archivo": "iva enero 2021.PDF"
+    },
+    {
+        "ventas_brutas": 210605835.0,
+        "debito_fiscal": 21060584.0,
+        "credito_fiscal": 21123211.0,
+        "compras_netas": 0.0,
+        "mes": "02",
+        "anio": "2021",
+        "archivo": "Iva Febrero 2021.PDF"
+    },
+    {
+        "ventas_brutas": 280270641.0,
+        "debito_fiscal": 28027064.0,
+        "credito_fiscal": 28227956.0,
+        "compras_netas": 0.0,
+        "mes": "03",
+        "anio": "2021",
+        "archivo": "Iva marzo 2021.PDF"
+    },
+    {
+        "ventas_brutas": 91936374.0,
+        "debito_fiscal": 9193637.0,
+        "credito_fiscal": 9244230.0,
+        "compras_netas": 0.0,
+        "mes": "05",
+        "anio": "2021",
+        "archivo": "Iva Mayo 2021.PDF"
+    },
+    {
+        "ventas_brutas": 230250832.0,
+        "debito_fiscal": 23025083.0,
+        "credito_fiscal": 15376939.0,
+        "compras_netas": 151840486.0,
+        "mes": "04",
+        "anio": "2022",
+        "archivo": "SOLPRO_Abr_2022.pdf"
+    },
+    {
+        "ventas_brutas": 401659643.0,
+        "debito_fiscal": 40165964.0,
+        "credito_fiscal": 32218184.0,
+        "compras_netas": 322042692.0,
+        "mes": "03",
+        "anio": "2022",
+        "archivo": "SOLPRO_Mar_2022.pdf"
+    }
+]

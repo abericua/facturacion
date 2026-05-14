@@ -66,7 +66,7 @@ def scan_historical_archives():
         return []
     
     historical_results = []
-    print(f"🔍 Iniciando escaneo profundo en: {base_path}...")
+    print(f"Iniciando escaneo profundo en: {base_path}...")
     
     for root, dirs, files in os.walk(base_path):
         for file in files:
@@ -83,7 +83,7 @@ def scan_historical_archives():
                         if res.get('ventas_brutas', 0) > 0:
                             res['archivo'] = file
                             historical_results.append(res)
-                            print(f"✅ [OK] {file} -> Ventas: GS {res['ventas_brutas']:,.0f} ({res.get('mes')}/{res.get('anio')})")
+                            print(f"[OK] {file} -> Ventas: GS {res['ventas_brutas']:,.0f} ({res.get('mes')}/{res.get('anio')})")
                 except Exception as e:
                     pass # Silenciar errores de archivos corruptos
     
@@ -91,11 +91,11 @@ def scan_historical_archives():
 
 if __name__ == "__main__":
     print("==========================================")
-    print("🏛️  SOLPRO - INTELIGENCIA HISTÓRICA v2.0")
+    print(" SOLPRO - INTELIGENCIA HISTORICA v2.0")
     print("==========================================\n")
     
     if pypdf is None:
-        print("❌ Error: Falta pypdf. Instale con: pip install pypdf")
+        print("Error: Falta pypdf. Instale con: pip install pypdf")
     else:
         results = scan_historical_archives()
         if results:
@@ -104,11 +104,11 @@ if __name__ == "__main__":
             with open(HISTORICAL_FILE, 'w', encoding='utf-8') as f:
                 json.dump(results, f, indent=4, ensure_ascii=False)
             
-            print(f"\n🚀 ¡ESCANEÓ COMPLETADO! {len(results)} meses recuperados.")
+            print(f"\n!ESCANEÓ COMPLETADO! {len(results)} meses recuperados.")
             
             df = pd.DataFrame(results)
             if 'anio' in df.columns:
-                print("\n📊 Resumen Histórico Facturado (IVA):")
+                print("\nResumen Historico Facturado (IVA):")
                 summary = df.groupby('anio')['ventas_brutas'].sum()
                 for anio, monto in summary.items():
                     print(f"   * {anio}: GS {monto:,.0f}")
