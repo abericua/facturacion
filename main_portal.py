@@ -614,17 +614,31 @@ if st.session_state.logged_in and st.session_state.user:
             if fin_tab == "📊 Dashboard 360":
                 if os.path.exists(SALES_FILE):
                     try:
-                        # Cargar Datos
-                        df = pd.read_excel(SALES_FILE)
-                        df['FECHA'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
-                        df = df.dropna(subset=['FECHA'])
-                        df_active = df[df['DESCRIPCION'] != "ANULADA"].copy()
+                        # Cargar Datos Actuales (2026)
+                        df_2026 = pd.read_excel(SALES_FILE)
+                        df_2026['FECHA'] = pd.to_datetime(df_2026['FECHA'], dayfirst=True, errors='coerce')
+                        df_2026 = df_2026.dropna(subset=['FECHA'])
+                        df_active = df_2026[df_2026['DESCRIPCION'] != "ANULADA"].copy()
+                        
+                        # Cargar Histórico (2024-2025)
+                        historical_file = os.path.join(DATABASE_DIR, "historical_summary.json")
+                        ventas_hist_total = 0
+                        df_hist = pd.DataFrame()
+                        
+                        if os.path.exists(historical_file):
+                            with open(historical_file, 'r', encoding='utf-8') as f:
+                                h_data = json.load(f)
+                                df_hist = pd.DataFrame(h_data)
+                                # Filtrar desde 2024
+                                df_hist = df_hist[df_hist['anio'].astype(int) >= 2024]
+                                ventas_hist_total = df_hist['ventas_brutas'].sum()
                         
                         prod_file = os.path.join(DATABASE_DIR, "productos_maestros.csv")
                         df_p = pd.read_csv(prod_file) if os.path.exists(prod_file) else None
                         
-                        # --- PROCESAMIENTO 360 ---
-                        total_ventas = df_active['PRECIO GS'].sum()
+                        # --- PROCESAMIENTO 360 (2024 - HOY) ---
+                        total_ventas_2026 = df_active['PRECIO GS'].sum()
+                        total_ventas = total_ventas_2026 + ventas_hist_total
                         total_cmv = 0
                         
                         if df_p is not None:
@@ -647,112 +661,129 @@ if st.session_state.logged_in and st.session_state.user:
                         else:
                             total_cmv = total_ventas * 0.80 # Default
                     
-                    margen_bruto = total_ventas - total_cmv
-                    margen_neto = margen_bruto * 0.60 # Estimación de gastos operativos (40% de la utilidad)
-                    
-                    # --- RENDER DASHBOARD MADRE ---
-                    st.title("📊 Dashboard Madre Real 2026")
-                    
-                    # KPIs al estilo React
-                    k1, k2, k3, k4 = st.columns(4)
-                    with k1:
-                        st.markdown(f"""<div class="kpi-card"><div class="kpi-label">VENTAS TOTALES</div><div class="kpi-value">GS {total_ventas:,.0f}</div><div class="kpi-badge" style="background:rgba(34,211,238,0.08);color:#22d3ee">100%</div></div>""", unsafe_allow_html=True)
-                    with k2:
-                        st.markdown(f"""<div class="kpi-card"><div class="kpi-label">CMV ESTIMADO</div><div class="kpi-value">GS {total_cmv:,.0f}</div><div class="kpi-badge" style="background:rgba(248,113,113,0.08);color:#f87171">80%</div></div>""", unsafe_allow_html=True)
-                    with k3:
-                        st.markdown(f"""<div class="kpi-card"><div class="kpi-label">MARGEN BRUTO</div><div class="kpi-value">GS {margen_bruto:,.0f}</div><div class="kpi-badge" style="background:rgba(52,211,153,0.08);color:#34d399">20%</div></div>""", unsafe_allow_html=True)
-                    with k4:
-                        st.markdown(f"""<div class="kpi-card"><div class="kpi-label">UTILIDAD NETA</div><div class="kpi-value">GS {margen_neto:,.0f}</div><div class="kpi-badge" style="background:rgba(245,158,11,0.08);color:#f59e0b">12%</div></div>""", unsafe_allow_html=True)
-
-                    st.markdown("---")
-                    
-                    c1, c2 = st.columns([2, 1])
-                    with c1:
-                        st.markdown("#### 📈 Evolución Mensual")
-                        chart_data = df_active.groupby(df_active['FECHA'].dt.strftime('%b'))['PRECIO GS'].sum()
-                        st.area_chart(chart_data)
-                    
-                    with c2:
-                        st.markdown("#### ⚖️ Análisis de Rentabilidad")
-                        st.markdown(f'<div class="row-analysis"><span>Ventas Brutas</span><b>GS {total_ventas:,.0f}</b></div>', unsafe_allow_html=True)
-                        st.markdown(f'<div class="row-analysis" style="border-left-color:#f87171"><span>Costo (CMV)</span><b>GS {total_cmv:,.0f}</b></div>', unsafe_allow_html=True)
-                        st.markdown(f'<div class="row-analysis" style="border-left-color:#34d399"><span>Margen Bruto</span><b>GS {margen_bruto:,.0f}</b></div>', unsafe_allow_html=True)
-                        st.markdown(f'<div class="row-analysis" style="border-left-color:#22d3ee"><span>Utilidad Final</span><b>GS {margen_neto:,.0f}</b></div>', unsafe_allow_html=True)
-
-                    st.info("💡 Este dashboard cruza en tiempo real el historial de ventas con la base de datos maestra unificada.")
-
-                    # --- RANKING DE PRODUCTOS ---
-                    st.markdown("#### 🏆 Top Productos más Vendidos")
-                    if 'DESCRIPCION' in df_active.columns:
-                        ranking = df_active.groupby('DESCRIPCION').agg({
-                            'PRECIO GS': 'sum',
-                            'VENDEDOR': 'count'
-                        }).rename(columns={'VENDEDOR': 'Operaciones'}).sort_values(by='PRECIO GS', ascending=False).head(10)
+                        margen_bruto = total_ventas - total_cmv
+                        margen_neto = margen_bruto * 0.60 # Estimación de gastos operativos (40% de la utilidad)
                         
-                        st.table(ranking.style.format({"PRECIO GS": "GS {:,.0f}"}))
-
-                    # --- ANALÍTICA ELITE: RENTABILIDAD POR VENDEDOR ---
-                    st.markdown("#### 👤 Eficiencia y Rentabilidad por Vendedor")
-                    if 'VENDEDOR' in df_active.columns:
-                        # Cálculo de margen por vendedor
-                        # Estimamos margen neto para cada operación (Cruce 360)
-                        df_active['MARGEN_EST'] = df_active['PRECIO GS'] * 0.20 # Asumimos 20% margen bruto promedio
+                        # --- RENDER DASHBOARD MADRE ---
+                        st.title("📊 Dashboard Madre Real 2026")
                         
-                        vendedor_stats = df_active.groupby('VENDEDOR').agg({
-                            'PRECIO GS': 'sum',
-                            'MARGEN_EST': 'sum',
-                            'DESCRIPCION': 'count'
-                        }).rename(columns={
-                            'PRECIO GS': 'Venta Total',
-                            'MARGEN_EST': 'Utilidad Est.',
-                            'DESCRIPCION': 'Ventas'
-                        })
-                        
-                        vendedor_stats['Eficiencia (%)'] = (vendedor_stats['Utilidad Est.'] / vendedor_stats['Venta Total'] * 100).fillna(0)
+                        # KPIs al estilo React
+                        k1, k2, k3, k4 = st.columns(4)
+                        with k1:
+                            st.markdown(f"""<div class="kpi-card"><div class="kpi-label">VENTAS TOTALES</div><div class="kpi-value">GS {total_ventas:,.0f}</div><div class="kpi-badge" style="background:rgba(34,211,238,0.08);color:#22d3ee">100%</div></div>""", unsafe_allow_html=True)
+                        with k2:
+                            st.markdown(f"""<div class="kpi-card"><div class="kpi-label">CMV ESTIMADO</div><div class="kpi-value">GS {total_cmv:,.0f}</div><div class="kpi-badge" style="background:rgba(248,113,113,0.08);color:#f87171">80%</div></div>""", unsafe_allow_html=True)
+                        with k3:
+                            st.markdown(f"""<div class="kpi-card"><div class="kpi-label">MARGEN BRUTO</div><div class="kpi-value">GS {margen_bruto:,.0f}</div><div class="kpi-badge" style="background:rgba(52,211,153,0.08);color:#34d399">20%</div></div>""", unsafe_allow_html=True)
+                        with k4:
+                            st.markdown(f"""<div class="kpi-card"><div class="kpi-label">UTILIDAD NETA</div><div class="kpi-value">GS {margen_neto:,.0f}</div><div class="kpi-badge" style="background:rgba(245,158,11,0.08);color:#f59e0b">12%</div></div>""", unsafe_allow_html=True)
+    
+                        st.markdown("---")
                         
                         c1, c2 = st.columns([2, 1])
                         with c1:
-                            st.bar_chart(vendedor_stats['Venta Total'])
+                            st.markdown("#### 📈 Evolución 2024 - 2026")
+                            # Preparar Timeline
+                            timeline = []
+                            if not df_hist.empty:
+                                for _, row in df_hist.iterrows():
+                                    timeline.append({
+                                        "Periodo": f"{row['anio']}-{row['mes']}",
+                                        "Ventas": row['ventas_brutas']
+                                    })
+                            
+                            # Agregar 2026
+                            df_2026_grouped = df_active.groupby(df_active['FECHA'].dt.strftime('%Y-%m'))['PRECIO GS'].sum().reset_index()
+                            for _, row in df_2026_grouped.iterrows():
+                                timeline.append({
+                                    "Periodo": row['FECHA'],
+                                    "Ventas": row['PRECIO GS']
+                                })
+                            
+                            df_timeline = pd.DataFrame(timeline).sort_values("Periodo")
+                            st.area_chart(df_timeline.set_index("Periodo")["Ventas"])
+                        
                         with c2:
-                            st.dataframe(vendedor_stats.style.format({
-                                "Venta Total": "GS {:,.0f}",
-                                "Utilidad Est.": "GS {:,.0f}",
-                                "Eficiencia (%)": "{:.1f}%"
-                            }))
-
-                    # --- ANALÍTICA ELITE: LEY DE PARETO (80/20) ---
-                    st.markdown("#### 🎯 Análisis de Pareto (80/20)")
-                    pareto_df = df_active.groupby('DESCRIPCION')['PRECIO GS'].sum().sort_values(ascending=False).reset_index()
-                    pareto_df['CumSum'] = pareto_df['PRECIO GS'].cumsum()
-                    pareto_df['CumPct'] = 100 * pareto_df['CumSum'] / pareto_df['PRECIO GS'].sum()
-                    
-                    vital_few = pareto_df[pareto_df['CumPct'] <= 80]
-                    st.success(f"💡 **Diagnóstico:** {len(vital_few)} productos generan el 80% de tus ingresos. Estos son tus productos críticos que nunca deben faltar.")
-                    
-                    with st.expander("Ver lista de productos críticos (80% del ingreso)"):
-                        st.write(vital_few[['DESCRIPCION', 'PRECIO GS', 'CumPct']])
-
-                    # --- ANALÍTICA ELITE: OPORTUNIDADES DE RE-FILL (CRM) (Suggestion #3) ---
-                    st.markdown("#### 📞 Oportunidades de Venta (CRM Re-Fill)")
-                    consumibles = df_active[df_active['DESCRIPCION'].str.contains("Tinta|Insumo|Papel|Vinilo|Cabezal", case=False, na=False)]
-                    if not consumibles.empty:
-                        # Identificar última compra por cliente (asumiendo columna 'CLIENTE' o similar, si no usamos Vendedor como proxy o simplificamos)
-                        # Para este demo, usaremos la lógica de frecuencia por producto si no hay ID de cliente único claro en el Excel actual
-                        ultima_venta = consumibles.groupby('DESCRIPCION')['FECHA'].max().reset_index()
-                        ultima_venta['Dias_Desde_Venta'] = (datetime.now() - ultima_venta['FECHA']).dt.days
+                            st.markdown("#### ⚖️ Análisis de Rentabilidad")
+                            st.markdown(f'<div class="row-analysis"><span>Ventas Brutas</span><b>GS {total_ventas:,.0f}</b></div>', unsafe_allow_html=True)
+                            st.markdown(f'<div class="row-analysis" style="border-left-color:#f87171"><span>Costo (CMV)</span><b>GS {total_cmv:,.0f}</b></div>', unsafe_allow_html=True)
+                            st.markdown(f'<div class="row-analysis" style="border-left-color:#34d399"><span>Margen Bruto</span><b>GS {margen_bruto:,.0f}</b></div>', unsafe_allow_html=True)
+                            st.markdown(f'<div class="row-analysis" style="border-left-color:#22d3ee"><span>Utilidad Final</span><b>GS {margen_neto:,.0f}</b></div>', unsafe_allow_html=True)
+    
+                        st.info("💡 Este dashboard cruza en tiempo real el historial de ventas con la base de datos maestra unificada.")
+    
+                        # --- RANKING DE PRODUCTOS ---
+                        st.markdown("#### 🏆 Top Productos más Vendidos")
+                        if 'DESCRIPCION' in df_active.columns:
+                            ranking = df_active.groupby('DESCRIPCION').agg({
+                                'PRECIO GS': 'sum',
+                                'VENDEDOR': 'count'
+                            }).rename(columns={'VENDEDOR': 'Operaciones'}).sort_values(by='PRECIO GS', ascending=False).head(10)
+                            
+                            st.table(ranking.style.format({"PRECIO GS": "GS {:,.0f}"}))
+    
+                        # --- ANALÍTICA ELITE: RENTABILIDAD POR VENDEDOR ---
+                        st.markdown("#### 👤 Eficiencia y Rentabilidad por Vendedor")
+                        if 'VENDEDOR' in df_active.columns:
+                            # Cálculo de margen por vendedor
+                            # Estimamos margen neto para cada operación (Cruce 360)
+                            df_active['MARGEN_EST'] = df_active['PRECIO GS'] * 0.20 # Asumimos 20% margen bruto promedio
+                            
+                            vendedor_stats = df_active.groupby('VENDEDOR').agg({
+                                'PRECIO GS': 'sum',
+                                'MARGEN_EST': 'sum',
+                                'DESCRIPCION': 'count'
+                            }).rename(columns={
+                                'PRECIO GS': 'Venta Total',
+                                'MARGEN_EST': 'Utilidad Est.',
+                                'DESCRIPCION': 'Ventas'
+                            })
+                            
+                            vendedor_stats['Eficiencia (%)'] = (vendedor_stats['Utilidad Est.'] / vendedor_stats['Venta Total'] * 100).fillna(0)
+                            
+                            c1, c2 = st.columns([2, 1])
+                            with c1:
+                                st.bar_chart(vendedor_stats['Venta Total'])
+                            with c2:
+                                st.dataframe(vendedor_stats.style.format({
+                                    "Venta Total": "GS {:,.0f}",
+                                    "Utilidad Est.": "GS {:,.0f}",
+                                    "Eficiencia (%)": "{:.1f}%"
+                                }))
+    
+                        # --- ANALÍTICA ELITE: LEY DE PARETO (80/20) ---
+                        st.markdown("#### 🎯 Análisis de Pareto (80/20)")
+                        pareto_df = df_active.groupby('DESCRIPCION')['PRECIO GS'].sum().sort_values(ascending=False).reset_index()
+                        pareto_df['CumSum'] = pareto_df['PRECIO GS'].cumsum()
+                        pareto_df['CumPct'] = 100 * pareto_df['CumSum'] / pareto_df['PRECIO GS'].sum()
                         
-                        # Alerta si pasaron más de 90 días (ciclo promedio de tinta)
-                        re_fill = ultima_venta[ultima_venta['Dias_Desde_Venta'] > 90].sort_values('Dias_Desde_Venta', ascending=False)
+                        vital_few = pareto_df[pareto_df['CumPct'] <= 80]
+                        st.success(f"💡 **Diagnóstico:** {len(vital_few)} productos generan el 80% de tus ingresos. Estos son tus productos críticos que nunca deben faltar.")
                         
-                        if not re_fill.empty:
-                            st.warning(f"💡 **Oportunidad:** Hay {len(re_fill)} productos/clientes que no compran insumos hace más de 3 meses. Es momento de contactarlos.")
-                            st.dataframe(re_fill[['DESCRIPCION', 'FECHA', 'Dias_Desde_Venta']].rename(columns={
-                                'DESCRIPCION': 'Producto Crítico',
-                                'FECHA': 'Última Venta',
-                                'Dias_Desde_Venta': 'Días de Inactividad'
-                            }))
-                        except Exception as e:
-                            st.error(f"Error al procesar ventas: {e}")
+                        with st.expander("Ver lista de productos críticos (80% del ingreso)"):
+                            st.write(vital_few[['DESCRIPCION', 'PRECIO GS', 'CumPct']])
+    
+                        # --- ANALÍTICA ELITE: OPORTUNIDADES DE RE-FILL (CRM) (Suggestion #3) ---
+                        st.markdown("#### 📞 Oportunidades de Venta (CRM Re-Fill)")
+                        consumibles = df_active[df_active['DESCRIPCION'].str.contains("Tinta|Insumo|Papel|Vinilo|Cabezal", case=False, na=False)]
+                        if not consumibles.empty:
+                            # Identificar última compra por cliente (asumiendo columna 'CLIENTE' o similar, si no usamos Vendedor como proxy o simplificamos)
+                            # Para este demo, usaremos la lógica de frecuencia por producto si no hay ID de cliente único claro en el Excel actual
+                            ultima_venta = consumibles.groupby('DESCRIPCION')['FECHA'].max().reset_index()
+                            ultima_venta['Dias_Desde_Venta'] = (datetime.now() - ultima_venta['FECHA']).dt.days
+                            
+                            # Alerta si pasaron más de 90 días (ciclo promedio de tinta)
+                            re_fill = ultima_venta[ultima_venta['Dias_Desde_Venta'] > 90].sort_values('Dias_Desde_Venta', ascending=False)
+                            
+                            if not re_fill.empty:
+                                st.warning(f"💡 **Oportunidad:** Hay {len(re_fill)} productos/clientes que no compran insumos hace más de 3 meses. Es momento de contactarlos.")
+                                st.dataframe(re_fill[['DESCRIPCION', 'FECHA', 'Dias_Desde_Venta']].rename(columns={
+                                    'DESCRIPCION': 'Producto Crítico',
+                                    'FECHA': 'Última Venta',
+                                    'Dias_Desde_Venta': 'Días de Inactividad'
+                                }))
+                    except Exception as e:
+                        st.error(f"Error al procesar ventas: {e}")
                 else:
                     if fin_tab == "📊 Dashboard 360":
                         st.warning("No hay historial de ventas disponible para generar el dashboard.")
