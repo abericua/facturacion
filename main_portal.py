@@ -349,6 +349,10 @@ st.markdown("""
         transition: all 0.3s ease;
         text-align: center;
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .bento-card:hover {
@@ -370,6 +374,27 @@ st.markdown("""
         padding: 0.5rem 2rem !important;
         text-transform: uppercase;
         letter-spacing: 1px;
+    }
+
+    /* Optimizaciones para Móviles (Responsive) */
+    @media (max-width: 768px) {
+        .bento-card {
+            padding: 1.2rem !important;
+            height: auto !important;
+            min-height: 160px !important;
+        }
+        .module-icon { font-size: 2.5rem !important; margin-bottom: 0.5rem !important; }
+        .module-title { font-size: 1.1rem !important; }
+        .module-desc { display: none; }
+        .stButton>button {
+            height: 3.5em !important;
+            font-size: 0.85rem !important;
+            padding: 0.5rem 1rem !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 8px 8px !important;
+            font-size: 0.75rem !important;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -523,9 +548,19 @@ if st.session_state.logged_in and st.session_state.user:
 
     elif st.session_state.current_page == "finanzas":
         if st.sidebar.button("⬅️ Volver al Portal"): navigate_to("portal")
-        st.title("📊 Centro de Control Financiero & Operativo")
+        # Configurar Tabs dinámicos según Rol
+        tab_list = ["📈 Análisis de Ventas", "📦 Monitor de Stock", "📂 Archivo Documental"]
+        if st.session_state.user['rol'] == 'admin':
+            tab_list.append("🧠 Cerebro Estratégico (ADMIN)")
         
-        tab_ana, tab_stock, tab_doc, tab_brain = st.tabs(["📈 Análisis de Ventas", "📦 Monitor de Stock", "📂 Archivo Documental", "🧠 Cerebro Estratégico"])
+        tabs = st.tabs(tab_list)
+        
+        # Asignar tabs a variables según su existencia
+        tab_ana = tabs[0]
+        tab_stock = tabs[1]
+        tab_doc = tabs[2]
+        if st.session_state.user['rol'] == 'admin':
+            tab_brain = tabs[3]
         with tab_ana:
             # Estilos CSS para el Dashboard Madre
             st.markdown("""
