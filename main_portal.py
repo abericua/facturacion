@@ -342,9 +342,9 @@ st.markdown("""
     
     :root {
         --solpro-gold: #D4AF37;
-        --luxury-black: #050505;
+        --luxury-black: #080808;
         --glass-bg: rgba(255, 255, 255, 0.02);
-        --glass-border: rgba(212, 175, 55, 0.15);
+        --glass-border: rgba(212, 175, 55, 0.1);
         --text-premium: #f8fafc;
     }
 
@@ -354,76 +354,81 @@ st.markdown("""
         font-family: 'Outfit', sans-serif; 
     }
     
+    .stSidebar {
+        background-color: #0c0c0c !important;
+        border-right: 1px solid var(--glass-border);
+    }
+
     .bento-card {
         background: var(--glass-bg);
         backdrop-filter: blur(12px);
         border: 1px solid var(--glass-border);
-        border-radius: 32px;
-        padding: 2.5rem;
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 28px;
+        padding: 2rem;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         text-align: center;
-        height: 100%;
+        height: 280px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         position: relative;
+        margin-bottom: 1rem;
     }
     
     .bento-card:hover {
-        transform: translateY(-12px);
+        transform: translateY(-8px);
         border-color: var(--solpro-gold);
-        background: rgba(212, 175, 55, 0.03);
-        box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 30px rgba(212, 175, 55, 0.05);
+        background: rgba(212, 175, 55, 0.04);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.5);
     }
     
     .module-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1.5rem;
-        filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.2));
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
     }
     
     .module-title {
         color: #ffffff;
         font-family: 'Syne', sans-serif;
-        font-size: 1.7rem;
+        font-size: 1.4rem;
         font-weight: 800;
-        letter-spacing: -0.03em;
-        margin-bottom: 0.8rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
         text-transform: uppercase;
     }
     
     .module-desc {
         color: #64748b;
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         font-weight: 300;
-        line-height: 1.6;
-        max-width: 280px;
+        line-height: 1.5;
+        max-width: 90%;
     }
     
     .stButton>button {
         background: transparent !important;
         color: var(--solpro-gold) !important;
         border: 1px solid var(--solpro-gold) !important;
-        border-radius: 100px !important;
-        padding: 0.8rem 2.5rem !important;
+        border-radius: 12px !important;
+        padding: 0.6rem 2rem !important;
         font-weight: 600 !important;
-        letter-spacing: 0.15em !important;
+        letter-spacing: 0.1em !important;
         text-transform: uppercase !important;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition: all 0.3s ease !important;
     }
     
     .stButton>button:hover {
         background: var(--solpro-gold) !important;
         color: var(--luxury-black) !important;
-        box-shadow: 0 0 40px rgba(212, 175, 55, 0.3) !important;
-        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.3) !important;
     }
 
-    /* Mobile Elegance */
+    /* Mobile Cleanup */
     @media (max-width: 768px) {
-        .bento-card { padding: 1.5rem !important; border-radius: 24px !important; }
-        .module-title { font-size: 1.2rem !important; }
+        .bento-card { height: auto; min-height: 200px; padding: 1.2rem; }
+        .module-title { font-size: 1.1rem; }
         .module-desc { display: none; }
     }
     </style>
@@ -533,8 +538,8 @@ if st.session_state.logged_in and st.session_state.user:
                 data = base64.b64encode(f.read()).decode()
                 st.sidebar.markdown(
                     f"""
-                    <div style="text-align: center; padding-bottom: 20px;">
-                        <img src="data:image/png;base64,{data}" width="180" style="filter: drop-shadow(0px 0px 5px rgba(245,158,11,0.5));">
+                    <div style="text-align: center; padding: 10px 0 30px 0;">
+                        <img src="data:image/png;base64,{data}" width="130" style="filter: drop-shadow(0px 0px 10px rgba(212, 175, 55, 0.4));">
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -554,41 +559,38 @@ if st.session_state.logged_in and st.session_state.user:
             st.session_state.logged_in = False
             st.rerun()
 
-        st.write("Selecciona el módulo que deseas operar hoy:")
-
-        # Grid Bento 1 + 2 (Uno grande y dos abajo)
-        col_main, col_side = st.columns([2, 1])
-
-        with col_main:
+        # Grid Bento 1 + 2
+        st.markdown("<div style='margin-bottom: 2rem;'></div>", unsafe_allow_html=True)
+        
+        c1, c2 = st.columns([1.5, 1])
+        with c1:
             st.markdown("""
-                <div class="bento-card" style="height: 250px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 5px solid #f59e0b;">
-                    <span class="module-icon" style="font-size: 4rem;">📄</span>
-                    <div class="module-title" style="font-size: 2rem;">FACTURACIÓN & STOCK</div>
-                    <div class="module-desc" style="font-size: 1.1rem;">Emisión de facturas legales, control de inventario en tiempo real y gestión de clientes SOLPRO.</div>
+                <div class="bento-card">
+                    <span class="module-icon">📄</span>
+                    <div class="module-title">FACTURACIÓN & STOCK</div>
+                    <div class="module-desc">Emisión legal, control de inventario y gestión de clientes.</div>
                 </div>
             """, unsafe_allow_html=True)
-            if st.button("LANZAR MÓDULO OPERATIVO", key="btn_fact", use_container_width=True):
+            if st.button("LANZAR MÓDULO", key="btn_fact", use_container_width=True):
                 navigate_to("facturador")
 
-        with col_side:
+        with c2:
             st.markdown("""
-                <div class="bento-card" style="height: 250px;">
+                <div class="bento-card">
                     <span class="module-icon">🧮</span>
                     <div class="module-title">CALCULADORA</div>
-                    <div class="module-desc">Motor de precios v36.0 y ROI industrial.</div>
+                    <div class="module-desc">Precios v36.0 y ROI industrial.</div>
                 </div>
             """, unsafe_allow_html=True)
             if st.button("ABRIR MOTOR", key="btn_calc", use_container_width=True):
                 navigate_to("calculadora")
 
         st.markdown("""
-            <div class="bento-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-top: 3px solid #6366f1;">
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <span class="module-icon" style="font-size: 3rem;">📊</span>
-                    <div>
-                        <div class="module-title">FINANZAS & CONTROL LEGAL</div>
-                        <div class="module-desc">Análisis financiero, Backoffice, conciliación bancaria y archivo central de IVAs/Documentos.</div>
-                    </div>
+            <div class="bento-card" style="height: 180px; flex-direction: row; gap: 30px; text-align: left;">
+                <span class="module-icon" style="margin:0;">📊</span>
+                <div>
+                    <div class="module-title" style="margin:0;">FINANZAS & CONTROL LEGAL</div>
+                    <div class="module-desc">Análisis 360, conciliación y archivo documental.</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
