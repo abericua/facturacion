@@ -615,15 +615,21 @@ if st.session_state.logged_in and st.session_state.user:
 
     elif st.session_state.current_page == "facturador":
         if st.sidebar.button("⬅️ Volver al Portal"): navigate_to("portal")
-        # Ejecutar el facturador directamente desde su archivo
-        facturador_path = os.path.join("Creador de Facturas", "app.py")
+        # Integración limpia mediante importación de módulo
+        import importlib.util
+        facturador_path = os.path.join(SGSP_ROOT, "Creador de Facturas", "app.py")
+        
         if os.path.exists(facturador_path):
-            with open(facturador_path, "r", encoding="utf-8") as f:
-                code = f.read()
-                # Eliminar bloque multilínea de st.set_page_config de forma segura
-                import re
-                code = re.sub(r"st\.set_page_config\(.*?\)", "# st.set_page_config(BLOQUE ELIMINADO)", code, flags=re.DOTALL)
-                exec(code, globals())
+            try:
+                # Cargar el facturador como un módulo de Python real
+                spec = importlib.util.spec_from_file_location("facturador_module", facturador_path)
+                facturador = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(facturador)
+                # Ejecutar la UI encapsulada
+                facturador.run_facturador_app()
+            except Exception as e:
+                st.error(f"Error crítico al cargar el módulo Facturador: {e}")
+                st.info("Esto puede deberse a un error de sintaxis en app.py o una dependencia faltante.")
         else:
             st.error(f"No se encontró el archivo: {facturador_path}")
 

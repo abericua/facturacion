@@ -84,11 +84,16 @@
 4.  **Analítica Elite:** El Dashboard identifica productos críticos (Pareto) y eficiencia de vendedores.
 5.  **Ala Financiera:** Control total de bancos, gastos e impuestos alineado a la normativa nacional paraguaya.
 
-## 🛡️ FASE 11: Seguridad Final y Hardening (Cierre de Ciclo)
-**Acciones:**
-- **Erradicación del Protocolo 007:** Eliminación total del código de emergencia `007007` en el Portal y el Facturador.
-- **Migración de Secretos:** `SYSTEM_PEPPER` movido de código fuente a variables de entorno de Railway.
-- **Saneamiento de Producción:** Desactivación del modo `debug` en el Bridge de IA.
-- **Unificación de Datos:** Eliminación de declaraciones redundantes de `SALES_FILE` para evitar colisiones de rutas.
+### FASE 11: Seguridad Final y Hardening (Mayo 2026)
+- **Erradicación de Backdoors:** Eliminado código `007007` en `main_portal.py` y `app.py`.
+- **Gestión de Secretos:** Migración de `SYSTEM_PEPPER` a variables de entorno.
+- **Estandarización 2FA:** Actualizado `usuarios.json` con `totp_secret` para todos los vendedores.
+- **Optimización de Rutas:** Uso de rutas absolutas en `app_bridge.py` para compatibilidad con Railway.
+
+### FASE 12: Refactorización Arquitectónica y Modularidad (Mayo 2026)
+- **Eliminación de exec():** Se reemplazó la carga dinámica de `app.py` por una importación limpia mediante `importlib`.
+- **Encapsulación de UI:** El Facturador fue convertido en un módulo importable con la función `run_facturador_app()`.
+- **Protección de Configuración:** `st.set_page_config` ahora solo se ejecuta en modo standalone, evitando conflictos en el portal.
+- **Robustez:** Implementado manejo de excepciones en la carga de módulos para prevenir caídas globales.
 
 **Estado del Sistema:** [MÁXIMA SEGURIDAD ACTIVADA - LISTO PARA PRODUCCIÓN]
