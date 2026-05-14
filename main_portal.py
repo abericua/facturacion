@@ -446,8 +446,17 @@ def navigate_to(page):
     st.rerun()
 
 def login_screen():
-    st.markdown("""
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; text-align: center;">
+    # --- LOGO EN LOGIN ---
+    logo_path = os.path.join(SGSP_ROOT, "LOGO  3D FONDO NEGRO 2026.png")
+    logo_html = ""
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as f:
+            data = base64.b64encode(f.read()).decode()
+            logo_html = f'<img src="data:image/png;base64,{data}" width="180" style="margin-bottom: 20px; filter: drop-shadow(0px 0px 15px rgba(212, 175, 55, 0.4));">'
+
+    st.markdown(f"""
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 55vh; text-align: center;">
+            {logo_html}
             <h1 style="font-family: 'Syne', sans-serif; font-size: 4.5rem; letter-spacing: -3px; color: #fff; margin-bottom: 0;">SOLPRO</h1>
             <p style="color: var(--solpro-gold); letter-spacing: 0.5em; text-transform: uppercase; font-size: 0.8rem; font-weight: 300; margin-top: -10px; opacity: 0.8;">Elite Control Center</p>
         </div>
