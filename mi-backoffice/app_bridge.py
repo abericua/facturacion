@@ -69,4 +69,4 @@ def review_code():
 
 if __name__ == '__main__':
     print(f"🚀 Sol Pro AI Bridge iniciado en http://localhost:5005")
-    app.run(port=5005, debug=True)
+    app.run(port=5005, debug=os.environ.get("FLASK_DEBUG", "false").lower() == "true")

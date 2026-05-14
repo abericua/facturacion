@@ -37,12 +37,29 @@ if os.path.exists(PERSISTENT_DIR):
     import shutil
     repo_db = os.path.join(SGSP_ROOT, "database")
     if os.path.exists(repo_db):
-        # FORZAR copia de usuarios.json esta vez para resetear el totp_secret
-        # (después de este deploy, el bootstrap no lo sobreescribirá más)
         _cred_src = os.path.join(repo_db, "usuarios.json")
         _cred_dst = os.path.join(PERSISTENT_DIR, "usuarios.json")
-        if os.path.exists(_cred_src):
+
+        if not os.path.exists(_cred_dst) and os.path.exists(_cred_src):
+            # Primera vez: copiar directamente
             shutil.copy2(_cred_src, _cred_dst)
+        elif os.path.exists(_cred_dst) and os.path.exists(_cred_src):
+            # Ya existe en el volumen: hacer merge preservando totp_secret
+            try:
+                import json as _json
+                with open(_cred_src, 'r', encoding='utf-8') as f:
+                    repo_users = _json.load(f)
+                with open(_cred_dst, 'r', encoding='utf-8') as f:
+                    vol_users = _json.load(f)
+                vol_secrets = {u['usuario']: u.get('totp_secret', '') for u in vol_users}
+                for u in repo_users:
+                    if u['usuario'] in vol_secrets and vol_secrets[u['usuario']]:
+                        u['totp_secret'] = vol_secrets[u['usuario']]
+                with open(_cred_dst, 'w', encoding='utf-8') as f:
+                    _json.dump(repo_users, f, ensure_ascii=False, indent=4)
+            except Exception as _e:
+                print(f"[Bootstrap] Merge warning: {_e}")
+
         # Copiar el resto SOLO si no existen en el volumen
         for item in os.listdir(repo_db):
             if item == "usuarios.json": continue
@@ -57,7 +74,6 @@ SALES_FILE = os.path.join(DATABASE_DIR, "VENTAS TOTALES 2026.xlsx")
 _USERS_FILE = os.path.join(DATABASE_DIR, "usuarios.json")
 USERS_FILE = _USERS_FILE if os.path.exists(_USERS_FILE) else os.path.join(SGSP_ROOT, "Creador de Facturas", "usuarios.json")
 PRODUCTS_FILE = os.path.join(DATABASE_DIR, "productos_maestros.csv")
-SALES_FILE = os.path.join(DATABASE_DIR, "VENTAS TOTALES 2026.xlsx")
 
 # --- AUDITORÍA DE SINCRONIZACIÓN AL ARRANQUE ---
 def sync_master_data():
@@ -84,7 +100,7 @@ def sync_master_data():
 # sync_master_data() # DESACTIVADO: Causaba pérdida de datos en producción
 
 # --- SEGURIDAD 007 ---
-SYSTEM_PEPPER = "SOLPRO_ULTRA_SECRET_2026_#!"
+SYSTEM_PEPPER = os.environ.get("SYSTEM_PEPPER", "SOLPRO_ULTRA_SECRET_2026_#!")
 
 def hash_password(password):
     """Hash con pepper (versión nueva)"""
@@ -201,7 +217,7 @@ def parse_iva_120(text):
     return data
 
 def scan_historical_archives():
-    base_path = "IIVAS Y DOCUMENTOS LEGALES SOLPRO"
+    base_path = os.path.join(SGSP_ROOT, "IIVAS Y DOCUMENTOS LEGALES SOLPRO")
     if not os.path.exists(base_path): return []
     
     historical_results = []
@@ -513,7 +529,7 @@ def login_screen():
                 code = st.text_input("CÓDIGO DE SEGURIDAD", max_chars=6, placeholder="000000")
                 if st.button("AUTENTICAR ACCESO", use_container_width=True):
                     totp = pyotp.TOTP(user['totp_secret'])
-                    if totp.verify(code) or code == "007007":
+                    if totp.verify(code):
                         st.session_state.logged_in = True
                         st.session_state.user = user
                         st.rerun()
@@ -1095,82 +1111,83 @@ if st.session_state.logged_in and st.session_state.user:
                     else:
                         st.warning("Por favor complete los campos obligatorios.")
 
-        with tab_brain:
-            # --- 3D IMMERSIVE EXPERIENCE: INTEL MATRIX ---
-            st.markdown("""
-                <style>
-                #three-canvas-container {
-                    width: 100%;
-                    height: 300px;
-                    background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%);
-                    border-radius: 12px;
-                    margin-bottom: 20px;
-                    overflow: hidden;
-                    border: 1px solid rgba(245, 158, 11, 0.2);
-                }
-                </style>
-                <div id="three-canvas-container"></div>
-                
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-                <script>
-                const container = document.getElementById('three-canvas-container');
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 300, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-                
-                renderer.setSize(container.offsetWidth, 300);
-                renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-                container.appendChild(renderer.domElement);
-                
-                // Geometry: Intelligence Matrix (Icosahedron)
-                const geometry = new THREE.IcosahedronGeometry(1, 1);
-                const material = new THREE.MeshPhongMaterial({
-                    color: 0xFFD700,
-                    wireframe: true,
-                    emissive: 0xFFD700,
-                    emissiveIntensity: 0.6,
-                    shininess: 120
-                });
-                const mesh = new THREE.Mesh(geometry, material);
-                scene.add(mesh);
-                
-                // Lights
-                const light = new THREE.PointLight(0xffffff, 1, 100);
-                light.position.set(5, 5, 5);
-                scene.add(light);
-                scene.add(new THREE.AmbientLight(0x404040));
-                
-                camera.position.z = 3;
-                
-                // Particles
-                const particlesGeometry = new THREE.BufferGeometry();
-                const count = 500;
-                const positions = new Float32Array(count * 3);
-                for(let i = 0; i < count * 3; i++) {
-                    positions[i] = (Math.random() - 0.5) * 10;
-                }
-                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                const particlesMaterial = new THREE.PointsMaterial({ size: 0.02, color: 0xFFD700 });
-                const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-                scene.add(particles);
-                
-                function animate() {
-                    requestAnimationFrame(animate);
-                    mesh.rotation.x += 0.005;
-                    mesh.rotation.y += 0.01;
-                    particles.rotation.y += 0.001;
-                    renderer.render(scene, camera);
-                }
-                
-                window.addEventListener('resize', () => {
-                    camera.aspect = container.offsetWidth / 300;
-                    camera.updateProjectionMatrix();
+        if st.session_state.user.get('rol') == 'admin':
+            with tab_brain:
+                # --- 3D IMMERSIVE EXPERIENCE: INTEL MATRIX ---
+                st.markdown("""
+                    <style>
+                    #three-canvas-container {
+                        width: 100%;
+                        height: 300px;
+                        background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%);
+                        border-radius: 12px;
+                        margin-bottom: 20px;
+                        overflow: hidden;
+                        border: 1px solid rgba(245, 158, 11, 0.2);
+                    }
+                    </style>
+                    <div id="three-canvas-container"></div>
+                    
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+                    <script>
+                    const container = document.getElementById('three-canvas-container');
+                    const scene = new THREE.Scene();
+                    const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 300, 0.1, 1000);
+                    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                    
                     renderer.setSize(container.offsetWidth, 300);
-                });
-                
-                animate();
-                </script>
-            """, unsafe_allow_html=True)
+                    renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
+                    container.appendChild(renderer.domElement);
+                    
+                    // Geometry: Intelligence Matrix (Icosahedron)
+                    const geometry = new THREE.IcosahedronGeometry(1, 1);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0xFFD700,
+                        wireframe: true,
+                        emissive: 0xFFD700,
+                        emissiveIntensity: 0.6,
+                        shininess: 120
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    scene.add(mesh);
+                    
+                    // Lights
+                    const light = new THREE.PointLight(0xffffff, 1, 100);
+                    light.position.set(5, 5, 5);
+                    scene.add(light);
+                    scene.add(new THREE.AmbientLight(0x404040));
+                    
+                    camera.position.z = 3;
+                    
+                    // Particles
+                    const particlesGeometry = new THREE.BufferGeometry();
+                    const count = 500;
+                    const positions = new Float32Array(count * 3);
+                    for(let i = 0; i < count * 3; i++) {
+                        positions[i] = (Math.random() - 0.5) * 10;
+                    }
+                    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    const particlesMaterial = new THREE.PointsMaterial({ size: 0.02, color: 0xFFD700 });
+                    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+                    scene.add(particles);
+                    
+                    function animate() {
+                        requestAnimationFrame(animate);
+                        mesh.rotation.x += 0.005;
+                        mesh.rotation.y += 0.01;
+                        particles.rotation.y += 0.001;
+                        renderer.render(scene, camera);
+                    }
+                    
+                    window.addEventListener('resize', () => {
+                        camera.aspect = container.offsetWidth / 300;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(container.offsetWidth, 300);
+                    });
+                    
+                    animate();
+                    </script>
+                """, unsafe_allow_html=True)
 
             st.markdown("### 🧠 Consultor Estratégico SOLPRO (Gemma 4 Bridge)")
             st.info("Este agente tiene acceso a tus ventas, bancos, stock y leyes cargadas. Úsalo para debatir planes de expansión o análisis de riesgos.")
