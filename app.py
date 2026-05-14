@@ -6,6 +6,8 @@ import hashlib
 import base64
 import io
 import requests
+import pyotp
+import qrcode
 from datetime import datetime, date
 from pdf_generator import generate_invoice_pdf
 
@@ -277,8 +279,13 @@ def emergency_data_fix():
 emergency_data_fix()
 
 # --- SEGURIDAD Y SESIÓN ---
+# Punto 2: Añadimos un 'PEPPER' (salt) para fortalecer los hashes
+SYSTEM_PEPPER = "SOLPRO_ULTRA_SECRET_2026_#!"
+
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    # Combinamos el password con el pepper del sistema
+    salted_pass = password + SYSTEM_PEPPER
+    return hashlib.sha256(salted_pass.encode()).hexdigest()
 
 def load_users():
     if os.path.exists(USERS_FILE):
@@ -286,45 +293,19 @@ def load_users():
             return json.load(f)
     return []
 
+def save_users(users):
+    with open(USERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(users, f, ensure_ascii=False, indent=4)
+
+# --- MANEJO DE LOGIN (Punto 1: Eliminado login por URL por seguridad) ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_data' not in st.session_state:
     st.session_state.user_data = None
-
-# --- MANEJO DE LOGIN POR URL ---
-if not st.session_state.logged_in:
-    # Usamos get() para manejar parámetros de forma segura
-    u_param = st.query_params.get("u")
-    p_param = st.query_params.get("p")
-    
-    if u_param and p_param:
-        try:
-            # En algunas versiones de Streamlit los parámetros pueden venir como listas
-            user_url = u_param[0] if isinstance(u_param, list) else u_param
-            pass_raw = p_param[0] if isinstance(p_param, list) else p_param
-            
-            # Asegurar padding correcto para base64
-            missing_padding = len(pass_raw) % 4
-            if missing_padding:
-                pass_raw += '=' * (4 - missing_padding)
-            
-            pass_url = base64.b64decode(pass_raw).decode('utf-8')
-            users = load_users()
-            hashed_input = hash_password(pass_url)
-            user_found = next((u for u in users if u['usuario'] == user_url and u['password'] == hashed_input), None)
-            
-            if user_found:
-                st.session_state.logged_in = True
-                st.session_state.user_data = user_found
-                # Limpiar parámetros de la URL para que no se vean
-                st.query_params.clear()
-                st.rerun()
-            else:
-                # Si falló el login, mostramos un error temporal (opcional)
-                st.error("Credenciales de URL inválidas")
-        except Exception as e:
-            # st.error(f"Error procesando login: {e}")
-            pass
+if 'login_step' not in st.session_state:
+    st.session_state.login_step = 1 # 1: Credenciales, 2: 2FA (TOTP)
+if 'temp_user' not in st.session_state:
+    st.session_state.temp_user = None
 
 # Funciones de carga
 def clean_price(price_str):
@@ -522,14 +503,24 @@ def get_next_invoice_number():
             except: pass
     return "0501"
 
-def void_invoice(invoice_num):
+def void_invoice(invoice_num, current_user):
     if os.path.exists(SALES_FILE):
         df = pd.read_excel(SALES_FILE)
         mask = df['NRO_FACTURA'].astype(str) == str(invoice_num)
         if mask.any():
             row_idx = mask[mask].index[0]
+            
+            # --- VALIDACIÓN DE SEGURIDAD (Punto 3: RBAC) ---
+            # Si no es admin, solo puede anular si él es el vendedor
+            if current_user['rol'] != 'admin':
+                vendedor_registro = str(df.loc[row_idx, 'VENDEDOR']).strip().upper()
+                vendedor_actual = str(current_user['nombre']).strip().upper()
+                if vendedor_registro != vendedor_actual:
+                    return False, f"⛔ Error: Esta factura pertenece a {vendedor_registro}. Solo el administrador puede anular facturas ajenas."
+            # -----------------------------------------------
+
             if df.loc[row_idx, 'DESCRIPCION'] == "ANULADA":
-                return False
+                return False, "⚠️ Esta factura ya se encuentra anulada."
                 
             if 'RAW_ITEMS' in df.columns:
                 raw_items_str = df.loc[row_idx, 'RAW_ITEMS']
@@ -543,6 +534,19 @@ def void_invoice(invoice_num):
                         print(f"Error restoring inventory: {e}")
             
             df.loc[mask, ['DESCRIPCION', 'PRECIO GS', 'PRECIO USD']] = ["ANULADA", 0, 0]
+            df.to_excel(SALES_FILE, index=False)
+            return True, "✅ Factura anulada exitosamente y stock devuelto."
+    return False, "❌ Factura no encontrada."
+
+def update_invoice_master(invoice_num, new_data):
+    """Función exclusiva de Admin para correcciones maestras"""
+    if os.path.exists(SALES_FILE):
+        df = pd.read_excel(SALES_FILE)
+        mask = df['NRO_FACTURA'].astype(str) == str(invoice_num)
+        if mask.any():
+            for key, value in new_data.items():
+                if key in df.columns:
+                    df.loc[mask, key] = value
             df.to_excel(SALES_FILE, index=False)
             return True
     return False
@@ -708,22 +712,81 @@ if not st.session_state.get('logged_in', False):
         <div class="sp-form-sub">Ingresa tus credenciales para continuar</div>
         """, unsafe_allow_html=True)
 
-        with st.form("solpro_login_form"):
-            user_input = st.text_input("Usuario", placeholder="admin")
-            pass_input = st.text_input("Contraseña", type="password", placeholder="••••••••")
-            st.checkbox("Mantener sesión iniciada")
-            submitted = st.form_submit_button("Entrar al sistema")
+        if st.session_state.login_step == 1:
+            with st.form("solpro_login_form"):
+                user_input = st.text_input("Usuario", placeholder="admin")
+                pass_input = st.text_input("Contraseña", type="password", placeholder="••••••••")
+                submitted = st.form_submit_button("Siguiente Paso ➔")
 
-        if submitted:
-            users = load_users()
-            hashed_input = hashlib.sha256(pass_input.encode()).hexdigest()
-            user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == hashed_input), None)
-            if user_found:
-                st.session_state.logged_in = True
-                st.session_state.user_data = user_found
+            if submitted:
+                users = load_users()
+                
+                # Intentar login con hash nuevo (salted)
+                hashed_input = hash_password(pass_input)
+                user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == hashed_input), None)
+                
+                # MIGRACIÓN AUTOMÁTICA: Si no se encuentra con el hash nuevo, probar con el hash viejo (sin salt)
+                if not user_found:
+                    old_hash = hashlib.sha256(pass_input.encode()).hexdigest()
+                    user_found = next((u for u in users if u['usuario'] == user_input and u['password'] == old_hash), None)
+                    if user_found:
+                        # Actualizar usuario a hash nuevo para la próxima vez
+                        for u in users:
+                            if u['usuario'] == user_input:
+                                u['password'] = hashed_input
+                        save_users(users)
+                
+                if user_found:
+                    st.session_state.temp_user = user_found
+                    st.session_state.login_step = 2
+                    st.rerun()
+                else:
+                    st.error("Credenciales incorrectas.")
+        
+        else:
+            # --- PASO 2: AUTENTICACIÓN DE GOOGLE (2FA) ---
+            user = st.session_state.temp_user
+            st.markdown(f"**Verificación de Seguridad para: {user['nombre']}**")
+            
+            # Si el usuario no tiene secreto TOTP, generarlo (primera vez)
+            if 'totp_secret' not in user or not user['totp_secret']:
+                new_secret = pyotp.random_base32()
+                user['totp_secret'] = new_secret
+                
+                # Actualizar base de datos
+                users = load_users()
+                for u in users:
+                    if u['usuario'] == user['usuario']:
+                        u['totp_secret'] = new_secret
+                save_users(users)
+                
+                st.warning("⚠️ Configuración Inicial de 2FA")
+                st.write("Escanea este código con Google Authenticator:")
+                
+                totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(name=user['usuario'], issuer_name="SOLPRO")
+                img = qrcode.make(totp_uri)
+                buf = io.BytesIO()
+                img.save(buf)
+                st.image(buf.getvalue(), width=200)
+                st.info(f"O ingresa este código manualmente: `{new_secret}`")
+
+            otp_input = st.text_input("Ingresa el código de 6 dígitos", placeholder="000000", max_chars=6)
+            col_b1, col_b2 = st.columns(2)
+            
+            if col_b1.button("✓ VERIFICAR ENTRAR"):
+                totp = pyotp.TOTP(user['totp_secret'])
+                if totp.verify(otp_input):
+                    st.session_state.logged_in = True
+                    st.session_state.user_data = user
+                    st.session_state.login_step = 1
+                    st.rerun()
+                else:
+                    st.error("Código inválido. Intenta de nuevo.")
+            
+            if col_b2.button("← VOLVER"):
+                st.session_state.login_step = 1
+                st.session_state.temp_user = None
                 st.rerun()
-            else:
-                st.error("Credenciales incorrectas. Verifica tu usuario y contraseña.")
 
     st.stop()
 
@@ -966,10 +1029,14 @@ with tab1:
 if True:
     with tab2:
         st.header("🚫 ANULACIONES")
-        inv_v = st.text_input("Nro Factura", placeholder="0000")
-        if st.button("EJECUTAR ANULACIÓN"):
-            if inv_v and void_invoice(inv_v): st.success("Anulada")
-            else: st.error("No encontrada")
+        st.info("Nota: Los vendedores solo pueden anular sus propias facturas. Los administradores tienen acceso total.")
+        inv_v = st.text_input("Nro Factura a anular", placeholder="0000")
+        if st.button("EJECUTAR ANULACIÓN", type="primary"):
+            if inv_v:
+                success, msg = void_invoice(inv_v, st.session_state.user_data)
+                if success: st.success(msg)
+                else: st.error(msg)
+            else: st.error("Ingresa un número de factura.")
 
     with tab3:
         df_i = load_products()
@@ -1114,6 +1181,59 @@ if True:
                             st.error(f"Error al generar: {e}")
                     else:
                         st.error("No se encontró ese número de factura en el historial.")
+            
+        # --- PANEL DE EDICIÓN MAESTRA (SOLO ADMIN) ---
+        if st.session_state.user_data['rol'] == 'admin':
+            st.divider()
+            st.markdown("<h3 style='color: #f1c232;'>🛠️ PANEL DE EDICIÓN MAESTRA (ADMIN)</h3>", unsafe_allow_html=True)
+            st.write("Usa esta herramienta para corregir errores de fecha, vendedor o datos generales de una factura emitida.")
+            
+            edit_nro = st.text_input("Nro. Factura a Corregir", placeholder="Ej: 0501", key="edit_master_nro")
+            
+            if edit_nro:
+                df_s = load_sales()
+                match = df_s[df_s['NRO_FACTURA'].astype(str) == str(edit_nro)]
+                
+                if not match.empty:
+                    row = match.iloc[0]
+                    with st.form("master_edit_form"):
+                        col_ed1, col_ed2 = st.columns(2)
+                        
+                        with col_ed1:
+                            new_fecha = st.date_input("Nueva Fecha", value=row['FECHA'])
+                            new_cliente = st.text_input("Nombre Cliente", value=row['CLIENTE'])
+                            
+                            # Cargar lista de vendedores para el selector
+                            all_users = load_users()
+                            v_names = [u['nombre'] for u in all_users]
+                            try:
+                                v_idx = v_names.index(row['VENDEDOR'])
+                            except: v_idx = 0
+                                
+                            new_vendedor = st.selectbox("Asignar a Vendedor", options=v_names, index=v_idx)
+                        
+                        with col_ed2:
+                            new_desc = st.text_area("Descripción/Items", value=row['DESCRIPCION'])
+                            new_p_gs = st.number_input("Precio Total GS", value=float(row['PRECIO GS']) if pd.notna(row['PRECIO GS']) else 0.0)
+                            new_p_usd = st.number_input("Precio Total USD", value=float(row['PRECIO USD']) if pd.notna(row['PRECIO USD']) else 0.0)
+                        
+                        if st.form_submit_button("💾 GUARDAR CAMBIOS CORRECTIVOS"):
+                            changes = {
+                                "FECHA": pd.to_datetime(new_fecha),
+                                "CLIENTE": new_cliente,
+                                "VENDEDOR": new_vendedor,
+                                "DESCRIPCION": new_desc,
+                                "PRECIO GS": new_p_gs if new_p_gs > 0 else None,
+                                "PRECIO USD": new_p_usd if new_p_usd > 0 else None
+                            }
+                            if update_invoice_master(edit_nro, changes):
+                                st.success(f"✅ Factura {edit_nro} actualizada correctamente.")
+                                st.cache_data.clear()
+                                st.rerun()
+                            else:
+                                st.error("Error al guardar los cambios.")
+                else:
+                    st.warning("Factura no encontrada para edición.")
 
         st.divider()
         st.markdown("<h3 style='margin-top: 20px; color: #f8fafc;'>🗄️ REPOSITORIO DE FACTURAS PDF</h3>", unsafe_allow_html=True)
