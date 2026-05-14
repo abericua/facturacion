@@ -354,114 +354,105 @@ st.set_page_config(page_title="SGSP - Solpro Master Control", layout="wide", pag
 # --- ESTILOS ANTIGRAVITY / BENTO ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Syne:wght@800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
     
     :root {
         --solpro-gold: #D4AF37;
-        --solpro-gold-low: rgba(212, 175, 55, 0.1);
-        --luxury-black: #030303;
-        --glass-border: rgba(212, 175, 55, 0.3);
-        --text-premium: #ffffff;
+        --luxury-black: #000000;
+        --border-color: #1a1a1a;
+        --text-main: #ffffff;
     }
 
-    /* Fondo Minimalista de Lujo */
     .stApp { 
         background-color: var(--luxury-black);
-        background-image: 
-            linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
-        background-size: 50px 50px;
-        color: var(--text-premium); 
-        font-family: 'Outfit', sans-serif; 
+        color: var(--text-main); 
+        font-family: 'Inter', sans-serif; 
     }
     
     .stSidebar {
         background-color: #000000 !important;
-        border-right: 1px solid var(--glass-border);
+        border-right: 1px solid var(--border-color);
     }
 
-    /* Tarjetas Rectas (Square Elite) */
+    /* Tarjetas de Lujo Minimalista */
     .bento-card {
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--glass-border);
-        border-radius: 0px !important; /* TOTALMENTE RECTO */
-        padding: 3rem;
-        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        text-align: left; /* Minimalismo editorial */
-        height: 320px;
+        background: #050505;
+        border: 1px solid var(--border-color);
+        border-radius: 0px !important;
+        padding: 4rem 2rem;
+        transition: all 0.2s ease-in-out;
+        text-align: center;
+        height: 280px;
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
-        align-items: flex-start;
+        justify-content: center;
+        align-items: center;
         position: relative;
-        overflow: hidden;
     }
     
     .bento-card:hover {
-        background: rgba(212, 175, 55, 0.05);
-        border-color: var(--solpro-gold);
-        transform: scale(1.01);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        border-color: #444;
+        background: #0a0a0a;
     }
 
     .module-icon {
-        font-size: 2.5rem;
-        margin-bottom: auto;
-        filter: grayscale(1) brightness(2);
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        opacity: 0.5;
     }
     
     .module-title {
-        color: var(--solpro-gold);
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.8rem;
-        font-weight: 900 !important; /* LETRAS BOLT MASIVAS */
-        letter-spacing: -1px;
-        line-height: 1;
-        margin-bottom: 0.5rem;
+        color: #fff;
+        font-size: 1.6rem;
+        font-weight: 900 !important;
+        letter-spacing: -0.05em;
         text-transform: uppercase;
+        margin-bottom: 0.5rem;
     }
     
     .module-desc {
-        color: rgba(255, 255, 255, 0.4);
-        font-size: 0.8rem;
+        color: #555;
+        font-size: 0.75rem;
         font-weight: 400;
-        letter-spacing: 1px;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
     }
     
-    /* Botones Minimalistas Rectos */
+    /* Botones de Bloque (Bold & Square) */
     .stButton>button {
-        background: transparent !important;
-        color: #fff !important;
-        border: 1px solid #333 !important;
-        border-radius: 0px !important; /* RECTO */
-        padding: 1rem 2rem !important;
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+        border-radius: 0px !important;
+        padding: 1rem !important;
         font-weight: 900 !important;
-        font-size: 0.75rem !important;
-        letter-spacing: 0.3em !important;
+        font-size: 0.8rem !important;
+        letter-spacing: 0.2em !important;
         text-transform: uppercase !important;
-        transition: all 0.3s ease !important;
-        width: 100%;
+        transition: opacity 0.2s !important;
     }
     
     .stButton>button:hover {
-        border-color: var(--solpro-gold) !important;
-        background: var(--solpro-gold) !important;
-        color: #000 !important;
+        opacity: 0.9 !important;
     }
 
-    /* Inputs Minimalistas */
+    /* Login Box */
     .stTextInput input {
         border-radius: 0px !important;
-        background: #080808 !important;
-        border: 1px solid #222 !important;
+        border: 1px solid #1a1a1a !important;
+        background: #050505 !important;
         color: #fff !important;
+        padding: 0.8rem !important;
     }
 
-    @media (max-width: 768px) {
-        .bento-card { height: 240px; padding: 1.5rem; }
+    /* Títulos de Página */
+    h1, h2, h3 {
+        font-weight: 900 !important;
+        letter-spacing: -0.05em !important;
+        text-transform: uppercase !important;
     }
+
+    hr { border-color: #1a1a1a !important; }
     </style>
 """, unsafe_allow_html=True)
 
