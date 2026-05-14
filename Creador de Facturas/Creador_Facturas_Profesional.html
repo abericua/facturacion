@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Facturas - Sol Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 20px;
+        }
+
+        .form-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .invoice-preview {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .items-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px 80px 30px;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-add {
+            background: #4299e1;
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .btn-remove {
+            background: #f56565;
+            color: white;
+            padding: 8px;
+            font-size: 12px;
+            width: 30px;
+            height: 30px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        /* Estilos de la Factura */
+        .invoice {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            position: relative;
+            font-family: Arial, sans-serif;
+        }
+
+        .invoice-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 3px solid black;
+            margin-bottom: 0;
+        }
+
+        .header-left {
+            border-right: 3px solid black;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-container {
+            width: 90px;
+            height: 90px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .company-details {
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .header-right {
+            padding: 15px;
+            position: relative;
+        }
+
+        .invoice-title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .ruc-info {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .factura-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .dates {
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+
+        .invoice-number {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .client-section {
+            border: 3px solid black;
+            border-top: none;
+            padding: 10px 15px;
+        }
+
+        .client-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 2px solid black;
+            padding: 8px 0;
+        }
+
+        .client-row:last-child {
+            border-bottom: none;
+        }
+
+        .client-label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .client-value {
+            font-size: 11px;
+            padding-left: 20px;
+        }
+
+        .sales-condition {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .items-table {
+            border: 3px solid black;
+            border-top: none;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table th {
+            background: white;
+            border-bottom: 2px solid black;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .items-table td {
+            border-bottom: 1px solid black;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .items-table .qty-col {
+            width: 60px;
+            text-align: center;
+        }
+
+        .items-table .desc-col {
+            text-align: left;
+        }
+
+        .items-table .price-col {
+            width: 120px;
+            text-align: right;
+        }
+
+        .items-table .value-col {
+            width: 100px;
+            text-align: center;
+        }
+
+        .subtotal-row {
+            background: white;
+            border: none;
+        }
+
+        .subtotal-row td {
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 2px solid black;
+        }
+
+        .total-row td {
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 2px solid black;
+            padding: 12px 8px;
+        }
+
+        .total-words {
+            border-bottom: 2px solid black;
+            padding: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .footer-section {
+            border: 3px solid black;
+            border-top: none;
+            padding: 10px;
+            font-size: 9px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .form-panel {
+                display: none;
+            }
+            .invoice-preview {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .checkbox-group input[type="checkbox"],
+        .checkbox-group input[type="radio"] {
+            width: auto;
+        }
+
+        .tax-summary {
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .currency-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .currency-option {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .currency-option:hover {
+            border-color: #667eea;
+        }
+
+        .currency-option.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .exchange-rate {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .client-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .client-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .client-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .client-item:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .client-item-info {
+            flex: 1;
+        }
+
+        .client-item-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .client-item-ruc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .client-item-delete {
+            color: #f56565;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .client-item-delete:hover {
+            color: #e53e3e;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+    
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .autocomplete-suggestions.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background: #f0f4ff;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .product-details {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .product-manager {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .saved-products-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .saved-product-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .saved-product-item:hover {
+            border-color: #667eea;
+        }
+
+        .product-delete-btn {
+            color: #f56565;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 2px 8px;
+        }
+
+        .product-delete-btn:hover {
+            color: #e53e3e;
+        }
+
+    
+        .history-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .invoice-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .invoice-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .invoice-item:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .invoice-number {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .invoice-amount {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .invoice-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .invoice-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-mini {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .export-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Panel de Formulario -->
+        <div class="form-panel">
+            <h1>📋 Crear Factura</h1>
+            
+            <!-- Selector de Clientes Guardados -->
+            <div class="client-selector">
+                <h2>👥 Clientes Guardados</h2>
+                <div id="clientList" class="client-list">
+                    <!-- Los clientes se cargarán aquí -->
+                </div>
+            </div>
+
+
+            <!-- Gestor de Productos -->
+            <div class="product-manager">
+                <h2>📦 Productos Guardados (<span id="productCount">0</span>)</h2>
+                <button class="btn btn-add" onclick="toggleProductsList()">Ver Lista</button>
+                <div id="savedProductsList" class="saved-products-list" style="display: none;">
+                    <!-- Los productos se cargarán aquí -->
+                </div>
+            </div>
+
+
+            <!-- Historial de Facturas -->
+            <div class="history-section">
+                <h2>📊 Historial de Facturas</h2>
+                
+                <div class="history-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalInvoices">0</div>
+                        <div class="stat-label">Total Facturas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="monthInvoices">0</div>
+                        <div class="stat-label">Este Mes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalAmount">₲ 0</div>
+                        <div class="stat-label">Total Facturado</div>
+                    </div>
+                </div>
+
+                <input type="text" class="search-box" id="searchInvoice" placeholder="🔍 Buscar por número, cliente o RUC...">
+                
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterInvoices('all')">Todas</button>
+                    <button class="filter-btn" onclick="filterInvoices('today')">Hoy</button>
+                    <button class="filter-btn" onclick="filterInvoices('week')">Esta Semana</button>
+                    <button class="filter-btn" onclick="filterInvoices('month')">Este Mes</button>
+                </div>
+
+                <div class="invoice-list" id="invoiceList">
+                    <!-- Las facturas se cargarán aquí -->
+                </div>
+
+                <div class="export-section">
+                    <h2 style="font-size: 14px; margin-bottom: 10px;">💾 Exportar Datos</h2>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="exportAllData()">Exportar Todo</button>
+                        <button class="btn btn-secondary" onclick="importData()">Importar Datos</button>
+                    </div>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Modal para ver detalles de factura -->
+            <div class="modal" id="invoiceModal">
+                <div class="modal-content">
+                    <span class="modal-close" onclick="closeInvoiceModal()">&times;</span>
+                    <div class="modal-header">Detalles de Factura</div>
+                    <div id="invoiceModalContent"></div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="reloadInvoice()">Cargar Factura</button>
+                        <button class="btn btn-danger" onclick="deleteInvoiceFromHistory()">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="currency-selector">
+                <div class="currency-option active" onclick="setCurrency('PYG')">
+                    💵 Guaraníes
+                </div>
+                <div class="currency-option" onclick="setCurrency('USD')">
+                    💲 Dólares
+                </div>
+            </div>
+
+            <div id="exchangeRateDiv" style="display: none;" class="exchange-rate">
+                <label>Tipo de Cambio (1 USD = X PYG)</label>
+                <input type="number" id="exchangeRate" value="7300" step="10">
+            </div>
+
+            <div class="form-group">
+                <label>Número de Factura</label>
+                <input type="text" id="invoiceNumber" value="002-001-0454" placeholder="Ej: 002-001-0454">
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de Emisión</label>
+                <input type="date" id="issueDate" value="2026-04-09">
+            </div>
+
+            <div class="form-group">
+                <label>Condición de Venta</label>
+                <div class="checkbox-group">
+                    <label><input type="radio" name="saleCondition" value="CONTADO" checked> Contado</label>
+                    <label><input type="radio" name="saleCondition" value="CRÉDITO"> Crédito</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre o Razón Social</label>
+                <input type="text" id="clientName" value="GRUPO UTEX EAS" placeholder="Nombre del cliente">
+            </div>
+
+            <div class="form-group">
+                <label>RUC o C.I. N°</label>
+                <input type="text" id="clientRuc" value="80141066-5" placeholder="RUC del cliente">
+            </div>
+
+            <div class="form-group">
+                <label>Dirección</label>
+                <input type="text" id="clientAddress" value="CIUDAD DEL ESTE" placeholder="Dirección del cliente">
+            </div>
+
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" id="clientPhone" value="0" placeholder="Teléfono">
+            </div>
+
+            <div class="form-group">
+                <label>Nota de Remisión N°</label>
+                <input type="text" id="remissionNote" placeholder="Opcional">
+            </div>
+
+            <button class="btn btn-secondary" onclick="saveClient()">💾 Guardar Cliente</button>
+
+            <div class="items-section">
+                <h2>Productos/Servicios</h2>
+                <div id="itemsContainer">
+                    <div class="item-row">
+                        <div>
+                            <label>Cant.</label>
+                            <input type="number" class="item-qty" value="2" min="1">
+                        </div>
+                        <div>
+                            <label>Descripción</label>
+                            <input type="text" class="item-desc" value="TINTAS YELLW T43M420">
+                        </div>
+                        <div>
+                            <label>Precio Unit.</label>
+                            <input type="number" class="item-price" value="2960000" step="1000">
+                        </div>
+                        <div>
+                            <label>IVA %</label>
+                            <select class="item-iva">
+                                <option value="0">Exentas</option>
+                                <option value="5">5%</option>
+                                <option value="10" selected>10%</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>&nbsp;</label>
+                            <button class="btn btn-remove" onclick="removeItem(this)">×</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-add" onclick="addItem()">+ Agregar Ítem</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="updateInvoice()">🔄 Actualizar Vista Previa</button>
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="generatePDF()">📄 Generar PDF</button>
+                <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
+            </div>
+        </div>
+
+        <!-- Vista Previa de la Factura -->
+        <div class="invoice-preview">
+            <div class="invoice" id="invoice">
+                <!-- El contenido se generará con JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCurrency = 'PYG';
+        let savedClients = [];
+
+
+        let savedProducts = [];
+        let currentAutocompleteInput = null;
+
+        // Cargar productos guardados
+        function loadProducts() {
+            const stored = localStorage.getItem('solproProducts');
+            if (stored) {
+                savedProducts = JSON.parse(stored);
+                updateProductCount();
+            }
+        }
+
+        // Guardar producto (solo descripción)
+        function saveProduct(description) {
+            // Verificar si ya existe
+            const exists = savedProducts.find(p => 
+                p.description.toLowerCase() === description.toLowerCase()
+            );
+
+            if (!exists && description.trim()) {
+                savedProducts.push({
+                    description: description.trim(),
+                    uses: 1,
+                    lastUsed: new Date().getTime()
+                });
+            } else if (exists) {
+                // Actualizar contador de usos
+                exists.uses++;
+                exists.lastUsed = new Date().getTime();
+            }
+
+            localStorage.setItem('solproProducts', JSON.stringify(savedProducts));
+            updateProductCount();
+        }
+
+        // Guardar productos de la factura actual (solo descripción)
+        function saveCurrentProducts() {
+            const itemRows = document.querySelectorAll('.item-row');
+            itemRows.forEach(row => {
+                const desc = row.querySelector('.item-desc').value;
+                
+                if (desc && desc.trim()) {
+                    saveProduct(desc);
+                }
+            });
+        }
+
+        // Actualizar contador
+        function updateProductCount() {
+            document.getElementById('productCount').textContent = savedProducts.length;
+        }
+
+        // Toggle lista de productos
+        function toggleProductsList() {
+            const list = document.getElementById('savedProductsList');
+            if (list.style.display === 'none') {
+                displaySavedProducts();
+                list.style.display = 'block';
+            } else {
+                list.style.display = 'none';
+            }
+        }
+
+        // Mostrar productos guardados
+        function displaySavedProducts() {
+            const container = document.getElementById('savedProductsList');
+            
+            if (savedProducts.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px; font-size: 12px;">No hay productos guardados aún</p>';
+                return;
+            }
+
+            // Ordenar por más usados
+            savedProducts.sort((a, b) => b.uses - a.uses);
+
+            container.innerHTML = savedProducts.map((product, index) => `
+                <div class="saved-product-item">
+                    <div>
+                        <div style="font-weight: 600;">${product.description}</div>
+                        <div style="color: #666; font-size: 11px;">
+                            Usado ${product.uses} veces
+                        </div>
+                    </div>
+                    <span class="product-delete-btn" onclick="deleteProduct(event, ${index})">×</span>
+                </div>
+            `).join('');
+        }
+
+        // Eliminar producto
+        function deleteProduct(event, index) {
+            event.stopPropagation();
+            
+            if (confirm('¿Eliminar este producto?')) {
+                savedProducts.splice(index, 1);
+                localStorage.setItem('solproProducts', JSON.stringify(savedProducts));
+                displaySavedProducts();
+                updateProductCount();
+            }
+        }
+
+        // Configurar autocompletado para un input
+        function setupAutocomplete(input) {
+            const container = document.createElement('div');
+            container.className = 'autocomplete-suggestions';
+            input.parentElement.style.position = 'relative';
+            input.parentElement.appendChild(container);
+
+            input.addEventListener('input', function() {
+                const value = this.value.toLowerCase().trim();
+                
+                if (value.length < 2) {
+                    container.classList.remove('active');
+                    return;
+                }
+
+                // Filtrar productos
+                const matches = savedProducts.filter(p => 
+                    p.description.toLowerCase().includes(value)
+                ).sort((a, b) => b.uses - a.uses).slice(0, 5);
+
+                if (matches.length === 0) {
+                    container.classList.remove('active');
+                    return;
+                }
+
+                // Mostrar sugerencias
+                container.innerHTML = matches.map(product => `
+                    <div class="autocomplete-item" data-description="${product.description}">
+                        <div class="product-name">${product.description}</div>
+                        <div class="product-details">
+                            Usado ${product.uses} veces
+                        </div>
+                    </div>
+                `).join('');
+
+                container.classList.add('active');
+
+                // Agregar eventos a las sugerencias
+                container.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const row = input.closest('.item-row');
+                        row.querySelector('.item-desc').value = this.dataset.description;
+                        container.classList.remove('active');
+                        // Enfocar el campo de precio para que el usuario lo complete
+                        row.querySelector('.item-price').focus();
+                    });
+                });
+            });
+
+            // Cerrar al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (!input.parentElement.contains(e.target)) {
+                    container.classList.remove('active');
+                }
+            });
+        }
+
+        // Modificar addItem para incluir autocompletado
+        const originalAddItem = addItem;
+        addItem = function() {
+            originalAddItem();
+            const newRow = document.getElementById('itemsContainer').lastElementChild;
+            const input = newRow.querySelector('.item-desc');
+            setupAutocomplete(input);
+        };
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClients();
+            loadProducts();
+            loadInvoiceHistory();
+            updateInvoice();
+            
+            // Configurar autocompletado para items existentes
+            document.querySelectorAll('.item-desc').forEach(input => {
+                setupAutocomplete(input);
+            });
+        });
+
+        // Modificar generatePDF para guardar productos antes de generar
+        const originalGeneratePDF = generatePDF;
+        generatePDF = function() {
+            saveCurrentProducts();
+            showAlert('Productos guardados automáticamente', 'info');
+            setTimeout(() => {
+                originalGeneratePDF();
+            }, 500);
+        };
+
+
+        // Cargar clientes desde localStorage
+        function loadClients() {
+            const stored = localStorage.getItem('solproClients');
+            if (stored) {
+                savedClients = JSON.parse(stored);
+                displayClients();
+            }
+        }
+
+        // Guardar cliente
+        function saveClient() {
+            const name = document.getElementById('clientName').value.trim();
+            const ruc = document.getElementById('clientRuc').value.trim();
+            const address = document.getElementById('clientAddress').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+
+            if (!name || !ruc) {
+                alert('Por favor ingrese al menos el nombre y RUC del cliente');
+                return;
+            }
+
+            // Verificar si ya existe
+            const existingIndex = savedClients.findIndex(c => c.ruc === ruc);
+            
+            const client = {
+                name: name,
+                ruc: ruc,
+                address: address,
+                phone: phone,
+                timestamp: new Date().getTime()
+            };
+
+            if (existingIndex >= 0) {
+                // Actualizar cliente existente
+                savedClients[existingIndex] = client;
+                showAlert('Cliente actualizado correctamente', 'success');
+            } else {
+                // Agregar nuevo cliente
+                savedClients.push(client);
+                showAlert('Cliente guardado correctamente', 'success');
+            }
+
+            // Guardar en localStorage
+            localStorage.setItem('solproClients', JSON.stringify(savedClients));
+            displayClients();
+        }
+
+        // Mostrar clientes en la lista
+        function displayClients() {
+            const container = document.getElementById('clientList');
+            
+            if (savedClients.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-size: 12px; text-align: center; padding: 20px;">No hay clientes guardados</p>';
+                return;
+            }
+
+            // Ordenar por más recientes
+            savedClients.sort((a, b) => b.timestamp - a.timestamp);
+
+            container.innerHTML = savedClients.map((client, index) => `
+                <div class="client-item" onclick="loadClient(${index})">
+                    <div class="client-item-info">
+                        <div class="client-item-name">${client.name}</div>
+                        <div class="client-item-ruc">RUC: ${client.ruc}</div>
+                    </div>
+                    <div class="client-item-delete" onclick="deleteClient(event, ${index})">×</div>
+                </div>
+            `).join('');
+        }
+
+        // Cargar datos del cliente
+        function loadClient(index) {
+            const client = savedClients[index];
+            document.getElementById('clientName').value = client.name;
+            document.getElementById('clientRuc').value = client.ruc;
+            document.getElementById('clientAddress').value = client.address || '';
+            document.getElementById('clientPhone').value = client.phone || '';
+            
+            showAlert('Cliente cargado: ' + client.name, 'info');
+            updateInvoice();
+        }
+
+        // Eliminar cliente
+        function deleteClient(event, index) {
+            event.stopPropagation();
+            
+            if (confirm('¿Está seguro de eliminar este cliente?')) {
+                savedClients.splice(index, 1);
+                localStorage.setItem('solproClients', JSON.stringify(savedClients));
+                displayClients();
+                showAlert('Cliente eliminado', 'success');
+            }
+        }
+
+        // Mostrar alertas
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const formPanel = document.querySelector('.form-panel');
+            formPanel.insertBefore(alertDiv, formPanel.firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        function setCurrency(currency) {
+            currentCurrency = currency;
+            
+            // Actualizar UI
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Mostrar/ocultar tipo de cambio
+            document.getElementById('exchangeRateDiv').style.display = currency === 'USD' ? 'block' : 'none';
+            
+            updateInvoice();
+        }
+
+        // Función para formatear números con separador de miles
+        function formatNumber(num, currency = 'PYG') {
+            if (currency === 'USD') {
+                return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Función para convertir PYG a USD
+        function convertToUSD(amountPYG) {
+            const rate = parseFloat(document.getElementById('exchangeRate').value) || 7300;
+            return amountPYG / rate;
+        }
+
+        // Función para obtener símbolo de moneda
+        function getCurrencySymbol() {
+            return currentCurrency === 'USD' ? 'US$' : '₲';
+        }
+
+        // Función para convertir número a palabras
+        function numeroALetras(num) {
+            const unidades = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+            const decenas = ['', '', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+            const centenas = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+            const especiales = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+
+            num = Math.round(num);
+
+            if (num === 0) return 'CERO';
+            if (num === 100) return 'CIEN';
+
+            let resultado = '';
+
+            // Millones
+            if (num >= 1000000) {
+                const millones = Math.floor(num / 1000000);
+                if (millones === 1) {
+                    resultado += 'UN MILLÓN ';
+                } else {
+                    resultado += numeroALetras(millones) + ' MILLONES ';
+                }
+                num %= 1000000;
+            }
+
+            // Miles
+            if (num >= 1000) {
+                const miles = Math.floor(num / 1000);
+                if (miles === 1) {
+                    resultado += 'MIL ';
+                } else {
+                    resultado += numeroALetras(miles) + ' MIL ';
+                }
+                num %= 1000;
+            }
+
+            // Centenas
+            if (num >= 100) {
+                resultado += centenas[Math.floor(num / 100)] + ' ';
+                num %= 100;
+            }
+
+            // Decenas y unidades
+            if (num >= 20) {
+                resultado += decenas[Math.floor(num / 10)];
+                if (num % 10 > 0) {
+                    resultado += ' Y ' + unidades[num % 10];
+                }
+            } else if (num >= 10) {
+                resultado += especiales[num - 10];
+            } else if (num > 0) {
+                resultado += unidades[num];
+            }
+
+            return resultado.trim();
+        }
+
+        function addItem() {
+            const container = document.getElementById('itemsContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'item-row';
+            newRow.innerHTML = `
+                <div>
+                    <label>Cant.</label>
+                    <input type="number" class="item-qty" value="1" min="1">
+                </div>
+                <div>
+                    <label>Descripción</label>
+                    <input type="text" class="item-desc" placeholder="Descripción del producto">
+                </div>
+                <div>
+                    <label>Precio Unit.</label>
+                    <input type="number" class="item-price" value="0" step="1000">
+                </div>
+                <div>
+                    <label>IVA %</label>
+                    <select class="item-iva">
+                        <option value="0">Exentas</option>
+                        <option value="5">5%</option>
+                        <option value="10" selected>10%</option>
+                    </select>
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button class="btn btn-remove" onclick="removeItem(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeItem(btn) {
+            const container = document.getElementById('itemsContainer');
+            if (container.children.length > 1) {
+                btn.closest('.item-row').remove();
+            } else {
+                alert('Debe haber al menos un ítem en la factura');
+            }
+        }
+
+        function updateInvoice() {
+            // Obtener datos del formulario
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const issueDate = new Date(document.getElementById('issueDate').value);
+            const saleCondition = document.querySelector('input[name="saleCondition"]:checked').value;
+            const clientName = document.getElementById('clientName').value;
+            const clientRuc = document.getElementById('clientRuc').value;
+            const clientAddress = document.getElementById('clientAddress').value;
+            const clientPhone = document.getElementById('clientPhone').value;
+            const remissionNote = document.getElementById('remissionNote').value;
+
+            // Calcular fecha fin vigencia (1 año después)
+            const endDate = new Date(issueDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+
+            // Formatear fechas
+            const formatDate = (date) => {
+                return date.toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            };
+
+            // Obtener ítems
+            const itemRows = document.querySelectorAll('.item-row');
+            let itemsHTML = '';
+            let totalExentas = 0;
+            let total5 = 0;
+            let total10 = 0;
+            let subtotal = 0;
+
+            itemRows.forEach(row => {
+                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                const desc = row.querySelector('.item-desc').value;
+                let price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const iva = parseInt(row.querySelector('.item-iva').value);
+                
+                let total = qty * price;
+
+                subtotal += total;
+
+                if (iva === 0) totalExentas += total;
+                else if (iva === 5) total5 += total;
+                else if (iva === 10) total10 += total;
+
+                // Convertir a USD si es necesario
+                if (currentCurrency === 'USD') {
+                    price = convertToUSD(price);
+                    total = qty * price;
+                }
+
+                itemsHTML += `
+                    <tr>
+                        <td class="qty-col">${qty}</td>
+                        <td class="desc-col">${desc}</td>
+                        <td class="price-col">${getCurrencySymbol()} ${formatNumber(price, currentCurrency)}</td>
+                        <td class="value-col">${totalExentas > 0 && iva === 0 ? formatNumber(total, currentCurrency) : ''}</td>
+                        <td class="value-col">${total5 > 0 && iva === 5 ? formatNumber(total, currentCurrency) : ''}</td>
+                        <td class="value-col">${total10 > 0 && iva === 10 ? formatNumber(total, currentCurrency) : ''}</td>
+                    </tr>
+                `;
+            });
+
+            // Convertir totales si es USD
+            let displaySubtotal = subtotal;
+            let displayExentas = totalExentas;
+            let display5 = total5;
+            let display10 = total10;
+
+            if (currentCurrency === 'USD') {
+                displaySubtotal = convertToUSD(subtotal);
+                displayExentas = convertToUSD(totalExentas);
+                display5 = convertToUSD(total5);
+                display10 = convertToUSD(total10);
+            }
+
+            // Llenar filas vacías
+            const emptyRowsNeeded = Math.max(0, 10 - itemRows.length);
+            for (let i = 0; i < emptyRowsNeeded; i++) {
+                itemsHTML += `
+                    <tr>
+                        <td class="qty-col">&nbsp;</td>
+                        <td class="desc-col">&nbsp;</td>
+                        <td class="price-col">&nbsp;</td>
+                        <td class="value-col">&nbsp;</td>
+                        <td class="value-col">&nbsp;</td>
+                        <td class="value-col">&nbsp;</td>
+                    </tr>
+                `;
+            }
+
+            // Calcular IVA
+            const iva5 = currentCurrency === 'USD' ? 
+                Math.round(convertToUSD(total5) * 0.05 / 1.05 * 100) / 100 : 
+                Math.round(total5 * 0.05 / 1.05);
+            
+            const iva10 = currentCurrency === 'USD' ? 
+                Math.round(convertToUSD(total10) * 0.10 / 1.10 * 100) / 100 : 
+                Math.round(total10 * 0.10 / 1.10);
+            
+            const totalIVA = iva5 + iva10;
+
+            // Moneda para texto
+            const currencyText = currentCurrency === 'USD' ? 'DÓLARES AMERICANOS' : 'GUARANÍES';
+
+            // Logo en base64
+            const LOGO_BASE64 = 'data:image/png;base64,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';
+
+            // Generar HTML de la factura
+            const invoiceHTML = `
+                <div class="invoice-header">
+                    <div class="header-left">
+                        <div class="logo-container">
+                            <img src="${LOGO_BASE64}" alt="Sol Pro Logo">
+                        </div>
+                        <div class="company-info">
+                            <div class="company-name">COMERCIO AL POR MAYOR DE OTRAS<br>MAQUINARIAS Y EQUIPOS N.C.P.</div>
+                            <div class="company-details">
+                                <strong>Cel.: (0981) 792 985</strong><br>
+                                📍 Santiago Leguizamón N° 2460<br>
+                                <strong>Fernando de la Mora - Paraguay</strong><br>
+                                <small>SOCIEDAD DE RESPONSABILIDAD LIMITADA</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <div class="invoice-title">
+                            <div class="ruc-info">RUC: 80102833 - 7</div>
+                            <div class="ruc-info">Timbrado N°: 18802689</div>
+                            <div class="factura-title">FACTURA</div>
+                            <div class="dates">
+                                Fecha Inicio Vigencia: ${formatDate(issueDate)}<br>
+                                Fecha Fin Vigencia: ${formatDate(endDate)}
+                            </div>
+                            <div class="invoice-number">N° ${invoiceNumber}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="client-section">
+                    <div class="client-row">
+                        <div>
+                            <span class="client-label">Fecha de Emisión:</span>
+                            <span class="client-value">${formatDate(issueDate)}</span>
+                        </div>
+                        <div class="sales-condition">
+                            <label>
+                                Condición de Venta: CONTADO <input type="checkbox" ${saleCondition === 'CONTADO' ? 'checked' : ''} disabled>
+                                CRÉDITO <input type="checkbox" ${saleCondition === 'CRÉDITO' ? 'checked' : ''} disabled>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="client-row">
+                        <div style="grid-column: 1 / -1;">
+                            <span class="client-label">Nombre o Razón Social:</span>
+                            <span class="client-value">${clientName}</span>
+                        </div>
+                    </div>
+                    <div class="client-row">
+                        <div>
+                            <span class="client-label">RUC o C.I. N°:</span>
+                            <span class="client-value">${clientRuc}</span>
+                        </div>
+                        <div>
+                            <span class="client-label">Nota de Remisión N°:</span>
+                            <span class="client-value">${remissionNote}</span>
+                        </div>
+                    </div>
+                    <div class="client-row">
+                        <div>
+                            <span class="client-label">Teléfono:</span>
+                            <span class="client-value">${clientPhone}</span>
+                        </div>
+                    </div>
+                    <div class="client-row">
+                        <div style="grid-column: 1 / -1;">
+                            <span class="client-label">Dirección:</span>
+                            <span class="client-value">${clientAddress}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th class="qty-col">Cant.</th>
+                            <th class="desc-col">DESCRIPCIÓN</th>
+                            <th class="price-col">Precio<br>Unitario</th>
+                            <th class="value-col" colspan="3">VALOR DE VENTAS</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th class="value-col">EXENTAS</th>
+                            <th class="value-col">5%</th>
+                            <th class="value-col">10%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHTML}
+                        <tr class="subtotal-row">
+                            <td colspan="3">Sub-Totales:</td>
+                            <td class="value-col">${displayExentas > 0 ? formatNumber(displayExentas, currentCurrency) : ''}</td>
+                            <td class="value-col">${display5 > 0 ? formatNumber(display5, currentCurrency) : ''}</td>
+                            <td class="value-col">${display10 > 0 ? formatNumber(display10, currentCurrency) : ''}</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3">TOTAL A PAGAR:</td>
+                            <td colspan="3" class="value-col">${getCurrencySymbol()} ${formatNumber(displaySubtotal, currentCurrency)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="total-words">
+                    TOTAL A PAGAR: ${numeroALetras(currentCurrency === 'USD' ? displaySubtotal : subtotal)} ${currencyText}.-
+                </div>
+
+                <div class="footer-section">
+                    <div class="footer-left">
+                        <div class="tax-summary">
+                            <strong>LIQUIDACIÓN DEL IVA: (5%)</strong><br>
+                            ${iva5 > 0 ? getCurrencySymbol() + ' ' + formatNumber(iva5, currentCurrency) : ''}
+                        </div>
+                        <div class="tax-summary">
+                            <strong>(10%)</strong><br>
+                            ${iva10 > 0 ? getCurrencySymbol() + ' ' + formatNumber(iva10, currentCurrency) : ''}
+                        </div>
+                        <div class="tax-summary">
+                            <strong>Total IVA:</strong><br>
+                            ${totalIVA > 0 ? getCurrencySymbol() + ' ' + formatNumber(totalIVA, currentCurrency) : ''}
+                        </div>
+                    </div>
+                    <div class="footer-right">
+                        <strong>ImpreGraf S.R.L.</strong> - Habilitación N° 1708 - RUC: 80067785 - 0 / Tel. (021) 511 906 - Cel. (0982) 163 790<br>
+                        Uscher Ríos c/ Magallanes - Fdo. de la Mora / 5 Tal. 50 x 3 del 0001 - 0750 - 21/04/2026<br>
+                        <em>Original: Cliente / Duplicado: Archivo Tributario<br>
+                        Triplicado: Contabilidad (No Válido para Crédito Fiscal)</em>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('invoice').innerHTML = invoiceHTML;
+        }
+
+        // Generar PDF
+        function generatePDF() {
+            const invoiceNumber = document.getElementById('invoiceNumber').value.replace(/\//g, '-');
+            const element = document.getElementById('invoice');
+            
+            const opt = {
+                margin: 0,
+                filename: `Factura_${invoiceNumber}.pdf`,
+                image: { type: 'jpeg', quality: 0.85 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                showAlert('PDF generado: Factura_' + invoiceNumber + '.pdf', 'success');
+            });
+        }
+
+
+        let invoiceHistory = [];
+        let currentFilter = 'all';
+        let selectedInvoice = null;
+
+        // Cargar historial
+        function loadInvoiceHistory() {
+            const stored = localStorage.getItem('solproInvoices');
+            if (stored) {
+                invoiceHistory = JSON.parse(stored);
+                updateHistoryStats();
+                displayInvoices();
+            }
+        }
+
+        // Guardar factura en historial
+        function saveInvoiceToHistory() {
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const clientName = document.getElementById('clientName').value;
+            const clientRuc = document.getElementById('clientRuc').value;
+            const clientAddress = document.getElementById('clientAddress').value;
+            const clientPhone = document.getElementById('clientPhone').value;
+            const remissionNote = document.getElementById('remissionNote').value;
+            const saleCondition = document.querySelector('input[name="saleCondition"]:checked').value;
+
+            // Obtener ítems
+            const items = [];
+            const itemRows = document.querySelectorAll('.item-row');
+            let total = 0;
+
+            itemRows.forEach(row => {
+                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                const desc = row.querySelector('.item-desc').value;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const iva = parseInt(row.querySelector('.item-iva').value);
+                const itemTotal = qty * price;
+                
+                if (desc && qty > 0) {
+                    items.push({
+                        quantity: qty,
+                        description: desc,
+                        price: price,
+                        iva: iva,
+                        total: itemTotal
+                    });
+                    total += itemTotal;
+                }
+            });
+
+            // Crear objeto de factura
+            const invoice = {
+                id: Date.now(),
+                number: invoiceNumber,
+                date: issueDate,
+                timestamp: new Date(issueDate).getTime(),
+                client: {
+                    name: clientName,
+                    ruc: clientRuc,
+                    address: clientAddress,
+                    phone: clientPhone
+                },
+                remissionNote: remissionNote,
+                saleCondition: saleCondition,
+                items: items,
+                total: total,
+                currency: currentCurrency
+            };
+
+            // Verificar si ya existe (para evitar duplicados)
+            const existingIndex = invoiceHistory.findIndex(inv => 
+                inv.number === invoiceNumber && inv.date === issueDate
+            );
+
+            if (existingIndex >= 0) {
+                // Actualizar existente
+                invoiceHistory[existingIndex] = invoice;
+            } else {
+                // Agregar nuevo
+                invoiceHistory.push(invoice);
+            }
+
+            // Guardar en localStorage
+            localStorage.setItem('solproInvoices', JSON.stringify(invoiceHistory));
+            
+            updateHistoryStats();
+            displayInvoices();
+        }
+
+        // Actualizar estadísticas
+        function updateHistoryStats() {
+            const total = invoiceHistory.length;
+            document.getElementById('totalInvoices').textContent = total;
+
+            // Facturas este mes
+            const now = new Date();
+            const thisMonth = invoiceHistory.filter(inv => {
+                const invDate = new Date(inv.date);
+                return invDate.getMonth() === now.getMonth() && 
+                       invDate.getFullYear() === now.getFullYear();
+            }).length;
+            document.getElementById('monthInvoices').textContent = thisMonth;
+
+            // Total facturado (solo en guaraníes para estadísticas)
+            const totalAmount = invoiceHistory.reduce((sum, inv) => {
+                if (inv.currency === 'PYG') {
+                    return sum + inv.total;
+                } else {
+                    // Convertir USD a PYG para estadísticas
+                    const rate = parseFloat(document.getElementById('exchangeRate').value) || 7300;
+                    return sum + (inv.total * rate);
+                }
+            }, 0);
+            document.getElementById('totalAmount').textContent = '₲ ' + formatNumber(totalAmount, 'PYG');
+        }
+
+        // Mostrar facturas
+        function displayInvoices() {
+            const container = document.getElementById('invoiceList');
+            const searchTerm = document.getElementById('searchInvoice').value.toLowerCase();
+
+            if (invoiceHistory.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px; font-size: 12px;">No hay facturas guardadas</p>';
+                return;
+            }
+
+            // Filtrar facturas
+            let filtered = invoiceHistory.filter(inv => {
+                const matchSearch = !searchTerm || 
+                    inv.number.toLowerCase().includes(searchTerm) ||
+                    inv.client.name.toLowerCase().includes(searchTerm) ||
+                    inv.client.ruc.toLowerCase().includes(searchTerm);
+
+                const invDate = new Date(inv.date);
+                const now = new Date();
+
+                if (currentFilter === 'today') {
+                    return matchSearch && invDate.toDateString() === now.toDateString();
+                } else if (currentFilter === 'week') {
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return matchSearch && invDate >= weekAgo;
+                } else if (currentFilter === 'month') {
+                    return matchSearch && invDate.getMonth() === now.getMonth() && 
+                           invDate.getFullYear() === now.getFullYear();
+                }
+                return matchSearch;
+            });
+
+            // Ordenar por fecha (más recientes primero)
+            filtered.sort((a, b) => b.timestamp - a.timestamp);
+
+            container.innerHTML = filtered.map(inv => {
+                const symbol = inv.currency === 'USD' ? 'US$' : '₲';
+                const amount = formatNumber(inv.total, inv.currency);
+                const date = new Date(inv.date).toLocaleDateString('es-PY');
+                
+                return `
+                    <div class="invoice-item" onclick="viewInvoiceDetails(${inv.id})">
+                        <div class="invoice-header">
+                            <span class="invoice-number">📄 ${inv.number}</span>
+                            <span class="invoice-amount">${symbol} ${amount}</span>
+                        </div>
+                        <div class="invoice-details">
+                            <strong>${inv.client.name}</strong> - RUC: ${inv.client.ruc}<br>
+                            ${date} | ${inv.items.length} item(s) | ${inv.saleCondition}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Ver detalles de factura
+        function viewInvoiceDetails(id) {
+            selectedInvoice = invoiceHistory.find(inv => inv.id === id);
+            if (!selectedInvoice) return;
+
+            const symbol = selectedInvoice.currency === 'USD' ? 'US$' : '₲';
+            const amount = formatNumber(selectedInvoice.total, selectedInvoice.currency);
+
+            let itemsHtml = selectedInvoice.items.map(item => `
+                <tr>
+                    <td>${item.quantity}</td>
+                    <td>${item.description}</td>
+                    <td style="text-align: right;">${symbol} ${formatNumber(item.price, selectedInvoice.currency)}</td>
+                    <td style="text-align: center;">${item.iva}%</td>
+                </tr>
+            `).join('');
+
+            const content = `
+                <div style="margin-bottom: 15px;">
+                    <strong>Número:</strong> ${selectedInvoice.number}<br>
+                    <strong>Fecha:</strong> ${new Date(selectedInvoice.date).toLocaleDateString('es-PY')}<br>
+                    <strong>Condición:</strong> ${selectedInvoice.saleCondition}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Cliente:</strong> ${selectedInvoice.client.name}<br>
+                    <strong>RUC:</strong> ${selectedInvoice.client.ruc}<br>
+                    <strong>Dirección:</strong> ${selectedInvoice.client.address}<br>
+                    <strong>Teléfono:</strong> ${selectedInvoice.client.phone}
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                    <thead>
+                        <tr style="background: #f7fafc;">
+                            <th style="padding: 8px; border: 1px solid #e0e0e0;">Cant.</th>
+                            <th style="padding: 8px; border: 1px solid #e0e0e0;">Descripción</th>
+                            <th style="padding: 8px; border: 1px solid #e0e0e0;">Precio</th>
+                            <th style="padding: 8px; border: 1px solid #e0e0e0;">IVA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                <div style="text-align: right; font-size: 18px; font-weight: bold;">
+                    Total: ${symbol} ${amount}
+                </div>
+            `;
+
+            document.getElementById('invoiceModalContent').innerHTML = content;
+            document.getElementById('invoiceModal').classList.add('active');
+        }
+
+        // Cerrar modal
+        function closeInvoiceModal() {
+            document.getElementById('invoiceModal').classList.remove('active');
+            selectedInvoice = null;
+        }
+
+        // Recargar factura
+        function reloadInvoice() {
+            if (!selectedInvoice) return;
+
+            // Cargar datos en el formulario
+            document.getElementById('invoiceNumber').value = selectedInvoice.number;
+            document.getElementById('issueDate').value = selectedInvoice.date;
+            document.getElementById('clientName').value = selectedInvoice.client.name;
+            document.getElementById('clientRuc').value = selectedInvoice.client.ruc;
+            document.getElementById('clientAddress').value = selectedInvoice.client.address;
+            document.getElementById('clientPhone').value = selectedInvoice.client.phone;
+            document.getElementById('remissionNote').value = selectedInvoice.remissionNote || '';
+            
+            // Condición de venta
+            const radioBtn = document.querySelector(`input[name="saleCondition"][value="${selectedInvoice.saleCondition}"]`);
+            if (radioBtn) radioBtn.checked = true;
+
+            // Cambiar moneda si es necesario
+            if (selectedInvoice.currency !== currentCurrency) {
+                setCurrency(selectedInvoice.currency);
+            }
+
+            // Limpiar items actuales
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+
+            // Cargar items de la factura
+            selectedInvoice.items.forEach((item, index) => {
+                if (index > 0) addItem();
+                
+                const row = container.children[index];
+                row.querySelector('.item-qty').value = item.quantity;
+                row.querySelector('.item-desc').value = item.description;
+                row.querySelector('.item-price').value = item.price;
+                row.querySelector('.item-iva').value = item.iva;
+            });
+
+            updateInvoice();
+            closeInvoiceModal();
+            
+            showAlert('Factura cargada: ' + selectedInvoice.number, 'success');
+            
+            // Scroll al inicio
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Eliminar factura del historial
+        function deleteInvoiceFromHistory() {
+            if (!selectedInvoice) return;
+            
+            if (confirm('¿Eliminar la factura ' + selectedInvoice.number + ' del historial?')) {
+                invoiceHistory = invoiceHistory.filter(inv => inv.id !== selectedInvoice.id);
+                localStorage.setItem('solproInvoices', JSON.stringify(invoiceHistory));
+                
+                updateHistoryStats();
+                displayInvoices();
+                closeInvoiceModal();
+                
+                showAlert('Factura eliminada del historial', 'success');
+            }
+        }
+
+        // Filtrar facturas
+        function filterInvoices(filter) {
+            currentFilter = filter;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayInvoices();
+        }
+
+        // Búsqueda en tiempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInvoice');
+            if (searchInput) {
+                searchInput.addEventListener('input', displayInvoices);
+            }
+        });
+
+        // Exportar todos los datos
+        function exportAllData() {
+            const data = {
+                clientes: savedClients,
+                productos: savedProducts,
+                facturas: invoiceHistory,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SolPro_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showAlert('Datos exportados correctamente', 'success');
+        }
+
+        // Importar datos
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    if (confirm('¿Importar datos? Esto REEMPLAZARÁ todos los datos actuales.')) {
+                        if (data.clientes) {
+                            savedClients = data.clientes;
+                            localStorage.setItem('solproClients', JSON.stringify(savedClients));
+                            displayClients();
+                        }
+                        
+                        if (data.productos) {
+                            savedProducts = data.productos;
+                            localStorage.setItem('solproProducts', JSON.stringify(savedProducts));
+                            displaySavedProducts();
+                            updateProductCount();
+                        }
+                        
+                        if (data.facturas) {
+                            invoiceHistory = data.facturas;
+                            localStorage.setItem('solproInvoices', JSON.stringify(invoiceHistory));
+                            updateHistoryStats();
+                            displayInvoices();
+                        }
+                        
+                        showAlert('Datos importados correctamente', 'success');
+                    }
+                } catch (error) {
+                    alert('Error al importar: Archivo inválido');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Resetear input
+            e.target.value = '';
+        });
+
+        // Modificar generatePDF para guardar en historial
+        const originalGeneratePDFFunc = generatePDF;
+        generatePDF = function() {
+            saveCurrentProducts();
+            saveInvoiceToHistory();
+            showAlert('Factura guardada en historial', 'success');
+            setTimeout(() => {
+                originalGeneratePDFFunc();
+            }, 500);
+        };
+
+        // Cargar historial al iniciar (agregar a la inicialización existente)
+        const originalInitCode = `loadClients();
+            loadProducts();
+            updateInvoice();`;
+
+        const newInitCode = `loadClients();
+            loadProducts();
+            loadInvoiceHistory();
+            updateInvoice();`;
+
+    </script>
+</body>
+</html>

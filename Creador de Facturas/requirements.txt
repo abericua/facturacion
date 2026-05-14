@@ -1,0 +1,10 @@
+streamlit
+pandas
+openpyxl
+reportlab
+num2words
+requests
+xlsxwriter
+pyotp
+qrcode
+pypdf>=3.0.0
