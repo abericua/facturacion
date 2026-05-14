@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLPRO ELITE | Professional Pricing Dashboard</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #0e1117;
+            --card-bg: rgba(26, 29, 35, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --solpro-yellow: #f1c40f;
+            --solpro-yellow-hover: #d4ac0d;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --glass-blur: blur(16px);
+            --font-family: 'Inter', sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        body { 
+            font-family: var(--font-family); 
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            perspective: 2000px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: -20%; left: -20%; width: 140%; height: 140%;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(241, 196, 15, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(46, 204, 113, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at center, #1a1d23 0%, #0e1117 100%);
+            z-index: -1;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+        
+        header { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+            padding: 25px 35px; background: var(--card-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            position: sticky; top: 20px; z-index: 100;
+        }
+
+        .logo-area h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.05em; margin: 0; }
+        .logo-area h1 span { color: var(--solpro-yellow); }
+        .logo-area p { color: var(--text-muted); font-size: 0.65rem; margin: 0; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; }
+
+        .top-actions { display: flex; gap: 12px; }
+        .btn-elite {
+            background: var(--solpro-yellow); color: #000; border: none; padding: 12px 20px; border-radius: 12px;
+            font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 8px; text-transform: uppercase;
+        }
+        .btn-elite:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 20px rgba(241, 196, 15, 0.3); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--card-border); }
+
+        .main-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; min-width: 0; }
+        .admin-sidebar { display: flex; flex-direction: column; gap: 25px; }
+
+        .bento-card {
+            background: var(--card-bg); backdrop-filter: var(--glass-blur); padding: 25px; border-radius: 24px;
+            border: 1px solid var(--card-border); box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.4s;
+        }
+        .bento-card:hover { border-color: rgba(241, 196, 15, 0.3); }
+        .bento-card h2 { 
+            font-size: 0.8rem; font-weight: 800; color: var(--solpro-yellow); 
+            text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
+            border-radius: 10px; color: white; font-weight: 600; font-size: 0.9rem; transition: 0.3s;
+        }
+        .form-group input:focus { border-color: var(--solpro-yellow); outline: none; background: rgba(255,255,255,0.1); }
+
+        .content-area { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+        .filter-shelf { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .search-main { flex: 1; min-width: 180px; position: relative; }
+        .search-main input {
+            width: 100%; padding: 14px 20px 14px 48px; background: var(--card-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border); border-radius: 14px; color: white; font-size: 0.9rem; font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: 0.3s;
+        }
+        .search-main i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--solpro-yellow); }
+
+        .select-filter {
+            padding: 14px 14px; background: var(--card-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border); border-radius: 14px; color: white; font-weight: 700; font-size: 0.75rem;
+            cursor: pointer; min-width: 140px; max-width: 160px;
+        }
+
+        .table-shelf {
+            background: var(--card-bg); backdrop-filter: var(--glass-blur); border-radius: 24px;
+            border: 1px solid var(--card-border); overflow-x: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+        }
+        .table-shelf table { min-width: 700px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            background: rgba(255,255,255,0.02); padding: 14px 16px; text-align: left;
+            font-size: 0.6rem; color: var(--solpro-yellow); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;
+            white-space: nowrap;
+        }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+        tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .price-col { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 800; }
+        .gs-color { color: var(--success); }
+        .usd-color { color: #3498db; }
+        .profit-badge { 
+            font-size: 0.6rem; padding: 4px 8px; border-radius: 6px; background: rgba(46, 204, 113, 0.1); color: var(--success);
+            font-weight: 800; border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        .actions-cell { display: flex; gap: 8px; justify-content: flex-end; }
+        .btn-action {
+            width: 38px; height: 38px; border-radius: 10px; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: var(--text-muted);
+            transition: 0.3s;
+        }
+        .btn-action:hover { transform: translateY(-3px); color: #000; background: var(--solpro-yellow); }
+        .btn-danger-action:hover { background: var(--danger); color: white; }
+
+        .modal { 
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;
+        }
+        .modal-content { 
+            background: #161b22; padding: 40px; border-radius: 24px; width: 500px; border: 1px solid var(--card-border);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+        }
+
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; background: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .badge-combo { background: rgba(241, 196, 15, 0.1); color: var(--solpro-yellow); }
+        
+        .status-footer { margin-top: 30px; text-align: center; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body>
+
+    <div id="roiModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--solpro-yellow); margin-bottom:10px;">Calculadora de ROI</h2>
+            <p id="roi_product_name" style="color:var(--text-muted); margin-bottom:25px;"></p>
+            <div class="form-group">
+                <label>Inversión Total (Gs)</label>
+                <input type="text" id="roi_total_inv" readonly>
+            </div>
+            <div class="form-group">
+                <label>Tu ganancia neta por unidad (Gs)</label>
+                <input type="number" id="roi_profit_unit" value="50000" oninput="calculateROI()">
+            </div>
+            <div class="form-group">
+                <label>Producción diaria estimada</label>
+                <input type="number" id="roi_daily_prod" value="10" oninput="calculateROI()">
+            </div>
+            <div style="background:rgba(46, 204, 113, 0.1); padding:20px; border-radius:15px; text-align:center; margin-top:20px;">
+                <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Retorno estimado en</span>
+                <div style="font-size:3rem; font-weight:900; color:var(--success);" id="roi_result_days">0</div>
+                <span style="font-size:0.8rem; color:var(--success); font-weight:800;">DÍAS DE TRABAJO</span>
+            </div>
+            <button class="btn-elite" style="width:100%; justify-content:center; margin-top:20px;" onclick="document.getElementById('roiModal').style.display='none'">CERRAR</button>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--solpro-yellow); margin-bottom:30px;">Editar Producto</h2>
+            <input type="hidden" id="edit_original_id">
+            <div class="form-group"><label>ID</label><input type="text" id="edit_id" readonly></div>
+            <div class="form-group"><label>Nombre</label><input type="text" id="edit_nombre"></div>
+            <div class="form-group"><label>Costo Base</label><input type="number" id="edit_costo"></div>
+            <div class="form-group"><label>Margen Individual (%)</label><input type="number" id="edit_margen"></div>
+            <button class="btn-elite" style="width:100%; justify-content:center; padding:15px;" onclick="saveEdit()">GUARDAR CAMBIOS</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>SOLPRO <span>ELITE</span></h1>
+                <p>Advanced Pricing Ecosystem v35.2</p>
+            </div>
+            <div class="top-actions">
+                <button class="btn-elite" id="btn_save_config"><i data-lucide="save"></i> Guardar Todo</button>
+                <button class="btn-elite btn-secondary" id="btn_export"><i data-lucide="download"></i> Exportar CSV</button>
+                <button class="btn-elite btn-secondary" id="btn_clear" style="color:var(--danger); border-color:var(--danger);"><i data-lucide="refresh-ccw"></i> Reset</button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <aside class="admin-sidebar">
+                <div class="bento-card">
+                    <h2><i data-lucide="settings"></i> Parámetros</h2>
+                    <div class="params-grid">
+                        <div class="form-group">
+                            <label>Dólar Mercado</label>
+                            <input type="number" id="p_dolar" value="6250" oninput="calculateAll()">
+                        </div>
+                        <div class="form-group">
+                            <label>Buffer Piso</label>
+                            <input type="number" id="p_buffer" value="0" oninput="calculateAll()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Banda Piso (Compra)</label>
+                        <input type="text" id="p_banda" readonly style="color:var(--success); border-color:rgba(46, 204, 113, 0.3);">
+                    </div>
+                    <div class="form-group">
+                        <label>Margen Global (%)</label>
+                        <input type="number" id="p_margen" value="23" oninput="applyGlobalMargin(this.value)">
+                    </div>
+                </div>
+
+                <div class="bento-card">
+                    <h2><i data-lucide="plus-circle"></i> Nuevo Producto</h2>
+                    <div class="form-group">
+                        <label>Proveedor</label>
+                        <select id="new_prov" onchange="suggestID()">
+                            <option value="Sol Control">Sol Control (SC)</option>
+                            <option value="Importacion SOLPRO">Importacion SOLPRO (IM)</option>
+                            <option value="Todo Costura">Todo Costura (TC)</option>
+                            <option value="COMBO">📦 COMBO (CMB)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Línea</label>
+                        <select id="new_linea">
+                            <option value="COMERCIAL">COMERCIAL</option>
+                            <option value="INDUSTRIAL">INDUSTRIAL</option>
+                            <option value="ACCESORIOS">ACCESORIOS</option>
+                            <option value="INSUMOS">INSUMOS</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>ID Ref</label><input type="text" id="new_id"></div>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="new_nombre"></div>
+                    <div class="form-group"><label>Costo</label><input type="number" id="new_costo" value="0"></div>
+                    <div class="form-group">
+                        <label>Moneda</label>
+                        <select id="new_moneda"><option value="USD">USD</option><option value="GS">GS</option></select>
+                    </div>
+                    <button class="btn-elite" style="width:100%; justify-content:center;" onclick="saveNewProduct()"><i data-lucide="plus"></i> Agregar</button>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <div class="filter-shelf">
+                    <div class="search-main">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="main_search" placeholder="Busca por nombre, ID o categoría..." oninput="renderTable()">
+                    </div>
+                    <select id="filter_linea" class="select-filter" onchange="renderTable()">
+                        <option value="">Línea: Todas</option>
+                        <option value="COMERCIAL">Comercial</option>
+                        <option value="INDUSTRIAL">Industrial</option>
+                        <option value="ACCESORIOS">Accesorios</option>
+                        <option value="INSUMOS">Insumos</option>
+                        <option value="COMBO COMERCIAL">Combos Comerciales</option>
+                        <option value="COMBO INDUSTRIAL">Combos Industriales</option>
+                    </select>
+                    <select id="filter_prov" class="select-filter" onchange="renderTable()">
+                        <option value="">Prov: Todos</option>
+                        <option value="Sol Control">Sol Control</option>
+                        <option value="Importacion SOLPRO">Importación</option>
+                        <option value="Todo Costura">Todo Costura</option>
+                        <option value="COMBO">Combos</option>
+                    </select>
+                </div>
+
+                <div class="table-shelf">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Producto</th>
+                                <th>Costo Base</th>
+                                <th>Profit</th>
+                                <th>Precio Contado</th>
+                                <th>Precio QR</th>
+                                <th style="text-align:right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="main_body"></tbody>
+                    </table>
+                </div>
+                <div id="txt_status" class="status-footer"></div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+        let db = [];
+        const DB_KEY = 'solpro_db_v35'; // New key for the full version
+        const PARAMS_KEY = 'solpro_params_v35';
+
+        // MASTER DATABASE (211 PRODUCTS)
+        const MASTER_DATA = `CMB-001,COMBO: IMPRESORA EPSON F170 + CAMEO 5,COMBO COMERCIAL,0.0,GS
+CMB-002,COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-003,COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1 + GRABADORA LASER 10W,COMBO COMERCIAL,0.0,GS
+CMB-004,COMBO: IMPRESORA EPSON L1250 + SCANCUT SDX125 + PRENSA 8 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-005,COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1 + CAMEO 5,COMBO COMERCIAL,0.0,GS
+CMB-006,COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1 + GRABADORA LASER 10W,COMBO COMERCIAL,0.0,GS
+CMB-007,COMBO: IMPRESORA EPSON F170 + SCANCUT SDX125 + PRENSA 8 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-008,COMBO: IMPRESORA EPSON L121 + PRENSA 8 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-009,COMBO: IMPRESORA EPSON L1250 + BORDADORA BROTHER NV970LPA 2 EN 1 BORDA Y COSE 10 + PRENSA 8 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-010,COMBO: IMPRESORA EPSON L1250 + CAMEO 5 + GRABADORA LASER 10W,COMBO COMERCIAL,0.0,GS
+CMB-011,COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-012,COMBO: SCANCUT SDX125 + PRENSA TERMICA 38X38,COMBO COMERCIAL,0.0,GS
+CMB-013,COMBO: IMPRESORA EPSON F170 + CAMEO 5 + GRABADORA LASER 10W,COMBO COMERCIAL,0.0,GS
+CMB-014,COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-015,COMBO: IMPRESORA EPSON L1250 + PRENSA TAZA COMUN 11 OZ,COMBO COMERCIAL,0.0,GS
+CMB-016,COMBO: IMPRESORA EPSON L121 + PRENSA 11 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-017,COMBO: IMPRESORA EPSON L1250 + PRENSA 11 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-018,COMBO: IMPRESORA EPSON F170 + PRENSA 15 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-019,COMBO: IMPRESORA EPSON L121 + PRENSA 15 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-020,COMBO: IMPRESORA EPSON L1250 + PRENSA 15 EN 1,COMBO COMERCIAL,0.0,GS
+CMB-022,COMBO: IMPRESORA EPSON L121 + PRENSA 8 EN 1 + CAMEO 5,COMBO COMERCIAL,0.0,GS
+CMB-023,COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1 + CAMEO 5,COMBO COMERCIAL,0.0,GS
+CMB-024,COMBO: GRABADORA LASER 10W + PATITAS BASE + EJE ROTATIVO ESTANDAR + COMPRESOR DE AIRE,COMBO COMERCIAL,0.0,GS
+CMB-025,COMBO: IMPRESORA EPSON F170 + PRENSA 15 EN 1 + CAMEO 5,COMBO COMERCIAL,7770000.0,GS
+CMB-026,COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + GRABADORA LASER 20W,COMBO COMERCIAL,9620000.0,GS
+CMB-027,COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + CAMEO 5 + PRENSA TERMICA 60X40,COMBO COMERCIAL,9270000.0,GS
+CMB-028,COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + GRABADORA LASER 10W,COMBO COMERCIAL,7820000.0,GS
+CMB-029,COMBO: GRABADORA LASER 10W + PATITAS BASE + EJE ROTATIVO ESTANDAR + COMPRESOR DE AIRE + CAMEO 5,COMBO COMERCIAL,6800000.0,GS
+IM-001,HORNO TUCANO DTF 90CM FOB,INDUSTRIAL,3991.0,USD
+SC-001,IMPRESORA EPSON F170,COMERCIAL,300.0,USD
+SC-002,IMPRESORA EPSON L121,COMERCIAL,90.0,USD
+SC-003,IMPRESORA EPSON L1250,COMERCIAL,143.0,USD
+SC-004,IMPRESORA EPSON L14150,COMERCIAL,664.1,USD
+SC-005,IMPRESORA EPSON L3210,COMERCIAL,174.0,USD
+SC-006,MP EPSON L 4360 MULTIFUNCION WIR,COMERCIAL,262.0,USD
+SC-007,IMP EPSON L 3210 MULTIFUNCION,COMERCIAL,201.4,USD
+SC-008,IMP EPSON L 3560 MULTIFUNCION WIR,COMERCIAL,244.3,USD
+SC-009,IMP EPSON L 4260 MULTIFUNCION WIR,COMERCIAL,264.0,USD
+SC-010,IMP EPSON L 5590 MULTIFUNCION WIR/RED,COMERCIAL,330.0,USD
+SC-011,IMP EPSON L 6270 MULTIFUNCION DUPLO/WIF/RED,COMERCIAL,443.0,USD
+SC-012,IMP EPSON L14150 MULTIFUNCION WIR A3,COMERCIAL,669.0,USD
+SC-013,IMP EPSON L 15150 MULTIFUNCION/FAX WIR/RED/A3,COMERCIAL,1049.0,USD
+SC-014,IMP EPSON L 8050 FOTOGRAFICA/CD WIR,COMERCIAL,390.0,USD
+SC-015,IMP EPSON L8180 MULTIFUNCION A3 WIR,COMERCIAL,920.0,USD
+SC-016,ACCESORIOS BROTHER PRCF3 MARCO DE TAPA DE 60MM/PL,ACCESORIOS,399.0,USD
+SC-017,BASTIDOR BROTHER PRH100 10X10CM,ACCESORIOS,33.25,USD
+SC-018,BASTIDOR BROTHER PRH180 18X13CM,ACCESORIOS,33.25,USD
+SC-019,BASTIDOR BROTHER PRH300 20X30CM,ACCESORIOS,47.5,USD
+SC-020,BASTIDOR BROTHER PRH60 6X4CM,ACCESORIOS,23.75,USD
+SC-021,BORDADORA BROTHER BP1530LPA 26 X 16CM,COMERCIAL,1155.0,USD
+SC-022,BORDADORA BROTHER NV970LPA 2 EN 1 BORDA Y COSE 10,COMERCIAL,630.0,USD
+SC-023,BORDADORA BROTHER PE910LPA 18 X 13CM,COMERCIAL,775.0,USD
+SC-024,BORDADORA BROTHER PR680WPA 30 X 20CM COMBO,COMBO COMERCIAL,7145.9,GS
+SC-025,BORDADORA BROTHER PR680WPA 30 X 20CM NORMAL,COMERCIAL,6294.0,USD
+SC-026,MAQUINA DE COSER BROTHER BM2800PA,COMERCIAL,170.05,USD
+SC-027,MAQUINA DE COSER BROTHER BM3850PA,COMERCIAL,224.2,USD
+SC-028,MAQUINA DE COSER BROTHER JS2135PA MECANICA FAMILIA,COMERCIAL,145.36,USD
+SC-029,MAQUINA DE COSER BROTHER SQ9100PA,COMERCIAL,350.55,USD
+SC-030,OVERLOCK BROTHER 3534DTPA,COMERCIAL,360.5,USD
+SC-031,SOFTWARE BROTHER PEDESIGN11L,ACCESORIOS,711.55,USD
+SC-032,TAPETE BROTHER CADXMATF12 P/ CORTE DE TELA 12X12,ACCESORIOS,25.65,USD
+SC-033,TAPETE BROTHER CADXMATLOW12 12X12 BAJA ADHERENCIA,ACCESORIOS,18.145,USD
+SC-034,TAPETE BROTHER CADXMATLOW24 30x60 BAJA ADHERENCIA,ACCESORIOS,29.735,USD
+SC-035,TAPETE BROTHER CADXMATSTD12 30x30 STD,ACCESORIOS,18.145,USD
+SC-036,TAPETE BROTHER CADXMATSTD24 30x60 STD,ACCESORIOS,29.735,USD
+SC-037,CUCHILLA BROTHER CADXBLDV1 DE VINILO P/ AUTO,ACCESORIOS,11.21,USD
+SC-038,CUCHILLA DE CORTE AUTO P/ TELA BROTHER CADXBLDQ1,ACCESORIOS,12.73,USD
+SC-039,CUCHILLA DE CORTE AUTO STD BROTHER  CADXBLD1,ACCESORIOS,12.73,USD
+SC-040,RODILLO BROTHER P/ ADHE DE MAT. AL TAPETE (CABRY1),ACCESORIOS,15.2,USD
+SC-041,SCANNCUT BROTHER SDX225PA,COMERCIAL,496.375,USD
+SC-042,SCANCUT SDX125,COMERCIAL,358.34,USD
+SC-043,PRENSA DE CALOR CRICUT TAZA 2008736,COMERCIAL,170.05,USD
+SC-044,PRENSA DE CALOR CRICUT EASYPRESS 2005557,COMERCIAL,150.575,USD
+SC-045,PRENSA DE CALOR CRICUT HAT 2009241,COMERCIAL,142.5,USD
+SC-046,PRENSA DE CALOR CRICUT EASYPRESS 2005553,COMERCIAL,128.725,USD
+SC-047,SURECOLOR P900,INDUSTRIAL,1577.0,USD
+SC-048,IMP EPSON SCF1070SE WIF/RED SURECOLOR,INDUSTRIAL,6572.0,USD
+SC-049,EPSON SURECOLOR P5000 STANDARD EDITION,INDUSTRIAL,2056.49,USD
+SC-050,EPSON SURECOLOR P7570 STANDARD EDITION,INDUSTRIAL,4616.73,USD
+SC-051,EPSON SURECOLOR P9570 STANDARD EDITION,INDUSTRIAL,6433.62,USD
+SC-052,EPSON SURECOLOR P8570D 44 DUAL ROLL,INDUSTRIAL,6038.42,USD
+SC-053,SURECOLOR P6570E SINGLE ROLL 24,INDUSTRIAL,3711.41,USD
+SC-054,SURECOLOR P6570DE DUAL ROLL 24,INDUSTRIAL,4525.04,USD
+SC-055,SURECOLOR P6570D DUAL ROLL 24 PS,INDUSTRIAL,5145.53,USD
+SC-056,EPSON SURECOLOR P20000 STANDARD EDITION,INDUSTRIAL,11921.63,USD
+SC-057,EPSON SURECOLOR P8570DL 44 INK BAGS PS,INDUSTRIAL,8265.99,USD
+SC-058,SURECOLOR S40600 PRODUCTION EDITION,INDUSTRIAL,8390.0,USD
+SC-059,SURE COLOR S60600L BULK INK SYSTEM,INDUSTRIAL,21979.96,USD
+SC-060,SURE COLOR S80600L BULK INK SYSTEM,INDUSTRIAL,26413.69,USD
+SC-061,EPSON SURECOLOR R5070L PRODUCTION EDITION,INDUSTRIAL,24127.91,USD
+SC-062,EPSON SURECOLOR R5070L PRODUCTION EDITION PRECIO ESPECIAL,INDUSTRIAL,22929.0,USD
+SC-063,EPSON SURECOLOR V7000 UV FLATBED,INDUSTRIAL,83580.47,USD
+SC-064,SC-V7000 LARGE FORMAT INKJET PRINTER,INDUSTRIAL,64356.96,USD
+SC-065,HEAD INSTALLATION KIT FOR SC-V7000SERIES,ACCESORIOS,17551.9,USD
+SC-066,DOCUMENT PACK FOR SC-V7000 SERIES,INDUSTRIAL,1671.6,USD
+SC-067,SIGNAGE SURECOLOR V1070 A4 PRECIO DE LISTA SOL CONTROL 2025 DIC CON EL 5%,COMERCIAL,8303.0,USD
+SC-068,SIGNAGE SURECOLOR V1070 A4,COMERCIAL,8000.0,USD
+SC-069,SIGNAGE SURECOLOR V2070 A3,COMERCIAL,0.0,USD
+SC-070,SURECOLOR T3170,COMERCIAL,894.83,USD
+SC-071,SURECOLOR T3170X,COMERCIAL,2098.0,USD
+SC-072,SURECOLOR T3170M,COMERCIAL,2109.34,USD
+SC-073,SURECOLOR T3770E SINGLE ROLL 24,INDUSTRIAL,3721.52,USD
+SC-074,SURECOLOR T3770DE DUAL ROLL 24,INDUSTRIAL,4536.65,USD
+SC-075,SURECOLOR T3770D DUAL ROLL 24 PS,INDUSTRIAL,5159.54,USD
+SC-076,SURECOLOR T5170,INDUSTRIAL,2405.53,USD
+SC-077,SURECOLOR T5170M,INDUSTRIAL,4082.1,USD
+SC-078,SURECOLOR T7770D 44,INDUSTRIAL,6422.12,USD
+SC-079,SURECOLOR T7770DL 44 INK BAG PS,INDUSTRIAL,9138.32,USD
+SC-080,SURECOLOR T5475,INDUSTRIAL,2579.1,USD
+SC-081,SURECOLOR T5470M,INDUSTRIAL,4628.0,USD
+SC-082,SURECOLOR T5770D 36,INDUSTRIAL,5539.65,USD
+SC-083,SURECOLOR T5770DM DUAL ROLL MFP 36,INDUSTRIAL,10189.01,USD
+SC-084,SCT5475SR SURECOLOR 36,INDUSTRIAL,2632.0,USD
+SC-085,SURECOLOR F570,INDUSTRIAL,2055.59,USD
+SC-086,SURECOLOR F1070,COMERCIAL,6571.1,USD
+SC-087,SURECOLOR F1070 + HORNO DTF A3,COMERCIAL,7046.1,USD
+SC-088,SURECOLOR  F6470 PRINTER WITH STAND & TAKEUP REEL SIN IVA,INDUSTRIAL,5900.0,USD
+SC-089,SURECOLOR  F6470 PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK),INDUSTRIAL,7176.0,USD
+SC-090,SURECOLOR  F6470H PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK),INDUSTRIAL,7200.09,USD
+SC-091,KIT INICIACION F6470,INSUMOS,502.6,USD
+SC-092,SURECOLOR F6470 IVA Y KIT,INDUSTRIAL,7702.7,USD
+SC-093,F6470 + KIT SIN IVA,INDUSTRIAL,7352.0,USD
+SC-094,SURECOLOR F3070 BASE UNIT,INDUSTRIAL,53976.54,USD
+SC-097,SCF9570PE - F9570 PROMO MUNDIAL (SIN TINTAS),INDUSTRIAL,23674.3,USD
+SC-098,SCF9570HPE - F9570H CON IVA,INDUSTRIAL,23691.27,USD
+SC-099,SURECOLOR F10070H BASE PRINTER FOR LATIN AMERICA,INDUSTRIAL,86881.66,USD
+SC-100,SURECOLOR F10070H OPT HEATER ROLL INK SYSTEM,INDUSTRIAL,11507.04,USD
+SC-101,SURECOLOR F2270 DIRECT TO GARMENT,INDUSTRIAL,14574.25,USD
+SC-102,TINTA F6470  POR CAJA UNA CAJA TRAE 2 DEL MISMO COLOR,INSUMOS,227.05,USD
+SC-103,CAJA F170 DE MANTENIMIENTO,INSUMOS,21.0,USD
+SC-104,CAJA F570 DE MANTENIMIENTO,INSUMOS,40.0,USD
+SC-105,TINTA F170 O F570 DE 140ML COLORES CY,INSUMOS,18.5,USD
+SC-106,ROLLO F570 PAPEL 30 METROS EPSON,INSUMOS,26.6,USD
+SC-107,TINTA EPSON F6200,INSUMOS,429.4,USD
+SC-108,TINTA EPSON F F6370 CAJA 6 UNIDADES,INSUMOS,541.5,USD
+SC-109,SCG6070SE - G6070 CON IVA,INDUSTRIAL,8629.0,USD
+SC-110,SCF9570PE - F9570 CON IVA PROMO,INDUSTRIAL,18617.0,USD
+SC-112,SCF9570PE - F9570 CON IVA,INDUSTRIAL,21701.45,USD
+SC-113,SCF9570HPE - F9570H SIN IVA,INDUSTRIAL,21717.0,USD
+SC-114,EPSON SURECOLOR F11070,INDUSTRIAL,101962.0,USD
+SC-115,EPSON SURECOLOR F11070 MEJORADO 3 UNIDADES,INDUSTRIAL,83982.54,USD
+SC-116,TINTA EPSON T890120 BLACK S40600,INSUMOS,90.25,USD
+SC-117,TINTA EPSON T890220 CYAN S40600,INSUMOS,90.25,USD
+SC-118,TINTA EPSON T890320 MAGENTA S40600,INSUMOS,90.25,USD
+SC-119,TINTA EPSON T890420 YELLOW S40600,INSUMOS,90.25,USD
+SC-120,TINTA EPSON T53K220 CYAN (F64/F95) - UNITARIO,INSUMOS,113.53,USD
+SC-121,TINTA EPSON T53K920 HDK (F64/F95) - UNITARIO,INSUMOS,113.53,USD
+SC-122,TINTA EPSON T53K420 YELLOW (F64/F95) - UNITARIO,INSUMOS,113.53,USD
+SC-123,TINTA EPSON T53K320 MAGENTA (F64/F95) - UNITARIO,INSUMOS,113.53,USD
+SC-124,TINTA EPSON T741220 CYAN (F62/F93) - UNITARIO,INSUMOS,71.57,USD
+SC-125,TINTA EPSON T741120 HDK (F62/F93) - UNITARIO,INSUMOS,71.57,USD
+SC-126,TINTA EPSON T741420 YELLOW (F62/F93) - UNITARIO,INSUMOS,71.57,USD
+SC-127,TINTA EPSON T741320 MAGENTA (F62/F93) - UNITARIO,INSUMOS,71.57,USD
+SC-128,TINTA EPSON T43M220 CYAN (F100/F110) - UNITARIO,INSUMOS,415.63,USD
+SC-129,TINTA EPSON T43M120 HDK (F100/F110) - UNITARIO,INSUMOS,415.63,USD
+SC-130,TINTA EPSON T43M420 YELLOW (F100/F110) - UNITARIO,INSUMOS,415.63,USD
+SC-131,TINTA EPSON T43M320 MAGENTA (F100/F110) - UNITARIO,INSUMOS,415.63,USD
+SC-132,TINTA EPSON T49M2 CYAN (F170/F570) - 140ML,INSUMOS,18.5,USD
+SC-133,TINTA EPSON T49M1 BLACK (F170/F570) - 140ML,INSUMOS,18.5,USD
+SC-134,TINTA EPSON T49M4 YELLOW (F170/F570) - 140ML,INSUMOS,18.5,USD
+SC-135,TINTA EPSON T49M3 MAGENTA (F170/F570) - 140ML,INSUMOS,18.5,USD
+SC-136,KIT DE LIMPIEZA DE CABEZAL F22/G60 C13S400216,INSUMOS,0.0,GS
+SC-138,T46C420 YELLOW F63/F94,INSUMOS,0.0,GS
+SC-139,T46C320 MAGENTA F63/F94,INSUMOS,0.0,GS
+SC-140,T46C220 CYAN F63/F94,INSUMOS,0.0,GS
+SC-141,T46C120 YHDK F63/F94,INSUMOS,0.0,GS
+TC-001,PRENSA TERMICA 60X40,COMERCIAL,2000000.0,GS
+TC-002,PRENSA TERMICA 38X38,COMERCIAL,1300000.0,GS
+TC-003,GRABADORA LASER 20W,COMERCIAL,4800000.0,GS
+TC-004,EJE ROTATIVO ESTÁNDAR,COMERCIAL,700000.0,GS
+TC-005,GRABADORA LASER 10W,COMERCIAL,3000000.0,GS
+TC-006,PATITAS BASE,ACCESORIOS,200000.0,GS
+TC-007,COMPRESOR DE AIRE,ACCESORIOS,450000.0,GS
+TC-009,PRENSA TAZA COMUN 11 OZ,COMERCIAL,440000.0,GS
+TC-010,TRANSFER TAZAS DOBLE,COMERCIAL,995000.0,GS
+TC-011,EJE ROTATIVO PRO,ACCESORIOS,1250000.0,GS
+TC-012,PRENSA 8 EN 1,COMERCIAL,1900000.0,GS
+TC-013,PRENSA 11 EN 1,COMERCIAL,2900000.0,GS
+TC-014,PRENSA 15 EN 1,COMERCIAL,3400000.0,GS
+TC-015,PRENSA 6 EN 1,COMERCIAL,1750000.0,GS
+TC-016,PRENSA BOLIGRAFOS,COMERCIAL,1190000.0,GS
+TC-017,TINTA LITRO SUBLI CY,INSUMOS,180000.0,GS
+TC-018,TINTA LITRO SUBLI BK,INSUMOS,225000.0,GS
+TC-019,RESMA DE PAPEL A4,INSUMOS,30000.0,GS
+TC-020,RESMA DE PAPEL A4 PREMIUN,INSUMOS,90000.0,GS
+TC-021,HORNO DTF A3,COMERCIAL,3300000.0,GS
+TC-022,CAMEO 5,COMERCIAL,2450000.0,GS
+TC-024,DTF 60CM 100 METROS,INSUMOS,1300000.0,GS
+TC-025,POLVO DTF KILO,INSUMOS,235000.0,GS
+TC-026,BORDADORA JANOME MC400E,COMERCIAL,8600000.0,GS
+TC-027,BORDADORA JANOME MC500E,COMERCIAL,9900000.0,GS
+TC-028,BORDADORA JANOME MC550E,COMERCIAL,10900000.0,GS
+TC-029,BORDADORA JANOME MB7,COMERCIAL,39500000.0,GS
+TC-030,BORDADORA INDUSTRIAL WILPEX WP121C,INDUSTRIAL,35500000.0,GS
+TC-031,OVERLOCK FLIAR WILPEX WP334,COMERCIAL,1826500.0,GS
+TC-032,COLLERETA Y OVERLOCK 5 HILOS WILPEX FLIAR,COMERCIAL,2730000.0,GS
+TC-033,CAMEO PLUS,COMERCIAL,3300000.0,GS
+TC-034,CAMEO 15 PULGADAS,COMERCIAL,3600000.0,GS
+TC-035,CAMEO 24 PULGADAS,COMERCIAL,4500000.0,GS
+TC-036,CORTADORA DE PLOTTER WILPPEX 75CM,COMERCIAL,3200000.0,GS
+TC-037,PRENSA TAZAS DOBLE,COMERCIAL,995000.0,GS
+TC-038,PRENSA TAZAS 5 EN 1,COMERCIAL,2700000.0,GS
+TC-039,BORDADORA WILPEX IND 15 AGUJAS SMART,INDUSTRIAL,36000000.0,GS
+TC-040,PRENSA MANUAL 100X80,INDUSTRIAL,12750000.0,GS
+TC-041,DOBLE BANDEJA,INDUSTRIAL,30500000.0,GS
+TC-042,CALANDRA 1.7 ROLLO A ROLLO,INDUSTRIAL,81000000.0,GS
+TC-043,CALANDRA 1.8,INDUSTRIAL,30000000.0,GS
+TC-044,EPSON F570+100X80+MULTI+OVERLOCK+COLLARETA FLIAR,INDUSTRIAL,30819955.16,GS
+TC-045,MAQUINA DE COSER RECTA IND WILPEX,INDUSTRIAL,2120000.0,GS
+TC-046,MAQUIINA DE COSER OVERLOCK IND WILPEX,INDUSTRIAL,3200000.0,GS
+TC-047,MAQUINA DE COSER COLLARETA IND WILPEX,INDUSTRIAL,4100000.0,GS`;
+
+        const redGs  = v => (v <= 0) ? 0 : (v < 500000 ? (Math.ceil(v / 10000)  * 10000)  - 1000  : (Math.ceil(v / 100000) * 100000) - 10000);
+        const redUsd = v => (v <= 0) ? 0 : (v < 100    ? (Math.ceil(v / 10)     * 10)      - 1     : (Math.ceil(v / 100)    * 100)    - 10);
+        const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+        // Normaliza texto para comparación: quita tildes, mayúsculas, caracteres especiales
+        const normalize = s => s.toUpperCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+        // Auto-calcula el costo de un combo sumando los costos de sus componentes
+        function autoCalcComboCosto(p, bandaPiso) {
+            const raw = p.nombre.replace(/^COMBO:\s*/i, '');
+            const parts = raw.split(/\s*\+\s*/);
+            let total = 0;
+            for (const part of parts) {
+                const normPart = normalize(part);
+                // Busca coincidencia exacta primero, luego parcial
+                const match = db.find(x => x.id !== p.id && normalize(x.nombre) === normPart)
+                           || db.find(x => x.id !== p.id && normalize(x.nombre).includes(normPart))
+                           || db.find(x => x.id !== p.id && normPart.includes(normalize(x.nombre)) && normalize(x.nombre).length > 8);
+                if (!match) return 0; // componente no encontrado → no calcular
+                total += match.moneda === 'USD' ? match.costo * bandaPiso : match.costo;
+            }
+            return total;
+        }
+
+        function calculateAll() {
+            const dolar = parseFloat(document.getElementById('p_dolar').value) || 7350;
+            const bufferP = parseFloat(document.getElementById('p_buffer').value) || 0;
+            const bandaPiso = dolar + bufferP;
+            document.getElementById('p_banda').value = `Gs. ${bandaPiso.toLocaleString('es-PY')}`;
+
+            db.forEach(p => {
+                const mPct = p.margen / 100;
+                const isInd = p.linea.includes('INDUSTRIAL');
+                const isCombo = p.id.startsWith('CMB') || p.linea.includes('COMBO');
+
+                if (isInd && !isCombo && p.moneda === 'USD') {
+                    // Industrial USD (Sol Control, Importacion): precio en USD
+                    p.vC = redUsd(p.costo / (1 - mPct));
+                    p.vQ = redUsd(p.vC / 0.96);
+                    p.profit = p.vC - p.costo;
+                    p.mon = 'USD';
+                } else {
+                    // GS directo (TC-), USD→GS con banda, o combos
+                    let costoGs = p.moneda === 'USD' ? p.costo * bandaPiso : p.costo;
+                    // Si es combo sin costo cargado, auto-calcular sumando componentes
+                    if (costoGs === 0 && isCombo) {
+                        costoGs = autoCalcComboCosto(p, bandaPiso);
+                    }
+                    p.costoCalculado = costoGs; // guardar para display
+                    p.vC = redGs(costoGs / (1 - mPct));
+                    p.vQ = redGs(p.vC / 0.96);
+                    p.profit = p.vC - costoGs;
+                    p.mon = 'GS';
+                }
+            });
+            renderTable();
+        }
+
+
+        function renderTable() {
+            const term = document.getElementById('main_search').value.toLowerCase();
+            const fLinea = document.getElementById('filter_linea').value;
+            const fProv = document.getElementById('filter_prov').value;
+
+            const filtered = db.filter(p => {
+                const matchTerm = !term || p.nombre.toLowerCase().includes(term) || p.id.toLowerCase().includes(term);
+                const matchLinea = !fLinea || p.linea === fLinea || (fLinea.startsWith('COMBO') && p.linea.includes('COMBO'));
+                const matchProv = !fProv || p.prov === fProv || (fProv === 'COMBO' && p.id.startsWith('CMB'));
+                return matchTerm && matchLinea && matchProv;
+            });
+
+            const rows = filtered.map(p => {
+                const sym = p.mon === 'USD' ? 'U$D' : 'Gs.';
+                const isCombo = p.id.startsWith('CMB');
+                return `
+                    <tr>
+                        <td class="prod-id" style="font-size:0.7rem; color:var(--solpro-yellow); font-family:'JetBrains Mono';">${esc(p.id)}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span class="badge ${isCombo ? 'badge-combo' : ''}">${esc(p.linea)}</span>
+                                <strong style="color:white;">${esc(p.nombre)}</strong>
+                            </div>
+                        </td>
+                        <td>
+                            ${p.costo > 0
+                                ? `<span style="color:var(--text-muted); font-size:0.8rem;">${p.moneda} ${p.costo.toLocaleString('es-PY')}</span>`
+                                : (p.costoCalculado > 0
+                                    ? `<span style="color:var(--text-muted); font-size:0.75rem;">Gs. ${Math.round(p.costoCalculado).toLocaleString('es-PY')} <span style="font-size:0.55rem; color:var(--solpro-yellow); background:rgba(241,196,15,0.1); padding:2px 5px; border-radius:4px;">AUTO</span></span>`
+                                    : `<span style="color:var(--text-muted);">—</span>`)
+                            }
+                        </td>
+                        <td>${(p.costo > 0 || p.costoCalculado > 0) && p.vC > 0
+                                ? `<span class="profit-badge">${sym} ${Math.round(p.profit).toLocaleString('es-PY')}</span>`
+                                : '<span style="color:var(--text-muted);font-size:0.7rem;">Sin costo</span>'
+                        }</td>
+                        <td><span class="price-col ${p.mon === 'USD' ? 'usd-color' : 'gs-color'}">${sym} ${p.vC.toLocaleString('es-PY')}</span></td>
+                        <td><span class="price-col" style="color:var(--solpro-yellow); opacity:0.8;">${sym} ${p.vQ.toLocaleString('es-PY')}</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="btn-action" onclick="shareWS('${esc(p.id)}')" title="WhatsApp"><i data-lucide="share-2"></i></button>
+                                <button class="btn-action" onclick="openROI('${esc(p.id)}')" title="ROI"><i data-lucide="trending-up"></i></button>
+                                <button class="btn-action" onclick="openEditModal('${esc(p.id)}')" title="Editar"><i data-lucide="edit-3"></i></button>
+                                <button class="btn-action btn-danger-action" onclick="deleteProduct('${esc(p.id)}')" title="Borrar"><i data-lucide="trash-2"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('main_body').innerHTML = rows.join('');
+            lucide.createIcons();
+            document.getElementById('txt_status').innerText = `SOLPRO ECOSYSTEM • ${filtered.length} EQUIPOS CARGADOS`;
+        }
+
+        function saveNewProduct() {
+            const id = document.getElementById('new_id').value.trim();
+            const nombre = document.getElementById('new_nombre').value.trim().toUpperCase();
+            if (!id || !nombre) return alert('ID y Nombre obligatorios');
+            if (db.find(x => x.id === id)) return alert('Ya existe un producto con ese ID');
+            
+            db.push({
+                id, nombre,
+                prov: document.getElementById('new_prov').value,
+                linea: document.getElementById('new_linea').value,
+                costo: parseFloat(document.getElementById('new_costo').value) || 0,
+                moneda: document.getElementById('new_moneda').value,
+                margen: parseFloat(document.getElementById('p_margen').value) || 30
+            });
+            calculateAll();
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            // Limpiar formulario
+            document.getElementById('new_nombre').value = '';
+            document.getElementById('new_costo').value = '0';
+            suggestID();
+        }
+
+        function suggestID() {
+            const prov = document.getElementById('new_prov').value;
+            const pre = prov === 'Sol Control' ? 'SC' : prov === 'Todo Costura' ? 'TC' : prov === 'COMBO' ? 'CMB' : 'IM';
+            const count = db.filter(x => x.id.startsWith(pre)).length + 1;
+            document.getElementById('new_id').value = `${pre}-${String(count).padStart(3, '0')}`;
+        }
+
+        function deleteProduct(id) {
+            if (confirm('¿Eliminar producto?')) {
+                db = db.filter(x => x.id !== id);
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+                calculateAll();
+            }
+        }
+
+        function openROI(id) {
+            const p = db.find(x => x.id === id);
+            const dolar = parseFloat(document.getElementById('p_dolar').value);
+            const invTotal = p.mon === 'USD' ? p.vC * dolar : p.vC;
+            
+            document.getElementById('roi_product_name').innerText = p.nombre;
+            document.getElementById('roi_total_inv').value = Math.round(invTotal).toLocaleString('es-PY');
+            document.getElementById('roiModal').dataset.price = invTotal;
+            document.getElementById('roiModal').style.display = 'flex';
+            calculateROI();
+        }
+
+        function calculateROI() {
+            const inv = parseFloat(document.getElementById('roiModal').dataset.price);
+            const profit = parseFloat(document.getElementById('roi_profit_unit').value) || 0;
+            const daily = parseFloat(document.getElementById('roi_daily_prod').value) || 0;
+            const res = document.getElementById('roi_result_days');
+            if (profit > 0 && daily > 0) res.innerText = Math.ceil(inv / (profit * daily)).toLocaleString('es-PY');
+            else res.innerText = '∞';
+        }
+
+        function openEditModal(id) {
+            const p = db.find(x => x.id === id);
+            document.getElementById('edit_original_id').value = p.id;
+            document.getElementById('edit_id').value = p.id;
+            document.getElementById('edit_nombre').value = p.nombre;
+            document.getElementById('edit_costo').value = p.costo;
+            document.getElementById('edit_margen').value = p.margen;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function saveEdit() {
+            const id = document.getElementById('edit_original_id').value;
+            const p = db.find(x => x.id === id);
+            p.nombre = document.getElementById('edit_nombre').value.trim().toUpperCase();
+            p.costo = parseFloat(document.getElementById('edit_costo').value) || 0;
+            p.margen = parseFloat(document.getElementById('edit_margen').value) || 30;
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            document.getElementById('editModal').style.display = 'none';
+            calculateAll();
+        }
+
+        function shareWS(id) {
+            const p = db.find(x => x.id === id);
+            const sym = p.mon === 'USD' ? 'U$D' : 'Gs.';
+            const msg = `🚀 *COTIZACIÓN SOLPRO ELITE*\n\n📦 *${p.nombre}*\n🆔 ID: ${p.id}\n\n💵 *CONTADO:* ${sym} ${p.vC.toLocaleString('es-PY')}\n💳 *TARJETA / QR:* ${sym} ${p.vQ.toLocaleString('es-PY')}\n\n📈 _Validez 24hs o agotar stock._`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function applyGlobalMargin(v) {
+            const m = parseFloat(v);
+            if (m > 0 && m < 100) { db.forEach(p => p.margen = m); calculateAll(); }
+        }
+
+        function saveParams() {
+            const p = { dolar: document.getElementById('p_dolar').value, buffer: document.getElementById('p_buffer').value, margen: document.getElementById('p_margen').value };
+            localStorage.setItem(PARAMS_KEY, JSON.stringify(p));
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            alert('✅ Base de Datos Sincronizada');
+        }
+
+        document.getElementById('btn_export').onclick = () => {
+            const fmtGs  = v => `Gs. ${Math.round(v).toLocaleString('es-PY')}`;
+            const fmtUsd = v => `U$D ${Math.round(v).toLocaleString('es-PY')}`;
+
+            const headers = 'ID REF;LÍNEA;PRODUCTO;P. CONTADO;P. DIGITAL (QR)\n';
+            const rows = db.filter(p => p.vC > 0).map(p => {
+                const nombre = p.nombre.replace(/;/g, ',');
+                const pC = p.mon === 'USD' ? fmtUsd(p.vC) : fmtGs(p.vC);
+                const pQ = p.mon === 'USD' ? fmtUsd(p.vQ) : fmtGs(p.vQ);
+                return [p.id, p.linea, nombre, pC, pQ].join(';');
+            }).join('\n');
+
+            const csv = '\ufeff' + headers + rows;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+            a.download = `LISTA_PRECIOS_SOLPRO_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        };
+
+        document.getElementById('btn_save_config').onclick = saveParams;
+        document.getElementById('btn_clear').onclick = () => { if(confirm('¿BORRAR TODO?')) { localStorage.clear(); location.reload(); } };
+
+        function parseMasterLine(line) {
+            // Format: ID,NOMBRE,LINEA,COSTO,MONEDA
+            // Split on comma but only take 5 fields (name may have no commas in MASTER_DATA)
+            const parts = line.split(',');
+            if (parts.length < 5) return null;
+            // Last 3 fields are LINEA, COSTO, MONEDA - name is everything in between
+            const id = parts[0].trim();
+            const moneda = parts[parts.length - 1].trim();
+            const costo = parts[parts.length - 2].trim();
+            const linea = parts[parts.length - 3].trim();
+            const nombre = parts.slice(1, parts.length - 3).join(',').trim();
+            if (!id || !nombre) return null;
+            const prov = id.startsWith('SC') ? 'Sol Control' : id.startsWith('TC') ? 'Todo Costura' : id.startsWith('CMB') ? 'COMBO' : 'Importacion SOLPRO';
+            return { id, nombre, linea, costo: parseFloat(costo) || 0, moneda, prov, margen: 30 };
+        }
+
+        function loadMasterData(savedMargenes) {
+            const lines = MASTER_DATA.trim().split('\n');
+            db = lines.map(parseMasterLine).filter(x => x !== null);
+            // Re-apply any saved margenes
+            if (savedMargenes) {
+                savedMargenes.forEach(s => {
+                    const p = db.find(x => x.id === s.id);
+                    if (p) p.margen = s.margen;
+                });
+            }
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+
+        const MASTER_COUNT = MASTER_DATA.trim().split('\n').length;
+        const MASTER_IDS = new Set(MASTER_DATA.trim().split('\n').map(l => l.split(',')[0].trim()));
+
+        window.onload = () => {
+            const saved = localStorage.getItem(DB_KEY);
+            let savedDb = [];
+            try { savedDb = saved ? JSON.parse(saved) : []; } catch(e) { savedDb = []; }
+
+            // Extraer márgenes personalizados y productos adicionales del usuario
+            const savedMargenes = {};
+            const customProducts = [];
+            savedDb.forEach(p => {
+                savedMargenes[p.id] = p.margen;
+                if (!MASTER_IDS.has(p.id)) customProducts.push(p); // producto añadido por el usuario
+            });
+
+            // SIEMPRE cargar desde MASTER_DATA (datos limpios y correctos)
+            const lines = MASTER_DATA.trim().split('\n');
+            db = lines.map(parseMasterLine).filter(x => x !== null);
+
+            // Reaplica márgenes que el usuario haya editado
+            db.forEach(p => {
+                if (savedMargenes[p.id] !== undefined) p.margen = savedMargenes[p.id];
+            });
+
+            // Agrega productos que el usuario haya creado
+            customProducts.forEach(p => db.push(p));
+
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+
+            // Restaurar parámetros guardados
+            const params = JSON.parse(localStorage.getItem(PARAMS_KEY) || '{}');
+            if (params.dolar) document.getElementById('p_dolar').value = params.dolar;
+            if (params.buffer) document.getElementById('p_buffer').value = params.buffer;
+            if (params.margen) document.getElementById('p_margen').value = params.margen;
+
+            calculateAll();
+            suggestID();
+        };
+    </script>
+</body>
+</html>
+

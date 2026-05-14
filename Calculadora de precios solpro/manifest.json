@@ -1,0 +1,17 @@
+{
+  "name": "Solpro Pricing Elite",
+  "short_name": "Solpro",
+  "description": "Calculadora de Precios Profesional Solpro",
+  "start_url": "calculadora_precios.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/512/calculator.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

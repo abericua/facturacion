@@ -1,0 +1,24 @@
+{
+  "parametros": {
+    "umbral_redondeo_gs": 389000,
+    "buffer_piso": 150,
+    "buffer_techo": 350,
+    "margen_deseado_pct": 30.0,
+    "comision_qr_pct": 4.0,
+    "factor_redondeo_gs": 10000,
+    "factor_redondeo_usd_bajo": 10,
+    "factor_redondeo_usd_alto": 100,
+    "msrp_anchor_factor": 1.15,
+    "margenes_sugeridos": {
+      "INDUSTRIAL": 25.0,
+      "COMERCIAL": 30.0,
+      "ACCESORIOS": 40.0,
+      "INSUMOS": 40.0,
+      "TINTAS": 25.0
+    }
+  },
+  "archivos": {
+    "productos_maestros": "productos_maestros.csv",
+    "excel_gestion": "SOLPRO_2026_Sistema_Gestion_V6.xlsx"
+  }
+}

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sol Pro AI Bridge | 3 Cerebros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07080f;
+            --card: #111420;
+            --accent: #f59e0b;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --gemini: #4285f4;
+            --gemma: #34d399;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-gemini { background: rgba(66, 133, 244, 0.2); color: var(--gemini); }
+        .badge-gemma { background: rgba(52, 211, 153, 0.2); color: var(--gemma); }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #d1d5db;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 15px;
+            box-sizing: border-box;
+            resize: none;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        textarea:focus { border-color: var(--accent); }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        select {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SOL PRO AI BRIDGE</h1>
+            <div class="subtitle">Estrategia de 3 Cerebros: Antigravity + Gemma + Tú</div>
+        </header>
+
+        <div class="grid">
+            <!-- Panel Gemini -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span style="font-weight: 600;">Input de Antigravity</span>
+                    <span class="badge badge-gemini">Nube / Gemini 3 Flash</span>
+                </div>
+                <textarea id="gemini-input" placeholder="Pega aquí el código generado por Antigravity..."></textarea>
+            </div>
+
+            <!-- Panel Gemma -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span style="font-weight: 600;">Revisión de Gemma</span>
+                    <span class="badge badge-gemma">Local / Ollama</span>
+                </div>
+                <textarea id="gemma-output" readonly placeholder="Gemma revisará el código aquí..."></textarea>
+            </div>
+        </div>
+
+        <div class="controls">
+            <label for="model-select">Modelo Local:</label>
+            <select id="model-select">
+                <option value="gemma">Gemma (Default)</option>
+            </select>
+            <button id="btn-review" onclick="runReview()">PEDIR REVISIÓN A GEMMA</button>
+        </div>
+        <div id="status" class="status text-center"></div>
+    </div>
+
+    <script>
+        async function loadModels() {
+            try {
+                const res = await fetch('/api/models');
+                const data = await res.json();
+                if (data.success) {
+                    const select = document.getElementById('model-select');
+                    select.innerHTML = '';
+                    data.models.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.error("No se pudieron cargar los modelos locales.");
+            }
+        }
+
+        async function runReview() {
+            const code = document.getElementById('gemini-input').value;
+            const model = document.getElementById('model-select').value;
+            const btn = document.getElementById('btn-review');
+            const status = document.getElementById('status');
+            const output = document.getElementById('gemma-output');
+
+            if (!code) {
+                alert("Por favor pega algo de código primero.");
+                return;
+            }
+
+            btn.disabled = true;
+            status.textContent = "Conectando con Gemma local...";
+            output.value = "Gemma está analizando el código...";
+
+            try {
+                const res = await fetch('/api/review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, model })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    output.value = data.review;
+                    status.textContent = "Revisión completada.";
+                } else {
+                    output.value = "ERROR: " + data.error;
+                    status.textContent = "Error en la comunicación.";
+                }
+            } catch (e) {
+                output.value = "ERROR: No se pudo conectar con el servidor bridge.";
+                status.textContent = "Asegúrate de que app_bridge.py esté corriendo.";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        loadModels();
+    </script>
+</body>
+</html>
