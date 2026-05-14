@@ -613,39 +613,39 @@ if st.session_state.logged_in and st.session_state.user:
 
             if fin_tab == "📊 Dashboard 360":
                 if os.path.exists(SALES_FILE):
-                try:
-                    # Cargar Datos
-                    df = pd.read_excel(SALES_FILE)
-                    df['FECHA'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
-                    df = df.dropna(subset=['FECHA'])
-                    df_active = df[df['DESCRIPCION'] != "ANULADA"].copy()
-                    
-                    prod_file = os.path.join(DATABASE_DIR, "productos_maestros.csv")
-                    df_p = pd.read_csv(prod_file) if os.path.exists(prod_file) else None
-                    
-                    # --- PROCESAMIENTO 360 ---
-                    total_ventas = df_active['PRECIO GS'].sum()
-                    total_cmv = 0
-                    
-                    if df_p is not None:
-                        # Mapeo de costos (Lógica de cruce)
-                        # Creamos un dict de costos por ID_Ref
-                        costos_dict = df_p.set_index('ID_Ref')['Costo_Compra'].to_dict()
-                        margenes_dict = df_p.set_index('ID_Ref')['Margen_Pct'].to_dict()
+                    try:
+                        # Cargar Datos
+                        df = pd.read_excel(SALES_FILE)
+                        df['FECHA'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
+                        df = df.dropna(subset=['FECHA'])
+                        df_active = df[df['DESCRIPCION'] != "ANULADA"].copy()
                         
-                        # Intentar cruzar costos
-                        # Nota: Las ventas pueden tener varios códigos. Tomamos el primero o buscamos coincidencia.
-                        def get_cost(desc):
-                            for id_ref, cost in costos_dict.items():
-                                if str(id_ref) in str(desc): return cost
-                            return 0
+                        prod_file = os.path.join(DATABASE_DIR, "productos_maestros.csv")
+                        df_p = pd.read_csv(prod_file) if os.path.exists(prod_file) else None
                         
-                        # Aproximación del CMV (Costo de Mercancía Vendida)
-                        # Si no hay match exacto, estimamos basado en el margen promedio configurado (23%)
-                        cmv_estimado = total_ventas * 0.77 
-                        total_cmv = cmv_estimado # Por ahora estimación hasta pulir el merge de IDs
-                    else:
-                        total_cmv = total_ventas * 0.80 # Default
+                        # --- PROCESAMIENTO 360 ---
+                        total_ventas = df_active['PRECIO GS'].sum()
+                        total_cmv = 0
+                        
+                        if df_p is not None:
+                            # Mapeo de costos (Lógica de cruce)
+                            # Creamos un dict de costos por ID_Ref
+                            costos_dict = df_p.set_index('ID_Ref')['Costo_Compra'].to_dict()
+                            margenes_dict = df_p.set_index('ID_Ref')['Margen_Pct'].to_dict()
+                            
+                            # Intentar cruzar costos
+                            # Nota: Las ventas pueden tener varios códigos. Tomamos el primero o buscamos coincidencia.
+                            def get_cost(desc):
+                                for id_ref, cost in costos_dict.items():
+                                    if str(id_ref) in str(desc): return cost
+                                return 0
+                            
+                            # Aproximación del CMV (Costo de Mercancía Vendida)
+                            # Si no hay match exacto, estimamos basado en el margen promedio configurado (23%)
+                            cmv_estimado = total_ventas * 0.77 
+                            total_cmv = cmv_estimado # Por ahora estimación hasta pulir el merge de IDs
+                        else:
+                            total_cmv = total_ventas * 0.80 # Default
                     
                     margen_bruto = total_ventas - total_cmv
                     margen_neto = margen_bruto * 0.60 # Estimación de gastos operativos (40% de la utilidad)
