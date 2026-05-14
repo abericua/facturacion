@@ -10,7 +10,7 @@ CORS(app)
 # Configuración
 OLLAMA_URL = "http://localhost:11434/api/generate"
 DEFAULT_MODEL = "gemma4:26b"  # Nombre exacto detectado en tu sistema
-PROJECT_PATH = os.getcwd()
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 BITACORA_PATH = os.path.join(PROJECT_PATH, "BITACORA_SOLPRO.md")
 
 def get_bitacora_context():
