@@ -274,6 +274,14 @@ def get_business_context():
             if hist:
                 v_prom = sum(h.get('ventas_brutas',0) for h in hist) / len(hist)
                 context += f"  * Venta Mensual Promedio Histórica: GS {v_prom:,.0f}\n"
+
+    # IDENTIDAD CORPORATIVA (Del Membrete)
+    context += "\n### IDENTIDAD CORPORATIVA (SOLPRO S.R.L.):\n"
+    context += "- RAZÓN SOCIAL: SOLPRO S.R.L.\n"
+    context += "- DIRECCIÓN: Tte. Rivarola, Fernando de la Mora (Zona Norte), Paraguay.\n"
+    context += "- TELÉFONO: +(595) 986 210765\n"
+    context += "- WEB: www.solpropy.com\n"
+    context += "- PARTNERS OFICIALES: EPSON (Authorised Service Centre), TUCANO.\n"
             
     return context
 
@@ -477,6 +485,20 @@ if not st.session_state.get('logged_in', False) or st.session_state.get('user') 
 # --- LÓGICA DE NAVEGACIÓN ---
 if st.session_state.logged_in and st.session_state.user:
     if st.session_state.current_page == "portal":
+        # --- LOGO INSTITUCIONAL ---
+        logo_path = os.path.join(SGSP_ROOT, "LOGO  2D FONDO NEGRO 2026.png")
+        if os.path.exists(logo_path):
+            with open(logo_path, "rb") as f:
+                data = base64.b64encode(f.read()).decode()
+                st.sidebar.markdown(
+                    f"""
+                    <div style="text-align: center; padding-bottom: 20px;">
+                        <img src="data:image/png;base64,{data}" width="180" style="filter: drop-shadow(0px 0px 5px rgba(245,158,11,0.5));">
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        
         # --- DASHBOARD PRINCIPAL (BENTO MENU) ---
         st.sidebar.markdown(f"👤 **Usuario:** {st.session_state.user['nombre']}")
         st.sidebar.markdown(f"🎭 **Rol:** {st.session_state.user['rol'].upper()}")
@@ -1046,11 +1068,11 @@ if st.session_state.logged_in and st.session_state.user:
                 // Geometry: Intelligence Matrix (Icosahedron)
                 const geometry = new THREE.IcosahedronGeometry(1, 1);
                 const material = new THREE.MeshPhongMaterial({
-                    color: 0xf59e0b,
+                    color: 0xFFD700,
                     wireframe: true,
-                    emissive: 0xf59e0b,
-                    emissiveIntensity: 0.5,
-                    shininess: 100
+                    emissive: 0xFFD700,
+                    emissiveIntensity: 0.6,
+                    shininess: 120
                 });
                 const mesh = new THREE.Mesh(geometry, material);
                 scene.add(mesh);
@@ -1071,7 +1093,7 @@ if st.session_state.logged_in and st.session_state.user:
                     positions[i] = (Math.random() - 0.5) * 10;
                 }
                 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                const particlesMaterial = new THREE.PointsMaterial({ size: 0.02, color: 0xf59e0b });
+                const particlesMaterial = new THREE.PointsMaterial({ size: 0.02, color: 0xFFD700 });
                 const particles = new THREE.Points(particlesGeometry, particlesMaterial);
                 scene.add(particles);
                 
