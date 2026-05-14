@@ -462,11 +462,12 @@ def login_screen():
         </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
-        with st.container():
-            st.markdown('<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 40px; border-radius: 32px; backdrop-filter: blur(20px);">', unsafe_allow_html=True)
+        # Contenedor de Login con Glassmorphism
+        with st.container(border=True):
             if st.session_state.login_step == 1:
+                st.markdown("<h3 style='text-align:center; color:#fff; font-family:Syne;'>IDENTIFICACIÓN</h3>", unsafe_allow_html=True)
                 with st.form("login_form", clear_on_submit=False):
                     u = st.text_input("USUARIO", placeholder="Nombre de acceso")
                     p = st.text_input("CLAVE", type="password", placeholder="••••••••")
@@ -482,6 +483,27 @@ def login_screen():
                             st.error("Acceso Denegado")
             else:
                 user = st.session_state.temp_user
+                
+                # --- LÓGICA DE QR / SEGURIDAD ---
+                if 'totp_secret' not in user or not user['totp_secret']:
+                    secret = pyotp.random_base32()
+                    user['totp_secret'] = secret
+                    users = load_users()
+                    for usr in users:
+                        if usr['usuario'] == user['usuario']: usr['totp_secret'] = secret
+                    save_users(users)
+                    
+                    st.info("Configuración 2FA Requerida")
+                    uri = pyotp.totp.TOTP(secret).provisioning_uri(name=user['usuario'], issuer_name="SGSP_SOLPRO")
+                    img = qrcode.make(uri)
+                    buf = io.BytesIO()
+                    img.save(buf)
+                    st.image(buf.getvalue(), caption="Escanea con Google Authenticator", use_container_width=True)
+                    st.code(f"Código manual: {secret}")
+                else:
+                    # Mostrar un icono de seguridad si ya está configurado
+                    st.markdown("<div style='text-align:center; font-size:4rem; margin-bottom:10px;'>🛡️</div>", unsafe_allow_html=True)
+                
                 st.markdown(f"<p style='text-align:center; color:#fff;'>Protocolo 2FA: <b>{user['nombre']}</b></p>", unsafe_allow_html=True)
                 code = st.text_input("CÓDIGO DE SEGURIDAD", max_chars=6, placeholder="000000")
                 if st.button("AUTENTICAR ACCESO", use_container_width=True):
@@ -492,7 +514,6 @@ def login_screen():
                         st.rerun()
                     else:
                         st.error("Código Inválido")
-            st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # --- BLOQUEO DE ACCESO SI NO HAY LOGIN ---
