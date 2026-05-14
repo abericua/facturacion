@@ -751,11 +751,11 @@ if st.session_state.logged_in and st.session_state.user:
                                 'FECHA': 'Última Venta',
                                 'Dias_Desde_Venta': 'Días de Inactividad'
                             }))
-                except Exception as e:
-                    st.error(f"Error al procesar ventas: {e}")
-            else:
-                if fin_tab == "📊 Dashboard 360":
-                    st.warning("No hay historial de ventas disponible para generar el dashboard.")
+                        except Exception as e:
+                            st.error(f"Error al procesar ventas: {e}")
+                else:
+                    if fin_tab == "📊 Dashboard 360":
+                        st.warning("No hay historial de ventas disponible para generar el dashboard.")
 
             # --- SECCIÓN: BANCOS Y CAJA ---
             if fin_tab == "🏦 Bancos y Caja":
