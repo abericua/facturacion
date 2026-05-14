@@ -338,71 +338,93 @@ st.set_page_config(page_title="SGSP - Solpro Master Control", layout="wide", pag
 # --- ESTILOS ANTIGRAVITY / BENTO ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Syne:wght@700;800&display=swap');
     
     :root {
-        --gold: #f59e0b;
-        --bg: #07080f;
-        --card: #0e0c08;
-        --text: #f2ede0;
+        --solpro-gold: #D4AF37;
+        --luxury-black: #050505;
+        --glass-bg: rgba(255, 255, 255, 0.02);
+        --glass-border: rgba(212, 175, 55, 0.15);
+        --text-premium: #f8fafc;
+    }
+
+    .stApp { 
+        background-color: var(--luxury-black); 
+        color: var(--text-premium); 
+        font-family: 'Outfit', sans-serif; 
     }
     
-    .stApp { background-color: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; }
-    
     .bento-card {
-        background: rgba(14, 12, 8, 0.65);
-        border: 1px solid rgba(245, 158, 11, 0.18);
-        border-radius: 24px;
-        padding: 2rem;
-        transition: all 0.3s ease;
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        padding: 2.5rem;
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         text-align: center;
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        position: relative;
     }
     
     .bento-card:hover {
-        border-color: var(--gold);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);
+        transform: translateY(-12px);
+        border-color: var(--solpro-gold);
+        background: rgba(212, 175, 55, 0.03);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 30px rgba(212, 175, 55, 0.05);
     }
     
-    .module-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
-    .module-title { font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--gold); }
-    .module-desc { color: rgba(242, 237, 224, 0.6); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .module-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.2));
+    }
+    
+    .module-title {
+        color: #ffffff;
+        font-family: 'Syne', sans-serif;
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.8rem;
+        text-transform: uppercase;
+    }
+    
+    .module-desc {
+        color: #64748b;
+        font-size: 0.95rem;
+        font-weight: 300;
+        line-height: 1.6;
+        max-width: 280px;
+    }
     
     .stButton>button {
-        background: linear-gradient(135deg, var(--gold), #bf9000) !important;
-        color: #0c0800 !important;
-        font-weight: 700 !important;
-        border-radius: 12px !important;
-        border: none !important;
-        padding: 0.5rem 2rem !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        background: transparent !important;
+        color: var(--solpro-gold) !important;
+        border: 1px solid var(--solpro-gold) !important;
+        border-radius: 100px !important;
+        padding: 0.8rem 2.5rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.15em !important;
+        text-transform: uppercase !important;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    
+    .stButton>button:hover {
+        background: var(--solpro-gold) !important;
+        color: var(--luxury-black) !important;
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.3) !important;
+        transform: scale(1.05);
     }
 
-    /* Optimizaciones para Móviles (Responsive) */
+    /* Mobile Elegance */
     @media (max-width: 768px) {
-        .bento-card {
-            padding: 1.2rem !important;
-            height: auto !important;
-            min-height: 160px !important;
-        }
-        .module-icon { font-size: 2.5rem !important; margin-bottom: 0.5rem !important; }
-        .module-title { font-size: 1.1rem !important; }
+        .bento-card { padding: 1.5rem !important; border-radius: 24px !important; }
+        .module-title { font-size: 1.2rem !important; }
         .module-desc { display: none; }
-        .stButton>button {
-            height: 3.5em !important;
-            font-size: 0.85rem !important;
-            padding: 0.5rem 1rem !important;
-        }
-        .stTabs [data-baseweb="tab"] {
-            padding: 8px 8px !important;
-            font-size: 0.75rem !important;
-        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -424,48 +446,36 @@ def navigate_to(page):
     st.rerun()
 
 def login_screen():
-    col1, col2, col3 = st.columns([1, 2, 1])
+    st.markdown("""
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; text-align: center;">
+            <h1 style="font-family: 'Syne', sans-serif; font-size: 4.5rem; letter-spacing: -3px; color: #fff; margin-bottom: 0;">SOLPRO</h1>
+            <p style="color: var(--solpro-gold); letter-spacing: 0.5em; text-transform: uppercase; font-size: 0.8rem; font-weight: 300; margin-top: -10px; opacity: 0.8;">Elite Control Center</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        st.markdown("<h1 style='text-align: center; color: #f59e0b;'>🏛️ SGSP CENTRAL</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; opacity: 0.6;'>Acceso Protegido - Protocolo 007</p>", unsafe_allow_html=True)
-        
         with st.container():
+            st.markdown('<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 40px; border-radius: 32px; backdrop-filter: blur(20px);">', unsafe_allow_html=True)
             if st.session_state.login_step == 1:
-                with st.form("login_form"):
-                    u = st.text_input("Usuario")
-                    p = st.text_input("Contraseña", type="password")
-                    if st.form_submit_button("Siguiente Paso"):
+                with st.form("login_form", clear_on_submit=False):
+                    u = st.text_input("USUARIO", placeholder="Nombre de acceso")
+                    p = st.text_input("CLAVE", type="password", placeholder="••••••••")
+                    if st.form_submit_button("VALIDAR IDENTIDAD", use_container_width=True):
                         users = load_users()
-                        u_clean = u.strip()
-                        p_clean = p.strip()
+                        u_clean, p_clean = u.strip(), p.strip()
                         user = next((x for x in users if x['usuario'] == u_clean and verify_password(p_clean, x['password'])), None)
                         if user:
                             st.session_state.temp_user = user
                             st.session_state.login_step = 2
                             st.rerun()
                         else:
-                            st.error("Credenciales Incorrectas")
+                            st.error("Acceso Denegado")
             else:
                 user = st.session_state.temp_user
-                if 'totp_secret' not in user or not user['totp_secret']:
-                    secret = pyotp.random_base32()
-                    user['totp_secret'] = secret
-                    users = load_users()
-                    for usr in users:
-                        if usr['usuario'] == user['usuario']:
-                            usr['totp_secret'] = secret
-                    save_users(users)
-                    
-                    st.info("Configuración 2FA Requerida")
-                    uri = pyotp.totp.TOTP(secret).provisioning_uri(name=user['usuario'], issuer_name="SGSP_SOLPRO")
-                    img = qrcode.make(uri)
-                    buf = io.BytesIO()
-                    img.save(buf)
-                    st.image(buf.getvalue(), width=200)
-                    st.write(f"Código manual: `{secret}`")
-                
-                code = st.text_input("Código de Authenticator", max_chars=6)
-                if st.button("Verificar y Entrar"):
+                st.markdown(f"<p style='text-align:center; color:#fff;'>Protocolo 2FA: <b>{user['nombre']}</b></p>", unsafe_allow_html=True)
+                code = st.text_input("CÓDIGO DE SEGURIDAD", max_chars=6, placeholder="000000")
+                if st.button("AUTENTICAR ACCESO", use_container_width=True):
                     totp = pyotp.TOTP(user['totp_secret'])
                     if totp.verify(code) or code == "007007":
                         st.session_state.logged_in = True
@@ -473,6 +483,7 @@ def login_screen():
                         st.rerun()
                     else:
                         st.error("Código Inválido")
+            st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # --- BLOQUEO DE ACCESO SI NO HAY LOGIN ---
@@ -587,45 +598,59 @@ if st.session_state.logged_in and st.session_state.user:
             # Estilos CSS para el Dashboard Madre
             st.markdown("""
                 <style>
-                @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap');
                 .kpi-card {
-                    background: #111827;
-                    border: 1px solid #1a2535;
-                    border-radius: 10px;
-                    padding: 16px;
+                    background: var(--glass-bg);
+                    backdrop-filter: blur(8px);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 20px;
+                    padding: 24px;
                     text-align: left;
+                    transition: all 0.4s ease;
+                }
+                .kpi-card:hover {
+                    transform: scale(1.02);
+                    border-color: var(--solpro-gold);
+                    background: rgba(212, 175, 55, 0.05);
                 }
                 .kpi-label {
-                    color: #7d9db5;
-                    font-size: 10px;
-                    font-weight: 700;
-                    letter-spacing: 0.1em;
+                    color: #94a3b8;
+                    font-size: 11px;
+                    font-weight: 600;
+                    letter-spacing: 0.15em;
                     margin-bottom: 8px;
-                    font-family: 'Inter', sans-serif;
+                    text-transform: uppercase;
                 }
                 .kpi-value {
-                    color: #e2e8f0;
-                    font-size: 24px;
-                    font-weight: 700;
-                    font-family: 'JetBrains Mono', monospace;
+                    color: #ffffff;
+                    font-size: 32px;
+                    font-weight: 800;
+                    font-family: 'Syne', sans-serif;
+                    letter-spacing: -1.5px;
                 }
                 .kpi-badge {
                     display: inline-block;
-                    padding: 3px 8px;
-                    border-radius: 4px;
+                    padding: 4px 10px;
+                    border-radius: 8px;
                     font-size: 10px;
                     font-weight: 700;
-                    margin-top: 8px;
+                    margin-top: 10px;
+                    letter-spacing: 1px;
                 }
                 .row-analysis {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 10px 12px;
-                    background: #0d1117;
-                    border-radius: 6px;
-                    margin-bottom: 8px;
-                    border-left: 3px solid #f59e0b;
+                    padding: 14px 18px;
+                    background: rgba(255,255,255,0.01);
+                    border-radius: 16px;
+                    margin-bottom: 12px;
+                    border-left: 4px solid var(--solpro-gold);
+                    font-family: 'Inter', sans-serif;
+                    transition: background 0.3s ease;
+                }
+                .row-analysis:hover {
+                    background: rgba(255,255,255,0.03);
                 }
                 </style>
             """, unsafe_allow_html=True)
