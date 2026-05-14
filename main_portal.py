@@ -1017,6 +1017,82 @@ if st.session_state.logged_in and st.session_state.user:
                         st.warning("Por favor complete los campos obligatorios.")
 
         with tab_brain:
+            # --- 3D IMMERSIVE EXPERIENCE: INTEL MATRIX ---
+            st.markdown("""
+                <style>
+                #three-canvas-container {
+                    width: 100%;
+                    height: 300px;
+                    background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%);
+                    border-radius: 12px;
+                    margin-bottom: 20px;
+                    overflow: hidden;
+                    border: 1px solid rgba(245, 158, 11, 0.2);
+                }
+                </style>
+                <div id="three-canvas-container"></div>
+                
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+                <script>
+                const container = document.getElementById('three-canvas-container');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 300, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                
+                renderer.setSize(container.offsetWidth, 300);
+                renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
+                container.appendChild(renderer.domElement);
+                
+                // Geometry: Intelligence Matrix (Icosahedron)
+                const geometry = new THREE.IcosahedronGeometry(1, 1);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0xf59e0b,
+                    wireframe: true,
+                    emissive: 0xf59e0b,
+                    emissiveIntensity: 0.5,
+                    shininess: 100
+                });
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+                
+                // Lights
+                const light = new THREE.PointLight(0xffffff, 1, 100);
+                light.position.set(5, 5, 5);
+                scene.add(light);
+                scene.add(new THREE.AmbientLight(0x404040));
+                
+                camera.position.z = 3;
+                
+                // Particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const count = 500;
+                const positions = new Float32Array(count * 3);
+                for(let i = 0; i < count * 3; i++) {
+                    positions[i] = (Math.random() - 0.5) * 10;
+                }
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                const particlesMaterial = new THREE.PointsMaterial({ size: 0.02, color: 0xf59e0b });
+                const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+                scene.add(particles);
+                
+                function animate() {
+                    requestAnimationFrame(animate);
+                    mesh.rotation.x += 0.005;
+                    mesh.rotation.y += 0.01;
+                    particles.rotation.y += 0.001;
+                    renderer.render(scene, camera);
+                }
+                
+                window.addEventListener('resize', () => {
+                    camera.aspect = container.offsetWidth / 300;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.offsetWidth, 300);
+                });
+                
+                animate();
+                </script>
+            """, unsafe_allow_html=True)
+
             st.markdown("### 🧠 Consultor Estratégico SOLPRO (Gemma 4 Bridge)")
             st.info("Este agente tiene acceso a tus ventas, bancos, stock y leyes cargadas. Úsalo para debatir planes de expansión o análisis de riesgos.")
             
