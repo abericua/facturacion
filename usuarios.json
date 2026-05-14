@@ -1,9 +1,10 @@
 [
     {
         "usuario": "admin",
-        "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+        "password": "b37849ed337cbe583731854040d836a25fb4f93869239dc897f02fb07d59f618",
         "rol": "admin",
-        "nombre": "Administrador SOLPRO"
+        "nombre": "Administrador SOLPRO",
+        "totp_secret": ""
     },
     {
         "usuario": "vendedor1",

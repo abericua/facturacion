@@ -7,3 +7,4 @@ requests
 xlsxwriter
 pyotp
 qrcode
+pypdf>=3.0.0

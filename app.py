@@ -11,10 +11,15 @@ import qrcode
 from datetime import datetime, date
 from pdf_generator import generate_invoice_pdf
 
-# Configuración de página
+# --- CONFIGURACIÓN DE RUTAS (Railway + Local) ---
+BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
+PERSISTENT_DIR = "/app/data" # Mount path del volumen Railway
+SGSP_DATABASE  = PERSISTENT_DIR if os.path.exists(PERSISTENT_DIR) else BASE_DIR
+SYSTEM_PEPPER  = os.environ.get("SYSTEM_PEPPER", "SOLPRO_ULTRA_SECRET_2026_#!")
+
 st.set_page_config(
-    page_title="SOLPRO - Facturación Corporativa", 
-    layout="wide", 
+    page_title="SOLPRO - Facturación Corporativa",
+    layout="wide",
     page_icon="📄",
     initial_sidebar_state="expanded"
 )
@@ -175,23 +180,18 @@ st.markdown("""
     }
     
     /* Responsive Mobile Design */
-    .responsive-flex {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
     @media (max-width: 768px) {
         .header-container {
             flex-direction: column !important;
             text-align: center !important;
-            gap: 15px !important;
-            padding: 20px !important;
+            gap: 10px !important;
+            padding: 15px !important;
+            margin-bottom: 20px !important;
         }
         
         .login-container {
-            margin: 30px 10px !important;
-            padding: 30px 20px !important;
+            margin: 20px 10px !important;
+            padding: 25px 15px !important;
         }
         
         .responsive-flex {
@@ -199,46 +199,48 @@ st.markdown("""
             align-items: flex-start !important;
             gap: 10px !important;
         }
-        
-        .responsive-flex > div:last-child {
-            width: 100% !important;
-            text-align: left !important;
-            padding-top: 10px !important;
-            border-top: 1px solid rgba(255,255,255,0.1) !important;
+
+        /* Ajustes para tabla de items en móvil */
+        [data-testid="stMetric"] {
+            padding: 10px !important;
         }
         
-        .total-display-container {
-            padding: 20px !important;
-            text-align: left !important;
+        .stButton>button {
+            height: 4.5em !important; /* Botones más grandes para dedos */
+            font-size: 0.9rem !important;
         }
-        .total-display-value {
-            font-size: 28px !important;
+
+        .stTabs [data-baseweb="tab"] {
+            padding: 10px 10px !important;
+            font-size: 0.8rem !important;
         }
-        
-        h1 { font-size: 1.5rem !important; }
-        h2 { font-size: 1.2rem !important; }
+
+        /* Ocultar elementos no críticos en móvil para ahorrar espacio */
+        .sp-left { display: none !important; }
+        [data-testid="column"]:nth-child(1) { display: none !important; }
+        [data-testid="column"]:nth-child(2) { width: 100% !important; flex: 1 1 100% !important; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Rutas de archivos dinámicas
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# --- CONFIGURACIÓN DE PERSISTENCIA (RAILWAY) ---
-PERSISTENT_DIR = "/app/data"
-DATA_DIR = PERSISTENT_DIR if os.path.exists(PERSISTENT_DIR) else BASE_DIR
-
-PRODUCTS_FILE = os.path.join(BASE_DIR, "LISTA DE PRECIOS DE VENTA.xlsx")
-SALES_FILE = os.path.join(DATA_DIR, "VENTAS TOTALES 2026.xlsx")
-CLIENTS_FILE = os.path.join(DATA_DIR, "clientes.json")
-USERS_FILE = os.path.join(BASE_DIR, "usuarios.json")
-OUTPUT_DIR = os.path.join(DATA_DIR, "Facturas_Emitidas")
+# --- CONFIGURACIÓN DE RUTAS ---
+# Priorizar volumen persistente de Railway para la Base de Datos Maestra
+SGSP_DATABASE = os.environ.get("SGSP_DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database"))
+# SGSP_DATABASE ya definido arriba. Solo sobreescribir si hay variable de entorno explícita.
+_env_override = os.environ.get("SGSP_DATABASE")
+if _env_override:
+    SGSP_DATABASE = _env_override
+PRODUCTS_FILE = os.path.join(SGSP_DATABASE, "productos_maestros.csv") # Unificado a CSV
+CLIENTS_FILE = os.path.join(SGSP_DATABASE, "clientes.json")
+SALES_FILE = os.path.join(SGSP_DATABASE, "VENTAS TOTALES 2026.xlsx")
+USERS_FILE = os.path.join(SGSP_DATABASE, "usuarios.json")
+OUTPUT_DIR = os.environ.get("OUTPUT_DIR", "facturas_emitidas")
 
 # Inicialización de carpeta de datos si es persistente
-if DATA_DIR != BASE_DIR:
+if SGSP_DATABASE != BASE_DIR:
     import shutil
     for f in ["VENTAS TOTALES 2026.xlsx", "clientes.json"]:
-        dest = os.path.join(DATA_DIR, f)
+        dest = os.path.join(SGSP_DATABASE, f)
         src = os.path.join(BASE_DIR, f)
         if not os.path.exists(dest) and os.path.exists(src):
             shutil.copy2(src, dest)
@@ -280,8 +282,6 @@ emergency_data_fix()
 
 # --- SEGURIDAD Y SESIÓN ---
 # Punto 2: Añadimos un 'PEPPER' (salt) para fortalecer los hashes
-SYSTEM_PEPPER = "SOLPRO_ULTRA_SECRET_2026_#!"
-
 def hash_password(password):
     # Combinamos el password con el pepper del sistema
     salted_pass = password + SYSTEM_PEPPER
@@ -324,29 +324,26 @@ def clean_price(price_str):
 @st.cache_data(ttl=60)
 def load_products():
     if os.path.exists(PRODUCTS_FILE):
-        df = pd.read_excel(PRODUCTS_FILE)
-        # Buscar la fila real de cabecera para evitar problemas si hay filas vacías al inicio
-        start_row = 0
-        for i in range(min(len(df), 10)):
-            if "ID REF" in str(df.iloc[i, 0]).upper():
-                start_row = i + 1
-                break
-        
+        df = pd.read_csv(PRODUCTS_FILE)
         df_final = pd.DataFrame()
-        df_final['CODIGO'] = df.iloc[start_row:, 0].astype(str).str.strip()
-        df_final['LINEA'] = df.iloc[start_row:, 1].astype(str).str.strip()
-        df_final['DESCRIPCION'] = df.iloc[start_row:, 2].astype(str).str.strip()
+        # Mapeo según estructura unificada por la Calculadora:
+        # Nombre,ID_Ref,Proveedor,Linea,Costo_Compra,Moneda_Costo,Margen_Pct
+        df_final['CODIGO'] = df['ID_Ref'].astype(str).str.strip()
+        df_final['LINEA'] = df['Linea'].astype(str).str.strip()
+        df_final['DESCRIPCION'] = df['Nombre'].astype(str).str.strip()
         
-        # Limpieza de precio
-        df_final['PRECIO'] = df.iloc[start_row:, 3].apply(clean_price)
+        # Calcular precio de venta basado en costo y margen (Lógica 360)
+        # Nota: Aquí podemos aplicar el margen si queremos precios dinámicos
+        # Pero por ahora tomamos el precio calculado de la calculadora si estuviera en el CSV
+        # Como no está, usamos la lógica de cálculo manual para asegurar consistencia
+        df_final['PRECIO'] = df['Costo_Compra'].astype(float) * (1 + df['Margen_Pct'].astype(float)/100)
         
-        # Manejo de Stock (Columna 5)
-        if len(df.columns) >= 6:
-            df_final['STOCK'] = pd.to_numeric(df.iloc[start_row:, 5], errors='coerce').fillna(0)
+        # Manejo de Stock
+        if 'Stock' in df.columns:
+            df_final['STOCK'] = pd.to_numeric(df['Stock'], errors='coerce').fillna(0)
         else:
             df_final['STOCK'] = 0
             
-        # Limpieza de nans y cabeceras residuales
         df_final = df_final[df_final['CODIGO'] != 'nan'].reset_index(drop=True)
         return df_final
     return pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO', 'STOCK'])
@@ -395,7 +392,7 @@ def save_client(client_data):
 
 def update_inventory(sales_list):
     if os.path.exists(PRODUCTS_FILE):
-        df = pd.read_excel(PRODUCTS_FILE)
+        df = pd.read_csv(PRODUCTS_FILE)
         start_row = 1 if not df.empty and str(df.iloc[0, 0]).strip() == 'ID REF' else 0
         for sale in sales_list:
             codigo = sale['COD_PRODUCTO']
@@ -415,12 +412,12 @@ def update_inventory(sales_list):
                     if pd.isna(current_stock): current_stock = 0
                     df.iloc[idx, 5] = current_stock - sale.get('_CANT_NUM', 0)
                 except: pass
-        df.to_excel(PRODUCTS_FILE, index=False)
+        df.to_csv(PRODUCTS_FILE, index=False)
         st.cache_data.clear()
 
 def validate_stock(sales_list):
     if not os.path.exists(PRODUCTS_FILE): return True, ""
-    df = pd.read_excel(PRODUCTS_FILE)
+    df = pd.read_csv(PRODUCTS_FILE)
     start_row = 1 if not df.empty and str(df.iloc[0, 0]).strip() == 'ID REF' else 0
     for sale in sales_list:
         codigo = sale['COD_PRODUCTO']
@@ -439,7 +436,7 @@ def validate_stock(sales_list):
 
 def add_inventory(codigo, cantidad_a_sumar):
     if os.path.exists(PRODUCTS_FILE):
-        df = pd.read_excel(PRODUCTS_FILE)
+        df = pd.read_csv(PRODUCTS_FILE)
         start_row = 1 if not df.empty and str(df.iloc[0, 0]).strip() == 'ID REF' else 0
         
         full_mask = df.iloc[:, 0].astype(str).str.strip() == str(codigo).strip()
@@ -456,7 +453,7 @@ def add_inventory(codigo, cantidad_a_sumar):
                 if pd.isna(current_stock): current_stock = 0
                 df.iloc[idx, 5] = current_stock + cantidad_a_sumar
             except: pass
-            df.to_excel(PRODUCTS_FILE, index=False)
+            df.to_csv(PRODUCTS_FILE, index=False)
             st.cache_data.clear()
             return True
     return False

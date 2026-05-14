@@ -24,5 +24,8 @@ COPY . .
 # Exponer el puerto que usará Streamlit
 EXPOSE 8501
 
+# Crear directorio de datos persistente
+RUN mkdir -p /data
+
 # Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
 CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0
