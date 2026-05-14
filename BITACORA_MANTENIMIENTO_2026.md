@@ -90,10 +90,14 @@
 - **Estandarización 2FA:** Actualizado `usuarios.json` con `totp_secret` para todos los vendedores.
 - **Optimización de Rutas:** Uso de rutas absolutas en `app_bridge.py` para compatibilidad con Railway.
 
-### FASE 12: Refactorización Arquitectónica y Modularidad (Mayo 2026)
-- **Eliminación de exec():** Se reemplazó la carga dinámica de `app.py` por una importación limpia mediante `importlib`.
-- **Encapsulación de UI:** El Facturador fue convertido en un módulo importable con la función `run_facturador_app()`.
-- **Protección de Configuración:** `st.set_page_config` ahora solo se ejecuta en modo standalone, evitando conflictos en el portal.
-- **Robustez:** Implementado manejo de excepciones en la carga de módulos para prevenir caídas globales.
+### FASE 13: Rediseño Minimalista de Lujo (Mayo 2026)
+- **Square Elite Design:** Transición estética total a bordes rectos (0px), eliminando curvaturas para un look de lujo industrial y arquitectónico.
+- **Tipografía de Impacto:** Implementación de fuente **Inter** con peso **900 (Ultra Bold)** en títulos masivos para proyectar autoridad y precisión.
+- **Estética de Alto Contraste:** Eliminación de gradientes y sombras pesadas en favor de un diseño minimalista basado en líneas finas de 1px y una paleta Blanco/Negro/Oro sobria.
 
-**Estado del Sistema:** [MÁXIMA SEGURIDAD ACTIVADA - LISTO PARA PRODUCCIÓN]
+### FASE 14: Resolución de Despliegue Crítico - Railway Sync (Mayo 2026)
+- **Unificación de Repositorio:** Resolución de conflicto de submódulos (gitlinks) que impedía la subida de archivos del facturador. Se eliminaron repositorios anidados para permitir el seguimiento físico de los archivos.
+- **Corrección de Rutas en Producción:** Garantizada la existencia de `/app/Creador de Facturas/app.py` en Railway, eliminando errores de "Archivo no encontrado".
+- **Sincronización Master:** Centralización definitiva de todo el código en la rama `master` para garantizar despliegues atómicos y consistentes.
+
+**Estado del Sistema:** [MÁXIMA SEGURIDAD ACTIVADA - DISEÑO PREMIUM - PRODUCCIÓN ESTABLE]
