@@ -358,94 +358,136 @@ st.markdown("""
     
     :root {
         --solpro-gold: #D4AF37;
-        --luxury-black: #080808;
-        --glass-bg: rgba(255, 255, 255, 0.02);
-        --glass-border: rgba(212, 175, 55, 0.1);
+        --solpro-gold-glow: rgba(212, 175, 55, 0.4);
+        --luxury-black: #050505;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(212, 175, 55, 0.15);
         --text-premium: #f8fafc;
+        --transition-main: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* Fondo Antigravity con Glow Radial */
     .stApp { 
-        background-color: var(--luxury-black); 
+        background-color: var(--luxury-black);
+        background-image: 
+            radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 40%);
         color: var(--text-premium); 
         font-family: 'Outfit', sans-serif; 
     }
     
     .stSidebar {
-        background-color: #0c0c0c !important;
+        background-color: rgba(8, 8, 8, 0.95) !important;
+        backdrop-filter: blur(20px);
         border-right: 1px solid var(--glass-border);
+    }
+
+    /* Animación de entrada escalonada */
+    @keyframes floatIn {
+        from { opacity: 0; transform: translateY(30px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .bento-card {
         background: var(--glass-bg);
-        backdrop-filter: blur(12px);
+        backdrop-filter: blur(25px);
         border: 1px solid var(--glass-border);
-        border-radius: 28px;
-        padding: 2rem;
-        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 32px;
+        padding: 2.5rem;
+        transition: var(--transition-main);
         text-align: center;
-        height: 280px;
+        height: 300px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         position: relative;
-        margin-bottom: 1rem;
+        overflow: hidden;
+        animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        transform-style: preserve-3d;
+        perspective: 1000px;
     }
     
+    .bento-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+        transition: 0.5s;
+    }
+
+    .bento-card:hover::before { left: 100%; }
+
     .bento-card:hover {
-        transform: translateY(-8px);
+        transform: translateY(-12px) rotateX(4deg) rotateY(2deg);
         border-color: var(--solpro-gold);
-        background: rgba(212, 175, 55, 0.04);
-        box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        background: rgba(212, 175, 55, 0.06);
+        box-shadow: 
+            0 40px 80px rgba(0,0,0,0.6),
+            0 0 20px rgba(212, 175, 55, 0.1);
     }
     
     .module-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+        transition: var(--transition-main);
+    }
+    
+    .bento-card:hover .module-icon {
+        transform: translateZ(30px) scale(1.1);
+        filter: drop-shadow(0 0 20px var(--solpro-gold-glow));
     }
     
     .module-title {
         color: #ffffff;
         font-family: 'Syne', sans-serif;
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         font-weight: 800;
-        letter-spacing: -0.02em;
-        margin-bottom: 0.5rem;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.75rem;
         text-transform: uppercase;
+        background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     
     .module-desc {
-        color: #64748b;
-        font-size: 0.85rem;
+        color: rgba(248, 250, 252, 0.5);
+        font-size: 0.9rem;
         font-weight: 300;
-        line-height: 1.5;
-        max-width: 90%;
+        line-height: 1.6;
+        max-width: 85%;
     }
     
+    /* Botones de Lujo */
     .stButton>button {
-        background: transparent !important;
+        background: rgba(212, 175, 55, 0.05) !important;
         color: var(--solpro-gold) !important;
-        border: 1px solid var(--solpro-gold) !important;
-        border-radius: 12px !important;
-        padding: 0.6rem 2rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.1em !important;
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 16px !important;
+        padding: 0.8rem 2.5rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.15em !important;
         text-transform: uppercase !important;
-        transition: all 0.3s ease !important;
+        transition: var(--transition-main) !important;
+        backdrop-filter: blur(10px);
     }
     
     .stButton>button:hover {
         background: var(--solpro-gold) !important;
-        color: var(--luxury-black) !important;
-        box-shadow: 0 0 30px rgba(212, 175, 55, 0.3) !important;
+        color: #000 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3) !important;
+        border-color: var(--solpro-gold) !important;
     }
 
-    /* Mobile Cleanup */
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-        .bento-card { height: auto; min-height: 200px; padding: 1.2rem; }
-        .module-title { font-size: 1.1rem; }
-        .module-desc { display: none; }
+        .bento-card { height: auto; min-height: 220px; padding: 1.5rem; border-radius: 24px; }
+        .module-title { font-size: 1.2rem; }
+        .module-desc { font-size: 0.8rem; }
     }
     </style>
 """, unsafe_allow_html=True)
