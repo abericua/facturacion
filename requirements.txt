@@ -1,11 +1,11 @@
-streamlit
+streamlit[starlette]
 pandas
 openpyxl
 reportlab
 num2words
 requests
 xlsxwriter
-
 httpx
-
 psycopg2-binary
+fastapi
+uvicorn
