@@ -4,6 +4,7 @@ import os
 import json
 import hashlib
 import base64
+from db_sgsp import (init_db, upsert_pago, conciliar_pago, get_resumen, get_pagos)
 from sync_service import (
     sync_pago, sync_pedido, sync_tipo_cambio,
     sync_clientes_bulk, sync_productos_bulk
@@ -42,115 +43,42 @@ def inicializar_tipo_cambio():
         with open(tc_path, 'w', encoding='utf-8') as f:
             json.dump(tc, f, indent=2, ensure_ascii=False)
 
-import threading
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-
-api = FastAPI()
-api.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@api.get("/api/pagos")
-def api_get_pagos():
-    import json, os
-    pagos_path = os.path.join(
-        os.path.dirname(__file__),
-        'database', 'pagos.json')
-    if not os.path.exists(pagos_path):
-        return []
-    with open(pagos_path, 'r',
-        encoding='utf-8') as f:
-        return json.load(f)
-
-@api.patch("/api/pagos/{id_pago}/conciliar")
-def api_conciliar_pago(id_pago: str):
-    import json, os
-    from datetime import datetime
-    pagos_path = os.path.join(
-        os.path.dirname(__file__),
-        'database', 'pagos.json')
-    with open(pagos_path, 'r',
-        encoding='utf-8') as f:
-        pagos = json.load(f)
-    for p in pagos:
-        if p['id_pago'] == id_pago:
-            p['conciliado'] = True
-            p['fecha_conciliacion'] = \
-                datetime.now().strftime('%Y-%m-%d')
-            break
-    with open(pagos_path, 'w',
-        encoding='utf-8') as f:
-        json.dump(pagos, f, indent=2,
-            ensure_ascii=False)
-    return {"ok": True, "id_pago": id_pago}
-
-@api.patch("/api/pagos/{id_pago}/desconciliar")
-def api_desconciliar_pago(id_pago: str):
-    import json, os
-    pagos_path = os.path.join(
-        os.path.dirname(__file__),
-        'database', 'pagos.json')
-    with open(pagos_path, 'r',
-        encoding='utf-8') as f:
-        pagos = json.load(f)
-    for p in pagos:
-        if p['id_pago'] == id_pago:
-            p['conciliado'] = False
-            p['fecha_conciliacion'] = ''
-            break
-    with open(pagos_path, 'w',
-        encoding='utf-8') as f:
-        json.dump(pagos, f, indent=2,
-            ensure_ascii=False)
-    return {"ok": True, "id_pago": id_pago}
-
-@api.get("/api/conciliacion/resumen")
-def api_resumen():
-    import json, os
-    pagos_path = os.path.join(
-        os.path.dirname(__file__),
-        'database', 'pagos.json')
-    if not os.path.exists(pagos_path):
-        return {"total": 0, "conciliados": 0,
-                "pendientes": 0, "pagos": []}
-    with open(pagos_path, 'r',
-        encoding='utf-8') as f:
-        pagos = json.load(f)
-    conciliados = [p for p in pagos
-        if p.get('conciliado')]
-    pendientes = [p for p in pagos
-        if not p.get('conciliado')]
-    return {
-        "total_pagos": len(pagos),
-        "total_gs": sum(
-            p.get('monto_gs', 0) for p in pagos),
-        "conciliados": len(conciliados),
-        "monto_conciliado_gs": sum(
-            p.get('monto_gs', 0)
-            for p in conciliados),
-        "pendientes": len(pendientes),
-        "monto_pendiente_gs": sum(
-            p.get('monto_gs', 0)
-            for p in pendientes),
-        "pagos": pagos
-    }
-
-def run_api():
-    uvicorn.run(api, host="127.0.0.1", port=8502,
-        log_level="error")
-
-api_thread = threading.Thread(
-    target=run_api, daemon=True)
-api_thread.start()
 
 
 def run_facturador_app():
+    init_db()
     inicializar_tipo_cambio()
+    
+    params = st.query_params
+    if params.get("api") == "resumen":
+        import json as _json
+        resumen = get_resumen()
+        st.json(resumen)
+        st.stop()
+
+    if params.get("api") == "pagos":
+        pagos = get_pagos(
+            conciliado=params.get("conciliado"),
+            desde=params.get("desde"),
+            hasta=params.get("hasta")
+        )
+        st.json(pagos)
+        st.stop()
+
+    if params.get("api") == "conciliar":
+        id_pago = params.get("id")
+        if id_pago:
+            ok = conciliar_pago(id_pago, True)
+            st.json({"ok": ok, "id_pago": id_pago})
+        st.stop()
+
+    if params.get("api") == "desconciliar":
+        id_pago = params.get("id")
+        if id_pago:
+            ok = conciliar_pago(id_pago, False)
+            st.json({"ok": ok, "id_pago": id_pago})
+        st.stop()
+
     if 'user' in st.session_state and 'user_data' not in st.session_state:
         st.session_state.user_data = st.session_state.user
     elif 'user' in st.session_state:
@@ -768,25 +696,10 @@ def run_facturador_app():
         with open(pedidos_path, 'w', encoding='utf-8') as f: json.dump(pedidos, f, indent=2, ensure_ascii=False)
         with open(items_path, 'w', encoding='utf-8') as f: json.dump(items, f, indent=2, ensure_ascii=False)
         with open(pagos_path, 'w', encoding='utf-8') as f: json.dump(pagos, f, indent=2, ensure_ascii=False)
-        
-        # -- SYNC API --
         try:
-            sync_pedido(venta_data)
-            if venta_data.get("monto_señado_gs", 0) > 0:
-                pago = {
-                    "id_pago": f"pago_{venta_data['id_pedido']}",
-                    "id_pedido": venta_data['id_pedido'],
-                    "fecha_pago": venta_data['fecha_pedido'],
-                    "tipo": "sena",
-                    "monto_gs": venta_data['monto_señado_gs'],
-                    "forma_pago": "Efectivo", # Default provisorio
-                    "nro_documento": venta_data.get('nro_factura_sena', ''),
-                    "tipo_documento": venta_data.get('tipo_doc_sena', 'recibo')
-                }
-                sync_pago(pago)
-        except Exception as e:
-            print(f"Error llamando a sync: {e}")
-
+            upsert_pago(pagos[-1])
+        except Exception:
+            pass
         return id_pedido
 
     def log_sales(sales_list, venta_data=None):

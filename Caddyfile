@@ -1,8 +1,0 @@
-:{$PORT} {
-    handle /api/* {
-        reverse_proxy localhost:8502
-    }
-    handle {
-        reverse_proxy localhost:8501
-    }
-}
