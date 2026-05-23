@@ -12,8 +12,10 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
-    nginx \
     && rm -rf /var/lib/apt/lists/*
+
+# Instalar Caddy
+RUN curl -sL "https://caddyserver.com/api/download?os=linux&arch=amd64" -o /usr/bin/caddy && chmod +x /usr/bin/caddy
 
 # Copiar archivos de dependencias e instalar
 COPY requirements.txt .
@@ -22,9 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el resto del código del proyecto
 COPY . .
 
-# Copiar configuración de nginx
-RUN rm -f /etc/nginx/sites-enabled/default
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copiar configuración de Caddy
+COPY Caddyfile /app/Caddyfile
 
 # Copiar start.sh y darle permisos
 COPY start.sh /start.sh
@@ -33,7 +34,7 @@ RUN chmod +x /start.sh
 # Crear directorio de datos persistente
 RUN mkdir -p /data
 
-# Exponer el puerto que usará Nginx
+# Exponer el puerto que usará Caddy
 EXPOSE 80
 
 # Comando para ejecutar la aplicación usando start.sh
