@@ -8,13 +8,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 def get_conn():
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
-        print("db_sgsp: No DATABASE_URL found in environment")
-        return None
-    try:
-        return psycopg2.connect(db_url)
-    except Exception as e:
-        print(f"db_sgsp: get_conn error: {e}")
-        return None
+        raise Exception("No DATABASE_URL found in environment")
+    return psycopg2.connect(db_url)
 
 def init_db():
     conn = get_conn()
@@ -144,10 +139,8 @@ def conciliar_pago(id_pago: str,
 
 def get_pagos(conciliado=None,
     desde=None, hasta=None) -> list:
-    conn = get_conn()
-    if not conn:
-        return [{"error": "get_conn returned None"}]
     try:
+        conn = get_conn()
         cur = conn.cursor()
         q = "SELECT * FROM sgsp_pagos WHERE 1=1"
         params = []
