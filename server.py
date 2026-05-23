@@ -29,6 +29,16 @@ def on_startup():
 def resumen():
     return JSONResponse(get_resumen())
 
+@api.get("/api/debug-env")
+def debug_env():
+    keys = list(os.environ.keys())
+    db_val = os.environ.get("DATABASE_URL")
+    return JSONResponse({
+        "keys": keys,
+        "has_database_url": "DATABASE_URL" in os.environ,
+        "db_url_starts_with": db_val[:12] if db_val else None
+    })
+
 @api.get("/api/pagos")
 def pagos(conciliado: str = None, desde: str = None, hasta: str = None):
     c = None
