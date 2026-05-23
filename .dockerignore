@@ -13,6 +13,7 @@ Facturas_Emitidas/*.pdf
 scratch/
 *.bat
 *.txt
+!requirements.txt
 LOGO*.png
 ISOLOGO*.png
 factura*.png
