@@ -6,11 +6,14 @@ from datetime import datetime
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_conn():
-    if not DATABASE_URL:
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        print("db_sgsp: No DATABASE_URL found in environment")
         return None
     try:
-        return psycopg2.connect(DATABASE_URL)
-    except Exception:
+        return psycopg2.connect(db_url)
+    except Exception as e:
+        print(f"db_sgsp: get_conn error: {e}")
         return None
 
 def init_db():
@@ -143,7 +146,7 @@ def get_pagos(conciliado=None,
     desde=None, hasta=None) -> list:
     conn = get_conn()
     if not conn:
-        return []
+        return [{"error": "get_conn returned None"}]
     try:
         cur = conn.cursor()
         q = "SELECT * FROM sgsp_pagos WHERE 1=1"
@@ -172,10 +175,14 @@ def get_pagos(conciliado=None,
         return rows
     except Exception as e:
         print(f"get_pagos error: {e}")
-        return []
+        return [{"error": str(e)}]
 
 def get_resumen() -> dict:
     pagos = get_pagos()
+    errors = [p for p in pagos if "error" in p]
+    if errors:
+        return {"error": errors[0]["error"]}
+
     conciliados = [p for p in pagos
         if p.get('conciliado')]
     pendientes = [p for p in pagos
