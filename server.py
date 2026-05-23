@@ -29,25 +29,6 @@ def on_startup():
 def resumen():
     return JSONResponse(get_resumen())
 
-@api.get("/api/debug-env")
-def debug_env():
-    keys = list(os.environ.keys())
-    db_val = os.environ.get("DATABASE_URL")
-    safe_db_val = None
-    if db_val:
-        try:
-            from urllib.parse import urlparse
-            p = urlparse(db_val)
-            safe_db_val = f"{p.scheme}://{p.username}:***@{p.hostname}:{p.port}{p.path}"
-        except Exception as e:
-            safe_db_val = f"parse_error: {e} | raw: {db_val.replace('postgres', '***')}"
-
-    return JSONResponse({
-        "keys": keys,
-        "has_database_url": "DATABASE_URL" in os.environ,
-        "db_url": safe_db_val
-    })
-
 @api.get("/api/pagos")
 def pagos(conciliado: str = None, desde: str = None, hasta: str = None):
     c = None
