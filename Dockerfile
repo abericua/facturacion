@@ -23,6 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Copiar configuración de nginx
+RUN rm -f /etc/nginx/sites-enabled/default
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copiar start.sh y darle permisos
