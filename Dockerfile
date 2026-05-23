@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar archivos de dependencias e instalar
@@ -21,11 +22,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el resto del código del proyecto
 COPY . .
 
-# Exponer el puerto que usará Streamlit
-EXPOSE 8501
+# Copiar configuración de nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copiar start.sh y darle permisos
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 # Crear directorio de datos persistente
 RUN mkdir -p /data
 
-# Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
-CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+# Exponer el puerto que usará Nginx
+EXPOSE 80
+
+# Comando para ejecutar la aplicación usando start.sh
+CMD ["/start.sh"]
