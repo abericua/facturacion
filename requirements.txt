@@ -7,3 +7,6 @@ requests
 xlsxwriter
 
 httpx
+
+fastapi
+uvicorn
