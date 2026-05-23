@@ -36,4 +36,33 @@ Este documento registra todas las mejoras, optimizaciones y resoluciones de prob
    - Se re-alinearon permanentemente las coordenadas del "Nro de Factura" al punto exacto de la plantilla solicitada (`x=550, y=490`).
 
 ---
-*Nota generada automáticamente tras la auditoría y certificación del sistema del 100% de la funcionalidad en Producción (Railway).*
+
+## 📅 Fecha: 14 de Mayo de 2026
+**Módulo:** Seguridad (Hardening), Autenticación y Control Administrativo
+
+### 🚀 Mejoras de Seguridad y Control (Auditoría 007)
+
+1.  **Eliminación de Vulnerabilidad de Login por URL:**
+    *   Se eliminó la capacidad de iniciar sesión mediante parámetros `?u=` y `?p=` en la URL, previniendo el robo de credenciales vía historial de navegación o logs.
+
+2.  **Fortalecimiento de Contraseñas (Salting & Peppering):**
+    *   Implementación de `SYSTEM_PEPPER`. Las contraseñas ahora se almacenan con un hash reforzado, protegiéndolas contra ataques de tablas arcoíris.
+    *   Se incluyó una lógica de migración automática para usuarios existentes.
+
+3.  **Autenticación de Dos Factores (2FA):**
+    *   Integración obligatoria con **Google Authenticator**. Cada inicio de sesión requiere ahora un código TOTP de 6 dígitos.
+    *   Generación automática de códigos QR para la configuración inicial de nuevos usuarios.
+
+4.  **Control de Acceso Basado en Roles (RBAC) para Anulaciones:**
+    *   **Restricción:** Los vendedores ahora solo tienen permiso para anular facturas que ellos mismos emitieron.
+    *   **Permiso Maestro:** El administrador mantiene la capacidad de anular cualquier registro del sistema.
+
+5.  **Panel de Edición Maestra (Admin Only):**
+    *   Se habilitó una herramienta de corrección en la pestaña "HISTORIAL" exclusiva para administradores.
+    *   Permite corregir: Fecha de emisión, cliente, reasignación de vendedor y montos totales (GS/USD) de facturas ya emitidas.
+
+6.  **Actualización de Infraestructura:**
+    *   Sincronización de dependencias en `requirements.txt` (`pyotp`, `qrcode`) para soportar las nuevas capas de seguridad.
+
+---
+*Nota: Sistema certificado bajo el protocolo de seguridad 007. Listo para despliegue en producción.*
