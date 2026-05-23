@@ -1,11 +1,14 @@
+"""
+SGSP Facturador v2.3 — ASGI Server
+FastAPI (/api/*) + Streamlit (/*) en el mismo proceso y puerto.
+"""
 import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from streamlit.web.bootstrap import run as st_run
+from streamlit.starlette import App as StreamlitApp
 
-# ── DB ──────────────────────────────────────────────────────────────────────
 from db_sgsp import (init_db, upsert_pago, conciliar_pago,
                      get_resumen, get_pagos)
 
@@ -45,20 +48,11 @@ def desconciliar(id_pago: str):
     ok = conciliar_pago(id_pago, False)
     return JSONResponse({"ok": ok, "id_pago": id_pago})
 
-# ── Mount Streamlit ───────────────────────────────────────────────────────────
-try:
-    from streamlit.web.server.server import Server as StServer
-    from streamlit.runtime.scriptrunner import get_script_run_ctx
-    # Streamlit >= 1.53 ASGI support
-    from streamlit.starlette import App as StreamlitApp
-    streamlit_app = StreamlitApp("app.py")
-    api.mount("/", streamlit_app)
-    USE_ASGI = True
-except ImportError:
-    USE_ASGI = False
+# ── Mount Streamlit en /* ─────────────────────────────────────────────────────
+# Las rutas /api/* ya están definidas arriba y tienen prioridad por orden.
+streamlit_app = StreamlitApp("app.py")
+api.mount("/", streamlit_app)
 
 # ── Entry point ───────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8501))
-    uvicorn.run(api, host="0.0.0.0", port=port,
-                log_level="info")
+port = int(os.environ.get("PORT", 8501))
+uvicorn.run(api, host="0.0.0.0", port=port, log_level="info")
