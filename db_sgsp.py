@@ -12,9 +12,12 @@ def get_conn():
     return psycopg2.connect(db_url)
 
 def init_db():
-    conn = get_conn()
-    if not conn:
+    try:
+        conn = get_conn()
+    except Exception as e:
+        print(f"DB init connection error: {e}")
         return False
+    
     try:
         cur = conn.cursor()
         cur.execute("""
@@ -140,7 +143,10 @@ def conciliar_pago(id_pago: str,
 def get_pagos(conciliado=None,
     desde=None, hasta=None) -> list:
     try:
-        conn = get_conn()
+        try:
+            conn = get_conn()
+        except Exception as e:
+            return [{"error": f"get_conn failed: {e}"}]
         cur = conn.cursor()
         q = "SELECT * FROM sgsp_pagos WHERE 1=1"
         params = []
