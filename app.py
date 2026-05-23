@@ -141,7 +141,7 @@ def api_resumen():
     }
 
 def run_api():
-    uvicorn.run(api, host="0.0.0.0", port=8502,
+    uvicorn.run(api, host="127.0.0.1", port=8502,
         log_level="error")
 
 api_thread = threading.Thread(
