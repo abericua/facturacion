@@ -1,0 +1,44 @@
+[
+  {
+    "id_pago": "PAG-0001",
+    "id_pedido": "PED-0001",
+    "fecha_pago": "2026-05-22",
+    "tipo": "contado_total",
+    "monto_gs": 219000.0,
+    "forma_pago": "CONTADO",
+    "nro_documento": "0520",
+    "tipo_documento": "factura_oficial",
+    "nro_factura": "0520",
+    "conciliado": false,
+    "fecha_conciliacion": "",
+    "observaciones": ""
+  },
+  {
+    "id_pago": "PAG-0002",
+    "id_pedido": "PED-0002",
+    "fecha_pago": "2026-05-22",
+    "tipo": "seña",
+    "monto_gs": 927000,
+    "forma_pago": "CONTADO",
+    "nro_documento": "REC-80106",
+    "tipo_documento": "Recibo interno",
+    "nro_factura": "REC-80106",
+    "conciliado": false,
+    "fecha_conciliacion": "",
+    "observaciones": ""
+  },
+  {
+    "id_pago": "PAG-0003",
+    "id_pedido": "PED-0003",
+    "fecha_pago": "2026-05-22",
+    "tipo": "contado_total",
+    "monto_gs": 169000.0,
+    "forma_pago": "CONTADO",
+    "nro_documento": "0521",
+    "tipo_documento": "factura_oficial",
+    "nro_factura": "0521",
+    "conciliado": false,
+    "fecha_conciliacion": "",
+    "observaciones": ""
+  }
+]

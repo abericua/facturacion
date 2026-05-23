@@ -1,0 +1,5200 @@
+[
+  {
+    "id_solpro": "PRD-001",
+    "ids_externos": {
+      "id_calculadora": "IM-001",
+      "id_maestro": "IM-001",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "HORNO TUCANO DTF 90CM FOB",
+    "aliases": [
+      "HORNO TUCANO DTF 90CM FOB"
+    ],
+    "proveedor": "Importacion SOLPRO",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 3991,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-002",
+    "ids_externos": {
+      "id_calculadora": "SC-001",
+      "id_maestro": "SC-001",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMPRESORA EPSON F170",
+    "aliases": [
+      "IMPRESORA EPSON F170"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 300,
+    "margen_pct": 26,
+    "stock_actual": 0,
+    "stock_reservado": 1,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-003",
+    "ids_externos": {
+      "id_calculadora": "SC-002",
+      "id_maestro": "SC-002",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMPRESORA EPSON L121",
+    "aliases": [
+      "IMPRESORA EPSON L121"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 90,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-004",
+    "ids_externos": {
+      "id_calculadora": "SC-003",
+      "id_maestro": "SC-003",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMPRESORA EPSON L1250",
+    "aliases": [
+      "IMPRESORA EPSON L1250"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 143,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-005",
+    "ids_externos": {
+      "id_calculadora": "SC-004",
+      "id_maestro": "SC-004",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMPRESORA EPSON L14150",
+    "aliases": [
+      "IMPRESORA EPSON L14150"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 664.1,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-006",
+    "ids_externos": {
+      "id_calculadora": "SC-005",
+      "id_maestro": "SC-005",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMPRESORA EPSON L3210",
+    "aliases": [
+      "IMPRESORA EPSON L3210"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 174,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-007",
+    "ids_externos": {
+      "id_calculadora": "SC-006",
+      "id_maestro": "SC-006",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MP EPSON L 4360 MULTIFUNCION WIR",
+    "aliases": [
+      "MP EPSON L 4360 MULTIFUNCION WIR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 262,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-008",
+    "ids_externos": {
+      "id_calculadora": "SC-007",
+      "id_maestro": "SC-007",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 3210 MULTIFUNCION",
+    "aliases": [
+      "IMP EPSON L 3210 MULTIFUNCION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 201.4,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-009",
+    "ids_externos": {
+      "id_calculadora": "SC-008",
+      "id_maestro": "SC-008",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 3560 MULTIFUNCION WIR",
+    "aliases": [
+      "IMP EPSON L 3560 MULTIFUNCION WIR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 244.3,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-010",
+    "ids_externos": {
+      "id_calculadora": "SC-009",
+      "id_maestro": "SC-009",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 4260 MULTIFUNCION WIR",
+    "aliases": [
+      "IMP EPSON L 4260 MULTIFUNCION WIR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 264,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-011",
+    "ids_externos": {
+      "id_calculadora": "SC-010",
+      "id_maestro": "SC-010",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 5590 MULTIFUNCION WIR/RED",
+    "aliases": [
+      "IMP EPSON L 5590 MULTIFUNCION WIR/RED"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 330,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-012",
+    "ids_externos": {
+      "id_calculadora": "SC-011",
+      "id_maestro": "SC-011",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 6270 MULTIFUNCION DUPLO/WIF/RED",
+    "aliases": [
+      "IMP EPSON L 6270 MULTIFUNCION DUPLO/WIF/RED"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 443,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-013",
+    "ids_externos": {
+      "id_calculadora": "SC-012",
+      "id_maestro": "SC-012",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L14150 MULTIFUNCION WIR A3",
+    "aliases": [
+      "IMP EPSON L14150 MULTIFUNCION WIR A3"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 669,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-014",
+    "ids_externos": {
+      "id_calculadora": "SC-013",
+      "id_maestro": "SC-013",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 15150 MULTIFUNCION/FAX WIR/RED/A3",
+    "aliases": [
+      "IMP EPSON L 15150 MULTIFUNCION/FAX WIR/RED/A3"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 1049,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-015",
+    "ids_externos": {
+      "id_calculadora": "SC-014",
+      "id_maestro": "SC-014",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L 8050 FOTOGRAFICA/CD WIR",
+    "aliases": [
+      "IMP EPSON L 8050 FOTOGRAFICA/CD WIR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 390,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-016",
+    "ids_externos": {
+      "id_calculadora": "SC-015",
+      "id_maestro": "SC-015",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON L8180 MULTIFUNCION A3 WIR",
+    "aliases": [
+      "IMP EPSON L8180 MULTIFUNCION A3 WIR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 920,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-017",
+    "ids_externos": {
+      "id_calculadora": "SC-016",
+      "id_maestro": "SC-016",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "ACCESORIOS BROTHER PRCF3 MARCO DE TAPA DE 60MM/PL",
+    "aliases": [
+      "ACCESORIOS BROTHER PRCF3 MARCO DE TAPA DE 60MM/PL"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 399,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-018",
+    "ids_externos": {
+      "id_calculadora": "SC-017",
+      "id_maestro": "SC-017",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BASTIDOR BROTHER PRH100 10X10CM",
+    "aliases": [
+      "BASTIDOR BROTHER PRH100 10X10CM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 33.25,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-019",
+    "ids_externos": {
+      "id_calculadora": "SC-018",
+      "id_maestro": "SC-018",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BASTIDOR BROTHER PRH180 18X13CM",
+    "aliases": [
+      "BASTIDOR BROTHER PRH180 18X13CM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 33.25,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-020",
+    "ids_externos": {
+      "id_calculadora": "SC-019",
+      "id_maestro": "SC-019",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BASTIDOR BROTHER PRH300 20X30CM",
+    "aliases": [
+      "BASTIDOR BROTHER PRH300 20X30CM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 47.5,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-021",
+    "ids_externos": {
+      "id_calculadora": "SC-020",
+      "id_maestro": "SC-020",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BASTIDOR BROTHER PRH60 6X4CM",
+    "aliases": [
+      "BASTIDOR BROTHER PRH60 6X4CM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 23.75,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-022",
+    "ids_externos": {
+      "id_calculadora": "SC-021",
+      "id_maestro": "SC-021",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA BROTHER BP1530LPA 26 X 16CM",
+    "aliases": [
+      "BORDADORA BROTHER BP1530LPA 26 X 16CM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 1155,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-023",
+    "ids_externos": {
+      "id_calculadora": "SC-022",
+      "id_maestro": "SC-022",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA BROTHER NV970LPA 2 EN 1 BORDA Y COSE 10",
+    "aliases": [
+      "BORDADORA BROTHER NV970LPA 2 EN 1 BORDA Y COSE 10"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 630,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-024",
+    "ids_externos": {
+      "id_calculadora": "SC-023",
+      "id_maestro": "SC-023",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA BROTHER PE910LPA 18 X 13CM",
+    "aliases": [
+      "BORDADORA BROTHER PE910LPA 18 X 13CM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 775,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-025",
+    "ids_externos": {
+      "id_calculadora": "SC-024",
+      "id_maestro": "SC-024",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA BROTHER PR680WPA 30 X 20CM COMBO",
+    "aliases": [
+      "BORDADORA BROTHER PR680WPA 30 X 20CM COMBO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 7145.9,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-026",
+    "ids_externos": {
+      "id_calculadora": "SC-025",
+      "id_maestro": "SC-025",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA BROTHER PR680WPA 30 X 20CM NORMAL",
+    "aliases": [
+      "BORDADORA BROTHER PR680WPA 30 X 20CM NORMAL"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 6294,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-027",
+    "ids_externos": {
+      "id_calculadora": "SC-026",
+      "id_maestro": "SC-026",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER BROTHER BM2800PA",
+    "aliases": [
+      "MAQUINA DE COSER BROTHER BM2800PA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 170.05,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-028",
+    "ids_externos": {
+      "id_calculadora": "SC-027",
+      "id_maestro": "SC-027",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER BROTHER BM3850PA",
+    "aliases": [
+      "MAQUINA DE COSER BROTHER BM3850PA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 224.2,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-029",
+    "ids_externos": {
+      "id_calculadora": "SC-028",
+      "id_maestro": "SC-028",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER BROTHER JS2135PA MECANICA FAMILIA",
+    "aliases": [
+      "MAQUINA DE COSER BROTHER JS2135PA MECANICA FAMILIA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 145.36,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-030",
+    "ids_externos": {
+      "id_calculadora": "SC-029",
+      "id_maestro": "SC-029",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER BROTHER SQ9100PA",
+    "aliases": [
+      "MAQUINA DE COSER BROTHER SQ9100PA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 350.55,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-031",
+    "ids_externos": {
+      "id_calculadora": "SC-030",
+      "id_maestro": "SC-030",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "OVERLOCK BROTHER 3534DTPA",
+    "aliases": [
+      "OVERLOCK BROTHER 3534DTPA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 360.5,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-032",
+    "ids_externos": {
+      "id_calculadora": "SC-031",
+      "id_maestro": "SC-031",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SOFTWARE BROTHER PEDESIGN11L",
+    "aliases": [
+      "SOFTWARE BROTHER PEDESIGN11L"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 711.55,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-033",
+    "ids_externos": {
+      "id_calculadora": "SC-032",
+      "id_maestro": "SC-032",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TAPETE BROTHER CADXMATF12 P/ CORTE DE TELA 12X12",
+    "aliases": [
+      "TAPETE BROTHER CADXMATF12 P/ CORTE DE TELA 12X12"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 25.65,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-034",
+    "ids_externos": {
+      "id_calculadora": "SC-033",
+      "id_maestro": "SC-033",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TAPETE BROTHER CADXMATLOW12 12X12 BAJA ADHERENCIA",
+    "aliases": [
+      "TAPETE BROTHER CADXMATLOW12 12X12 BAJA ADHERENCIA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 18.145,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-035",
+    "ids_externos": {
+      "id_calculadora": "SC-034",
+      "id_maestro": "SC-034",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TAPETE BROTHER CADXMATLOW24 30x60 BAJA ADHERENCIA",
+    "aliases": [
+      "TAPETE BROTHER CADXMATLOW24 30x60 BAJA ADHERENCIA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 29.735,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-036",
+    "ids_externos": {
+      "id_calculadora": "SC-035",
+      "id_maestro": "SC-035",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TAPETE BROTHER CADXMATSTD12 30x30 STD",
+    "aliases": [
+      "TAPETE BROTHER CADXMATSTD12 30x30 STD"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 18.145,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-037",
+    "ids_externos": {
+      "id_calculadora": "SC-036",
+      "id_maestro": "SC-036",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TAPETE BROTHER CADXMATSTD24 30x60 STD",
+    "aliases": [
+      "TAPETE BROTHER CADXMATSTD24 30x60 STD"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 29.735,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-038",
+    "ids_externos": {
+      "id_calculadora": "SC-037",
+      "id_maestro": "SC-037",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CUCHILLA BROTHER CADXBLDV1 DE VINILO P/ AUTO",
+    "aliases": [
+      "CUCHILLA BROTHER CADXBLDV1 DE VINILO P/ AUTO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 11.21,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-039",
+    "ids_externos": {
+      "id_calculadora": "SC-038",
+      "id_maestro": "SC-038",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CUCHILLA DE CORTE AUTO P/ TELA BROTHER CADXBLDQ1",
+    "aliases": [
+      "CUCHILLA DE CORTE AUTO P/ TELA BROTHER CADXBLDQ1"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 12.73,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-040",
+    "ids_externos": {
+      "id_calculadora": "SC-039",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CUCHILLA DE CORTE AUTO STD BROTHER CADXBLD1",
+    "aliases": [
+      "CUCHILLA DE CORTE AUTO STD BROTHER CADXBLD1"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 12.73,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-041",
+    "ids_externos": {
+      "id_calculadora": "SC-040",
+      "id_maestro": "SC-040",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "RODILLO BROTHER P/ ADHE DE MAT. AL TAPETE (CABRY1)",
+    "aliases": [
+      "RODILLO BROTHER P/ ADHE DE MAT. AL TAPETE (CABRY1)"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 15.2,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-042",
+    "ids_externos": {
+      "id_calculadora": "SC-041",
+      "id_maestro": "SC-041",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCANNCUT BROTHER SDX225PA",
+    "aliases": [
+      "SCANNCUT BROTHER SDX225PA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 496.375,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-043",
+    "ids_externos": {
+      "id_calculadora": "SC-042",
+      "id_maestro": "SC-042",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCANCUT SDX125",
+    "aliases": [
+      "SCANCUT SDX125"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 358.34,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-044",
+    "ids_externos": {
+      "id_calculadora": "SC-043",
+      "id_maestro": "SC-043",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA DE CALOR CRICUT TAZA 2008736",
+    "aliases": [
+      "PRENSA DE CALOR CRICUT TAZA 2008736"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 170.05,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-045",
+    "ids_externos": {
+      "id_calculadora": "SC-044",
+      "id_maestro": "SC-044",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA DE CALOR CRICUT EASYPRESS 2005557",
+    "aliases": [
+      "PRENSA DE CALOR CRICUT EASYPRESS 2005557"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 150.575,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-046",
+    "ids_externos": {
+      "id_calculadora": "SC-045",
+      "id_maestro": "SC-045",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA DE CALOR CRICUT HAT 2009241",
+    "aliases": [
+      "PRENSA DE CALOR CRICUT HAT 2009241"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 142.5,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-047",
+    "ids_externos": {
+      "id_calculadora": "SC-046",
+      "id_maestro": "SC-046",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA DE CALOR CRICUT EASYPRESS 2005553",
+    "aliases": [
+      "PRENSA DE CALOR CRICUT EASYPRESS 2005553"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 128.725,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-048",
+    "ids_externos": {
+      "id_calculadora": "SC-047",
+      "id_maestro": "SC-047",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR P900",
+    "aliases": [
+      "SURECOLOR P900"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 1577,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-049",
+    "ids_externos": {
+      "id_calculadora": "SC-048",
+      "id_maestro": "SC-048",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON SCF1070SE WIF/RED SURECOLOR",
+    "aliases": [
+      "IMP EPSON SCF1070SE WIF/RED SURECOLOR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 6572,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-050",
+    "ids_externos": {
+      "id_calculadora": "SC-049",
+      "id_maestro": "SC-049",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR P5000 STANDARD EDITION",
+    "aliases": [
+      "EPSON SURECOLOR P5000 STANDARD EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2056.49,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-051",
+    "ids_externos": {
+      "id_calculadora": "SC-050",
+      "id_maestro": "SC-050",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR P7570 STANDARD EDITION",
+    "aliases": [
+      "EPSON SURECOLOR P7570 STANDARD EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 4616.73,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-052",
+    "ids_externos": {
+      "id_calculadora": "SC-051",
+      "id_maestro": "SC-051",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR P9570 STANDARD EDITION",
+    "aliases": [
+      "EPSON SURECOLOR P9570 STANDARD EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 6433.62,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-053",
+    "ids_externos": {
+      "id_calculadora": "SC-052",
+      "id_maestro": "SC-052",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR P8570D 44 DUAL ROLL",
+    "aliases": [
+      "EPSON SURECOLOR P8570D 44 DUAL ROLL"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 6038.42,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-054",
+    "ids_externos": {
+      "id_calculadora": "SC-053",
+      "id_maestro": "SC-053",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR P6570E SINGLE ROLL 24",
+    "aliases": [
+      "SURECOLOR P6570E SINGLE ROLL 24"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 3711.41,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-055",
+    "ids_externos": {
+      "id_calculadora": "SC-054",
+      "id_maestro": "SC-054",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR P6570DE DUAL ROLL 24",
+    "aliases": [
+      "SURECOLOR P6570DE DUAL ROLL 24"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 4525.04,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-056",
+    "ids_externos": {
+      "id_calculadora": "SC-055",
+      "id_maestro": "SC-055",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR P6570D DUAL ROLL 24 PS",
+    "aliases": [
+      "SURECOLOR P6570D DUAL ROLL 24 PS"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 5145.53,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-057",
+    "ids_externos": {
+      "id_calculadora": "SC-056",
+      "id_maestro": "SC-056",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR P20000 STANDARD EDITION",
+    "aliases": [
+      "EPSON SURECOLOR P20000 STANDARD EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 11921.63,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-058",
+    "ids_externos": {
+      "id_calculadora": "SC-057",
+      "id_maestro": "SC-057",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR P8570DL 44 INK BAGS PS",
+    "aliases": [
+      "EPSON SURECOLOR P8570DL 44 INK BAGS PS"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 8265.99,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-059",
+    "ids_externos": {
+      "id_calculadora": "SC-058",
+      "id_maestro": "SC-058",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR S40600 PRODUCTION EDITION",
+    "aliases": [
+      "SURECOLOR S40600 PRODUCTION EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 8390,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-060",
+    "ids_externos": {
+      "id_calculadora": "SC-059",
+      "id_maestro": "SC-059",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURE COLOR S60600L BULK INK SYSTEM",
+    "aliases": [
+      "SURE COLOR S60600L BULK INK SYSTEM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 21979.96,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-061",
+    "ids_externos": {
+      "id_calculadora": "SC-060",
+      "id_maestro": "SC-060",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURE COLOR S80600L BULK INK SYSTEM",
+    "aliases": [
+      "SURE COLOR S80600L BULK INK SYSTEM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 26413.69,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-062",
+    "ids_externos": {
+      "id_calculadora": "SC-061",
+      "id_maestro": "SC-061",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR R5070L PRODUCTION EDITION",
+    "aliases": [
+      "EPSON SURECOLOR R5070L PRODUCTION EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 24127.91,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-063",
+    "ids_externos": {
+      "id_calculadora": "SC-062",
+      "id_maestro": "SC-062",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR R5070L PRODUCTION EDITION PRECIO ESPECIAL",
+    "aliases": [
+      "EPSON SURECOLOR R5070L PRODUCTION EDITION PRECIO ESPECIAL"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 22929,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-064",
+    "ids_externos": {
+      "id_calculadora": "SC-063",
+      "id_maestro": "SC-063",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR V7000 UV FLATBED",
+    "aliases": [
+      "EPSON SURECOLOR V7000 UV FLATBED"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 83580.47,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-065",
+    "ids_externos": {
+      "id_calculadora": "SC-064",
+      "id_maestro": "SC-064",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SC-V7000 LARGE FORMAT INKJET PRINTER",
+    "aliases": [
+      "SC-V7000 LARGE FORMAT INKJET PRINTER"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 64356.96,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-066",
+    "ids_externos": {
+      "id_calculadora": "SC-065",
+      "id_maestro": "SC-065",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "HEAD INSTALLATION KIT FOR SC-V7000SERIES",
+    "aliases": [
+      "HEAD INSTALLATION KIT FOR SC-V7000SERIES"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 17551.9,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-067",
+    "ids_externos": {
+      "id_calculadora": "SC-066",
+      "id_maestro": "SC-066",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "DOCUMENT PACK FOR SC-V7000 SERIES",
+    "aliases": [
+      "DOCUMENT PACK FOR SC-V7000 SERIES"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 1671.6,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-068",
+    "ids_externos": {
+      "id_calculadora": "SC-067",
+      "id_maestro": "SC-067",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SIGNAGE SURECOLOR V1070 A4 PRECIO DE LISTA SOL CONTROL 2025 DIC CON EL 5%",
+    "aliases": [
+      "SIGNAGE SURECOLOR V1070 A4 PRECIO DE LISTA SOL CONTROL 2025 DIC CON EL 5%"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 8303,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-069",
+    "ids_externos": {
+      "id_calculadora": "SC-068",
+      "id_maestro": "SC-068",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SIGNAGE SURECOLOR V1070 A4",
+    "aliases": [
+      "SIGNAGE SURECOLOR V1070 A4"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 8000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-070",
+    "ids_externos": {
+      "id_calculadora": "SC-069",
+      "id_maestro": "SC-069",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SIGNAGE SURECOLOR V2070 A3",
+    "aliases": [
+      "SIGNAGE SURECOLOR V2070 A3"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-071",
+    "ids_externos": {
+      "id_calculadora": "SC-070",
+      "id_maestro": "SC-070",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T3170",
+    "aliases": [
+      "SURECOLOR T3170"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 894.83,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-072",
+    "ids_externos": {
+      "id_calculadora": "SC-071",
+      "id_maestro": "SC-071",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T3170X",
+    "aliases": [
+      "SURECOLOR T3170X"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2098,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-073",
+    "ids_externos": {
+      "id_calculadora": "SC-072",
+      "id_maestro": "SC-072",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T3170M",
+    "aliases": [
+      "SURECOLOR T3170M"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2109.34,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-074",
+    "ids_externos": {
+      "id_calculadora": "SC-073",
+      "id_maestro": "SC-073",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T3770E SINGLE ROLL 24",
+    "aliases": [
+      "SURECOLOR T3770E SINGLE ROLL 24"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 3721.52,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-075",
+    "ids_externos": {
+      "id_calculadora": "SC-074",
+      "id_maestro": "SC-074",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T3770DE DUAL ROLL 24",
+    "aliases": [
+      "SURECOLOR T3770DE DUAL ROLL 24"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 4536.65,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-076",
+    "ids_externos": {
+      "id_calculadora": "SC-075",
+      "id_maestro": "SC-075",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T3770D DUAL ROLL 24 PS",
+    "aliases": [
+      "SURECOLOR T3770D DUAL ROLL 24 PS"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 5159.54,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-077",
+    "ids_externos": {
+      "id_calculadora": "SC-076",
+      "id_maestro": "SC-076",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T5170",
+    "aliases": [
+      "SURECOLOR T5170"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2405.53,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-078",
+    "ids_externos": {
+      "id_calculadora": "SC-077",
+      "id_maestro": "SC-077",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T5170M",
+    "aliases": [
+      "SURECOLOR T5170M"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 4082.1,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-079",
+    "ids_externos": {
+      "id_calculadora": "SC-078",
+      "id_maestro": "SC-078",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T7770D 44",
+    "aliases": [
+      "SURECOLOR T7770D 44"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 6422.12,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-080",
+    "ids_externos": {
+      "id_calculadora": "SC-079",
+      "id_maestro": "SC-079",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T7770DL 44 INK BAG PS",
+    "aliases": [
+      "SURECOLOR T7770DL 44 INK BAG PS"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 9138.32,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-081",
+    "ids_externos": {
+      "id_calculadora": "SC-080",
+      "id_maestro": "SC-080",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T5475",
+    "aliases": [
+      "SURECOLOR T5475"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2579.1,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-082",
+    "ids_externos": {
+      "id_calculadora": "SC-081",
+      "id_maestro": "SC-081",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T5470M",
+    "aliases": [
+      "SURECOLOR T5470M"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 4628,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-083",
+    "ids_externos": {
+      "id_calculadora": "SC-082",
+      "id_maestro": "SC-082",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T5770D 36",
+    "aliases": [
+      "SURECOLOR T5770D 36"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 5539.65,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-084",
+    "ids_externos": {
+      "id_calculadora": "SC-083",
+      "id_maestro": "SC-083",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR T5770DM DUAL ROLL MFP 36",
+    "aliases": [
+      "SURECOLOR T5770DM DUAL ROLL MFP 36"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 10189.01,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-085",
+    "ids_externos": {
+      "id_calculadora": "SC-084",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCT5475SR SURECOLOR 36",
+    "aliases": [
+      "SCT5475SR SURECOLOR 36"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2632,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-086",
+    "ids_externos": {
+      "id_calculadora": "SC-085",
+      "id_maestro": "SC-085",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F570",
+    "aliases": [
+      "SURECOLOR F570"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 2055.59,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-087",
+    "ids_externos": {
+      "id_calculadora": "SC-086",
+      "id_maestro": "SC-086",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F1070",
+    "aliases": [
+      "SURECOLOR F1070"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 6571.1,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-088",
+    "ids_externos": {
+      "id_calculadora": "SC-087",
+      "id_maestro": "SC-087",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F1070 + HORNO DTF A3",
+    "aliases": [
+      "SURECOLOR F1070 + HORNO DTF A3"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "COMERCIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 7046.1,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-089",
+    "ids_externos": {
+      "id_calculadora": "SC-088",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F6470 PRINTER WITH STAND & TAKEUP REEL SIN IVA",
+    "aliases": [
+      "SURECOLOR F6470 PRINTER WITH STAND & TAKEUP REEL SIN IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 5900,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-090",
+    "ids_externos": {
+      "id_calculadora": "SC-089",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F6470 PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)",
+    "aliases": [
+      "SURECOLOR F6470 PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 7176,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-091",
+    "ids_externos": {
+      "id_calculadora": "SC-090",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F6470H PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)",
+    "aliases": [
+      "SURECOLOR F6470H PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 7200.09,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-092",
+    "ids_externos": {
+      "id_calculadora": "SC-091",
+      "id_maestro": "SC-091",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "KIT INICIACION F6470",
+    "aliases": [
+      "KIT INICIACION F6470"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 502.6,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-093",
+    "ids_externos": {
+      "id_calculadora": "SC-092",
+      "id_maestro": "SC-092",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F6470 IVA Y KIT",
+    "aliases": [
+      "SURECOLOR F6470 IVA Y KIT"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 7702.7,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-094",
+    "ids_externos": {
+      "id_calculadora": "SC-093",
+      "id_maestro": "SC-093",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "F6470 + KIT SIN IVA",
+    "aliases": [
+      "F6470 + KIT SIN IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 7352,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-095",
+    "ids_externos": {
+      "id_calculadora": "SC-094",
+      "id_maestro": "SC-094",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F3070 BASE UNIT",
+    "aliases": [
+      "SURECOLOR F3070 BASE UNIT"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 53976.54,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-096",
+    "ids_externos": {
+      "id_calculadora": "SC-095",
+      "id_maestro": "SC-096",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F9470 PRODUCTION EDITION",
+    "aliases": [
+      "SURECOLOR F9470 PRODUCTION EDITION"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 21090,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-097",
+    "ids_externos": {
+      "id_calculadora": "SC-097",
+      "id_maestro": "SC-112",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCF9570PE - F9570 CON IVA",
+    "aliases": [
+      "SCF9570PE - F9570 CON IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 23674.3,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-098",
+    "ids_externos": {
+      "id_calculadora": "SC-098",
+      "id_maestro": "SC-098",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCF9570HPE - F9570H CON IVA",
+    "aliases": [
+      "SCF9570HPE - F9570H CON IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 23691.27,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-099",
+    "ids_externos": {
+      "id_calculadora": "SC-099",
+      "id_maestro": "SC-099",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F10070H BASE PRINTER FOR LATIN AMERICA",
+    "aliases": [
+      "SURECOLOR F10070H BASE PRINTER FOR LATIN AMERICA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 86881.66,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-100",
+    "ids_externos": {
+      "id_calculadora": "SC-100",
+      "id_maestro": "SC-100",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F10070H OPT HEATER ROLL INK SYSTEM",
+    "aliases": [
+      "SURECOLOR F10070H OPT HEATER ROLL INK SYSTEM"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 11507.04,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-101",
+    "ids_externos": {
+      "id_calculadora": "SC-101",
+      "id_maestro": "SC-101",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR F2270 DIRECT TO GARMENT",
+    "aliases": [
+      "SURECOLOR F2270 DIRECT TO GARMENT"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 14574.25,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-102",
+    "ids_externos": {
+      "id_calculadora": "SC-102",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA F6470 POR CAJA UNA CAJA TRAE 2 DEL MISMO COLOR",
+    "aliases": [
+      "TINTA F6470 POR CAJA UNA CAJA TRAE 2 DEL MISMO COLOR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 227.05,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-103",
+    "ids_externos": {
+      "id_calculadora": "SC-103",
+      "id_maestro": "SC-103",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CAJA F170 DE MANTENIMIENTO",
+    "aliases": [
+      "CAJA F170 DE MANTENIMIENTO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 21,
+    "margen_pct": 23,
+    "stock_actual": 3,
+    "stock_reservado": 0,
+    "stock_disponible": 3,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-104",
+    "ids_externos": {
+      "id_calculadora": "SC-104",
+      "id_maestro": "SC-104",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CAJA F570 DE MANTENIMIENTO",
+    "aliases": [
+      "CAJA F570 DE MANTENIMIENTO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 40,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-105",
+    "ids_externos": {
+      "id_calculadora": "SC-105",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA F170 O F570 DE 140ML COLORES CY MG YE (CADA UNO) BOTELLITA",
+    "aliases": [
+      "TINTA F170 O F570 DE 140ML COLORES CY MG YE (CADA UNO) BOTELLITA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 18.5,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-106",
+    "ids_externos": {
+      "id_calculadora": "SC-106",
+      "id_maestro": "SC-106",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "ROLLO F570 PAPEL 30 METROS EPSON",
+    "aliases": [
+      "ROLLO F570 PAPEL 30 METROS EPSON"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 26.6,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-107",
+    "ids_externos": {
+      "id_calculadora": "SC-107",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON F6200 CON IVA",
+    "aliases": [
+      "TINTA EPSON F6200 CON IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 429.4,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-108",
+    "ids_externos": {
+      "id_calculadora": "SC-108",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON F F6370 F9470 (UNA CAJA 6 UNIDADES) CON IVA",
+    "aliases": [
+      "TINTA EPSON F F6370 F9470 (UNA CAJA 6 UNIDADES) CON IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 541.5,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-109",
+    "ids_externos": {
+      "id_calculadora": "SC-109",
+      "id_maestro": "SC-109",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCG6070SE - G6070 CON IVA",
+    "aliases": [
+      "SCG6070SE - G6070 CON IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 8629,
+    "margen_pct": 23,
+    "stock_actual": 1,
+    "stock_reservado": 0,
+    "stock_disponible": 1,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-110",
+    "ids_externos": {
+      "id_calculadora": "SC-110",
+      "id_maestro": "SC-110",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCF9570PE - F9570 CON IVA PROMO",
+    "aliases": [
+      "SCF9570PE - F9570 CON IVA PROMO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 18617,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-111",
+    "ids_externos": {
+      "id_calculadora": "SC-113",
+      "id_maestro": "SC-113",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCF9570HPE - F9570H SIN IVA",
+    "aliases": [
+      "SCF9570HPE - F9570H SIN IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 21717,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-112",
+    "ids_externos": {
+      "id_calculadora": "SC-114",
+      "id_maestro": "SC-114",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR F11070",
+    "aliases": [
+      "EPSON SURECOLOR F11070"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 101962,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-113",
+    "ids_externos": {
+      "id_calculadora": "SC-115",
+      "id_maestro": "SC-115",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON SURECOLOR F11070 MEJORADO 3 UNIDADES",
+    "aliases": [
+      "EPSON SURECOLOR F11070 MEJORADO 3 UNIDADES"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "maquinaria",
+    "moneda_costo": "USD",
+    "costo": 83982.54,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-114",
+    "ids_externos": {
+      "id_calculadora": "TC-001",
+      "id_maestro": "TC-001",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA TERMICA 60X40",
+    "aliases": [
+      "PRENSA TERMICA 60X40"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 2000000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-115",
+    "ids_externos": {
+      "id_calculadora": "TC-002",
+      "id_maestro": "TC-002",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA TERMICA 38X38",
+    "aliases": [
+      "PRENSA TERMICA 38X38"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1300000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-116",
+    "ids_externos": {
+      "id_calculadora": "TC-003",
+      "id_maestro": "TC-023",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "GRABADORA LASER 10W",
+    "aliases": [
+      "GRABADORA LASER 10W"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 4800000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-117",
+    "ids_externos": {
+      "id_calculadora": "TC-004",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EJE ROTATIVO ESTANDAR",
+    "aliases": [
+      "EJE ROTATIVO ESTANDAR"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 700000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-118",
+    "ids_externos": {
+      "id_calculadora": "TC-005",
+      "id_maestro": "TC-008",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "GRABADORA LASER 20W",
+    "aliases": [
+      "GRABADORA LASER 20W"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 4800000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-119",
+    "ids_externos": {
+      "id_calculadora": "TC-006",
+      "id_maestro": "TC-006",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PATITAS BASE",
+    "aliases": [
+      "PATITAS BASE"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "ACCESORIOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 200000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-120",
+    "ids_externos": {
+      "id_calculadora": "TC-007",
+      "id_maestro": "TC-007",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMPRESOR DE AIRE",
+    "aliases": [
+      "COMPRESOR DE AIRE"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "ACCESORIOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 450000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-121",
+    "ids_externos": {
+      "id_calculadora": "TC-009",
+      "id_maestro": "TC-009",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA TAZA COMUN 11 OZ",
+    "aliases": [
+      "PRENSA TAZA COMUN 11 OZ"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 440000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-122",
+    "ids_externos": {
+      "id_calculadora": "TC-010",
+      "id_maestro": "TC-010",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TRANSFER TAZAS DOBLE",
+    "aliases": [
+      "TRANSFER TAZAS DOBLE"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 995000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-123",
+    "ids_externos": {
+      "id_calculadora": "TC-011",
+      "id_maestro": "TC-011",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EJE ROTATIVO PRO",
+    "aliases": [
+      "EJE ROTATIVO PRO"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "ACCESORIOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1250000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-124",
+    "ids_externos": {
+      "id_calculadora": "TC-012",
+      "id_maestro": "TC-012",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA 8 EN 1",
+    "aliases": [
+      "PRENSA 8 EN 1"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1900000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-125",
+    "ids_externos": {
+      "id_calculadora": "TC-013",
+      "id_maestro": "TC-013",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA 11 EN 1",
+    "aliases": [
+      "PRENSA 11 EN 1"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 2900000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-126",
+    "ids_externos": {
+      "id_calculadora": "TC-014",
+      "id_maestro": "TC-014",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA 15 EN 1",
+    "aliases": [
+      "PRENSA 15 EN 1"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3400000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-127",
+    "ids_externos": {
+      "id_calculadora": "TC-015",
+      "id_maestro": "TC-015",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA 6 EN 1",
+    "aliases": [
+      "PRENSA 6 EN 1"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1750000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-128",
+    "ids_externos": {
+      "id_calculadora": "TC-016",
+      "id_maestro": "TC-016",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA BOLIGRAFOS",
+    "aliases": [
+      "PRENSA BOLIGRAFOS"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1190000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-129",
+    "ids_externos": {
+      "id_calculadora": "TC-017",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA LITRO SUBLI CY MG YE",
+    "aliases": [
+      "TINTA LITRO SUBLI CY MG YE"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 180000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-130",
+    "ids_externos": {
+      "id_calculadora": "TC-018",
+      "id_maestro": "TC-018",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA LITRO SUBLI BK",
+    "aliases": [
+      "TINTA LITRO SUBLI BK"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 225000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-131",
+    "ids_externos": {
+      "id_calculadora": "TC-019",
+      "id_maestro": "TC-019",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "RESMA DE PAPEL A4",
+    "aliases": [
+      "RESMA DE PAPEL A4"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 30000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-132",
+    "ids_externos": {
+      "id_calculadora": "TC-020",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "RESMA DE PAPEL A4 PREMIUM",
+    "aliases": [
+      "RESMA DE PAPEL A4 PREMIUM"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 90000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-133",
+    "ids_externos": {
+      "id_calculadora": "TC-021",
+      "id_maestro": "TC-021",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "HORNO DTF A3",
+    "aliases": [
+      "HORNO DTF A3"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3300000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-134",
+    "ids_externos": {
+      "id_calculadora": "TC-022",
+      "id_maestro": "TC-022",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CAMEO 5",
+    "aliases": [
+      "CAMEO 5"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 2450000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-135",
+    "ids_externos": {
+      "id_calculadora": "TC-024",
+      "id_maestro": "TC-024",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "DTF 60CM 100 METROS",
+    "aliases": [
+      "DTF 60CM 100 METROS"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1300000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-136",
+    "ids_externos": {
+      "id_calculadora": "TC-025",
+      "id_maestro": "TC-025",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "POLVO DTF KILO",
+    "aliases": [
+      "POLVO DTF KILO"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 235000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-137",
+    "ids_externos": {
+      "id_calculadora": "TC-026",
+      "id_maestro": "TC-026",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA JANOME MC400E",
+    "aliases": [
+      "BORDADORA JANOME MC400E"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 8600000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-138",
+    "ids_externos": {
+      "id_calculadora": "TC-027",
+      "id_maestro": "TC-027",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA JANOME MC500E",
+    "aliases": [
+      "BORDADORA JANOME MC500E"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 9900000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-139",
+    "ids_externos": {
+      "id_calculadora": "TC-028",
+      "id_maestro": "TC-028",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA JANOME MC550E",
+    "aliases": [
+      "BORDADORA JANOME MC550E"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 10900000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-140",
+    "ids_externos": {
+      "id_calculadora": "TC-029",
+      "id_maestro": "TC-029",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA JANOME MB7",
+    "aliases": [
+      "BORDADORA JANOME MB7"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 39500000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-141",
+    "ids_externos": {
+      "id_calculadora": "TC-030",
+      "id_maestro": "TC-030",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA INDUSTRIAL WILPEX WP121C",
+    "aliases": [
+      "BORDADORA INDUSTRIAL WILPEX WP121C"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 35500000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-142",
+    "ids_externos": {
+      "id_calculadora": "TC-031",
+      "id_maestro": "TC-031",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "OVERLOCK FLIAR WILPEX WP334",
+    "aliases": [
+      "OVERLOCK FLIAR WILPEX WP334"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 1826500,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-143",
+    "ids_externos": {
+      "id_calculadora": "TC-032",
+      "id_maestro": "TC-032",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COLLERETA Y OVERLOCK 5 HILOS WILPEX FLIAR",
+    "aliases": [
+      "COLLERETA Y OVERLOCK 5 HILOS WILPEX FLIAR"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 2730000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-144",
+    "ids_externos": {
+      "id_calculadora": "TC-034",
+      "id_maestro": "TC-034",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CAMEO 15 PULGADAS",
+    "aliases": [
+      "CAMEO 15 PULGADAS"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3600000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-145",
+    "ids_externos": {
+      "id_calculadora": "TC-035",
+      "id_maestro": "TC-035",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CAMEO 24 PULGADAS",
+    "aliases": [
+      "CAMEO 24 PULGADAS"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 4500000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-146",
+    "ids_externos": {
+      "id_calculadora": "TC-036",
+      "id_maestro": "TC-036",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CORTADORA DE PLOTTER WILPPEX 75CM",
+    "aliases": [
+      "CORTADORA DE PLOTTER WILPPEX 75CM"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3200000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-147",
+    "ids_externos": {
+      "id_calculadora": "TC-037",
+      "id_maestro": "TC-037",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA TAZAS DOBLE",
+    "aliases": [
+      "PRENSA TAZAS DOBLE"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 995000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-148",
+    "ids_externos": {
+      "id_calculadora": "TC-038",
+      "id_maestro": "TC-038",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA TAZAS 5 EN 1",
+    "aliases": [
+      "PRENSA TAZAS 5 EN 1"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 2700000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-149",
+    "ids_externos": {
+      "id_calculadora": "TC-039",
+      "id_maestro": "TC-039",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "BORDADORA WILPEX IND 15 AGUJAS SMART",
+    "aliases": [
+      "BORDADORA WILPEX IND 15 AGUJAS SMART"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 36000000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-150",
+    "ids_externos": {
+      "id_calculadora": "TC-040",
+      "id_maestro": "TC-040",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "PRENSA MANUAL 100X80",
+    "aliases": [
+      "PRENSA MANUAL 100X80"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 12750000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-151",
+    "ids_externos": {
+      "id_calculadora": "TC-041",
+      "id_maestro": "TC-041",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "DOBLE BANDEJA",
+    "aliases": [
+      "DOBLE BANDEJA"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 30500000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-152",
+    "ids_externos": {
+      "id_calculadora": "TC-042",
+      "id_maestro": "TC-042",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CALANDRA 1.7 ROLLO A ROLLO",
+    "aliases": [
+      "CALANDRA 1.7 ROLLO A ROLLO"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 81000000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-153",
+    "ids_externos": {
+      "id_calculadora": "TC-043",
+      "id_maestro": "TC-043",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CALANDRA 1.8",
+    "aliases": [
+      "CALANDRA 1.8"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 30000000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-154",
+    "ids_externos": {
+      "id_calculadora": "TC-044",
+      "id_maestro": "TC-044",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EPSON F570+100X80+MULTI+OVERLOCK+COLLARETA FLIAR",
+    "aliases": [
+      "EPSON F570+100X80+MULTI+OVERLOCK+COLLARETA FLIAR"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 30819955.16,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-155",
+    "ids_externos": {
+      "id_calculadora": "TC-045",
+      "id_maestro": "TC-045",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER RECTA IND WILPEX",
+    "aliases": [
+      "MAQUINA DE COSER RECTA IND WILPEX"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 2120000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-156",
+    "ids_externos": {
+      "id_calculadora": "TC-046",
+      "id_maestro": "",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER OVERLOCK IND WILPEX",
+    "aliases": [
+      "MAQUINA DE COSER OVERLOCK IND WILPEX"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3200000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-157",
+    "ids_externos": {
+      "id_calculadora": "TC-047",
+      "id_maestro": "TC-047",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUINA DE COSER COLLARETA IND WILPEX",
+    "aliases": [
+      "MAQUINA DE COSER COLLARETA IND WILPEX"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 4100000,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-158",
+    "ids_externos": {
+      "id_calculadora": "CMB-001",
+      "id_maestro": "CMB-001",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + CAMEO 5",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + CAMEO 5"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-159",
+    "ids_externos": {
+      "id_calculadora": "CMB-002",
+      "id_maestro": "CMB-002",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-160",
+    "ids_externos": {
+      "id_calculadora": "CMB-003",
+      "id_maestro": "CMB-003",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1 + GRABADORA LASER 10W",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1 + GRABADORA LASER 10W"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-161",
+    "ids_externos": {
+      "id_calculadora": "CMB-004",
+      "id_maestro": "CMB-004",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + SCANCUT SDX125 + PRENSA 8 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + SCANCUT SDX125 + PRENSA 8 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-162",
+    "ids_externos": {
+      "id_calculadora": "CMB-005",
+      "id_maestro": "CMB-021",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1 + CAMEO 5",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1 + CAMEO 5"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-163",
+    "ids_externos": {
+      "id_calculadora": "CMB-006",
+      "id_maestro": "CMB-006",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1 + GRABADORA LASER 10W",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 8 EN 1 + GRABADORA LASER 10W"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-164",
+    "ids_externos": {
+      "id_calculadora": "CMB-007",
+      "id_maestro": "CMB-007",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + SCANCUT SDX125 + PRENSA 8 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + SCANCUT SDX125 + PRENSA 8 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-165",
+    "ids_externos": {
+      "id_calculadora": "CMB-008",
+      "id_maestro": "CMB-008",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L121 + PRENSA 8 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L121 + PRENSA 8 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-166",
+    "ids_externos": {
+      "id_calculadora": "CMB-009",
+      "id_maestro": "CMB-009",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + BORDADORA BROTHER NV970LPA 2 EN 1 BORDA Y COSE 10 + PRENSA 8 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + BORDADORA BROTHER NV970LPA 2 EN 1 BORDA Y COSE 10 + PRENSA 8 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-167",
+    "ids_externos": {
+      "id_calculadora": "CMB-010",
+      "id_maestro": "CMB-010",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + CAMEO 5 + GRABADORA LASER 10W",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + CAMEO 5 + GRABADORA LASER 10W"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-168",
+    "ids_externos": {
+      "id_calculadora": "CMB-011",
+      "id_maestro": "CMB-011",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-169",
+    "ids_externos": {
+      "id_calculadora": "CMB-012",
+      "id_maestro": "CMB-012",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: SCANCUT SDX125 + PRENSA TERMICA 38X38",
+    "aliases": [
+      "COMBO: SCANCUT SDX125 + PRENSA TERMICA 38X38"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-170",
+    "ids_externos": {
+      "id_calculadora": "CMB-013",
+      "id_maestro": "CMB-013",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + CAMEO 5 + GRABADORA LASER 10W",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + CAMEO 5 + GRABADORA LASER 10W"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-171",
+    "ids_externos": {
+      "id_calculadora": "CMB-014",
+      "id_maestro": "CMB-014",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-172",
+    "ids_externos": {
+      "id_calculadora": "CMB-015",
+      "id_maestro": "CMB-015",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + PRENSA TAZA COMUN 11 OZ",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + PRENSA TAZA COMUN 11 OZ"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-173",
+    "ids_externos": {
+      "id_calculadora": "CMB-016",
+      "id_maestro": "CMB-016",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L121 + PRENSA 11 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L121 + PRENSA 11 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-174",
+    "ids_externos": {
+      "id_calculadora": "CMB-017",
+      "id_maestro": "CMB-017",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + PRENSA 11 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + PRENSA 11 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-175",
+    "ids_externos": {
+      "id_calculadora": "CMB-018",
+      "id_maestro": "CMB-018",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 15 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 15 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-176",
+    "ids_externos": {
+      "id_calculadora": "CMB-019",
+      "id_maestro": "CMB-019",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L121 + PRENSA 15 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L121 + PRENSA 15 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-177",
+    "ids_externos": {
+      "id_calculadora": "CMB-020",
+      "id_maestro": "CMB-020",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + PRENSA 15 EN 1",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + PRENSA 15 EN 1"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-178",
+    "ids_externos": {
+      "id_calculadora": "CMB-022",
+      "id_maestro": "CMB-022",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L121 + PRENSA 8 EN 1 + CAMEO 5",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L121 + PRENSA 8 EN 1 + CAMEO 5"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-179",
+    "ids_externos": {
+      "id_calculadora": "CMB-023",
+      "id_maestro": "CMB-023",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1 + CAMEO 5",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON L1250 + PRENSA 8 EN 1 + CAMEO 5"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-180",
+    "ids_externos": {
+      "id_calculadora": "CMB-024",
+      "id_maestro": "CMB-024",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: GRABADORA LASER 10W + PATITAS BASE + EJE ROTATIVO ESTANDAR + COMPRESOR DE AIRE",
+    "aliases": [
+      "COMBO: GRABADORA LASER 10W + PATITAS BASE + EJE ROTATIVO ESTANDAR + COMPRESOR DE AIRE"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 23,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-181",
+    "ids_externos": {
+      "id_calculadora": "CMB-025",
+      "id_maestro": "CMB-025",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 15 EN 1 + CAMEO 5",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 15 EN 1 + CAMEO 5"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 30,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-182",
+    "ids_externos": {
+      "id_calculadora": "CMB-026",
+      "id_maestro": "CMB-026",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + GRABADORA LASER 20W",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + GRABADORA LASER 20W"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 30,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-183",
+    "ids_externos": {
+      "id_calculadora": "CMB-027",
+      "id_maestro": "CMB-027",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + CAMEO 5 + PRENSA TERMICA 60X40",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + CAMEO 5 + PRENSA TERMICA 60X40"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 30,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-184",
+    "ids_externos": {
+      "id_calculadora": "CMB-028",
+      "id_maestro": "CMB-028",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + GRABADORA LASER 10W",
+    "aliases": [
+      "COMBO: IMPRESORA EPSON F170 + PRENSA 11 EN 1 + GRABADORA LASER 10W"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 30,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-185",
+    "ids_externos": {
+      "id_calculadora": "CMB-029",
+      "id_maestro": "CMB-029",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "COMBO: GRABADORA LASER 10W + PATITAS BASE + EJE ROTATIVO ESTANDAR + COMPRESOR DE AIRE + CAMEO 5",
+    "aliases": [
+      "COMBO: GRABADORA LASER 10W + PATITAS BASE + EJE ROTATIVO ESTANDAR + COMPRESOR DE AIRE + CAMEO 5"
+    ],
+    "proveedor": "COMBO",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 0,
+    "margen_pct": 30,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-186",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-039",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CUCHILLA DE CORTE AUTO STD BROTHER  CADXBLD1",
+    "aliases": [
+      "CUCHILLA DE CORTE AUTO STD BROTHER  CADXBLD1"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "ACCESORIOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 12.73,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-187",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-084",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCT5475SR SURECOLOR 36\"",
+    "aliases": [
+      "SCT5475SR SURECOLOR 36\""
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 2632.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-188",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-088",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR  F6470 PRINTER WITH STAND & TAKEUP REEL SIN IVA",
+    "aliases": [
+      "SURECOLOR  F6470 PRINTER WITH STAND & TAKEUP REEL SIN IVA"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 5900.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-189",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-089",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR  F6470 PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)",
+    "aliases": [
+      "SURECOLOR  F6470 PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 7176.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-190",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-090",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SURECOLOR  F6470H PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)",
+    "aliases": [
+      "SURECOLOR  F6470H PRINTER WITH STAND & TAKEUP REEL (NO INITIAL INK/UGK)"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 7200.09,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-191",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-097",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "SCF9570PE - F9570 PROMO MUNDIAL (SIN TINTAS)",
+    "aliases": [
+      "SCF9570PE - F9570 PROMO MUNDIAL (SIN TINTAS)"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 23674.3,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-192",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-102",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA F6470  POR CAJA UNA CAJA TRAE 2 DEL MISMO COLOR",
+    "aliases": [
+      "TINTA F6470  POR CAJA UNA CAJA TRAE 2 DEL MISMO COLOR"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 227.05,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-193",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-105",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA F170 O F570 DE 140ML COLORES CY",
+    "aliases": [
+      "TINTA F170 O F570 DE 140ML COLORES CY"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 18.5,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-194",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-107",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON F6200",
+    "aliases": [
+      "TINTA EPSON F6200"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 429.4,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-195",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-108",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON F F6370 CAJA 6 UNIDADES",
+    "aliases": [
+      "TINTA EPSON F F6370 CAJA 6 UNIDADES"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 541.5,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-196",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-116",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T890120 BLACK S40600",
+    "aliases": [
+      "TINTA EPSON T890120 BLACK S40600"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 90.25,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-197",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-117",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T890220 CYAN S40600",
+    "aliases": [
+      "TINTA EPSON T890220 CYAN S40600"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 90.25,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-198",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-118",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T890320 MAGENTA S40600",
+    "aliases": [
+      "TINTA EPSON T890320 MAGENTA S40600"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 90.25,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-199",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-119",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T890420 YELLOW S40600",
+    "aliases": [
+      "TINTA EPSON T890420 YELLOW S40600"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 90.25,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-200",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-120",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T53K220 CYAN (F64/F95) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T53K220 CYAN (F64/F95) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 113.53,
+    "margen_pct": 23.0,
+    "stock_actual": 4,
+    "stock_reservado": 0,
+    "stock_disponible": 4,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-201",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-121",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T53K920 HDK (F64/F95) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T53K920 HDK (F64/F95) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 113.53,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-202",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-122",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T53K420 YELLOW (F64/F95) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T53K420 YELLOW (F64/F95) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 113.53,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-203",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-123",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T53K320 MAGENTA (F64/F95) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T53K320 MAGENTA (F64/F95) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 113.53,
+    "margen_pct": 23.0,
+    "stock_actual": 4,
+    "stock_reservado": 0,
+    "stock_disponible": 4,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-204",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-124",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T741220 CYAN (F62/F93) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T741220 CYAN (F62/F93) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 71.57,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-205",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-125",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T741120 HDK (F62/F93) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T741120 HDK (F62/F93) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 71.57,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-206",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-126",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T741420 YELLOW (F62/F93) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T741420 YELLOW (F62/F93) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 71.57,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-207",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-127",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T741320 MAGENTA (F62/F93) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T741320 MAGENTA (F62/F93) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 71.57,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-208",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-128",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T43M220 CYAN (F100/F110) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T43M220 CYAN (F100/F110) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 415.63,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-209",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-129",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T43M120 HDK (F100/F110) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T43M120 HDK (F100/F110) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 415.63,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-210",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-130",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T43M420 YELLOW (F100/F110) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T43M420 YELLOW (F100/F110) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 415.63,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-211",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-131",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T43M320 MAGENTA (F100/F110) - UNITARIO",
+    "aliases": [
+      "TINTA EPSON T43M320 MAGENTA (F100/F110) - UNITARIO"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 415.63,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-212",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-132",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T49M2 CYAN (F170/F570) - 140ML",
+    "aliases": [
+      "TINTA EPSON T49M2 CYAN (F170/F570) - 140ML"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 18.5,
+    "margen_pct": 23.0,
+    "stock_actual": 3,
+    "stock_reservado": 0,
+    "stock_disponible": 3,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-213",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-133",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T49M1 BLACK (F170/F570) - 140ML",
+    "aliases": [
+      "TINTA EPSON T49M1 BLACK (F170/F570) - 140ML"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 18.5,
+    "margen_pct": 23.0,
+    "stock_actual": 3,
+    "stock_reservado": 0,
+    "stock_disponible": 3,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-214",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-134",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T49M4 YELLOW (F170/F570) - 140ML",
+    "aliases": [
+      "TINTA EPSON T49M4 YELLOW (F170/F570) - 140ML"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 18.5,
+    "margen_pct": 23.0,
+    "stock_actual": 4,
+    "stock_reservado": 0,
+    "stock_disponible": 4,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-215",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-135",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA EPSON T49M3 MAGENTA (F170/F570) - 140ML",
+    "aliases": [
+      "TINTA EPSON T49M3 MAGENTA (F170/F570) - 140ML"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 18.5,
+    "margen_pct": 23.0,
+    "stock_actual": 4,
+    "stock_reservado": 0,
+    "stock_disponible": 4,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-216",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-136",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "KIT DE LIMPIEZA DE CABEZAL F22/G60 C13S400216",
+    "aliases": [
+      "KIT DE LIMPIEZA DE CABEZAL F22/G60 C13S400216"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 104.5,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-217",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-138",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "T46C420 YELLOW F63/F94",
+    "aliases": [
+      "T46C420 YELLOW F63/F94"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 69.0,
+    "margen_pct": 23.0,
+    "stock_actual": 4,
+    "stock_reservado": 0,
+    "stock_disponible": 4,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-218",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-139",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "T46C320 MAGENTA F63/F94",
+    "aliases": [
+      "T46C320 MAGENTA F63/F94"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 69.0,
+    "margen_pct": 23.0,
+    "stock_actual": 5,
+    "stock_reservado": 0,
+    "stock_disponible": 5,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-219",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-140",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "T46C220 CYAN F63/F94",
+    "aliases": [
+      "T46C220 CYAN F63/F94"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 69.0,
+    "margen_pct": 23.0,
+    "stock_actual": 2,
+    "stock_reservado": 0,
+    "stock_disponible": 2,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-220",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-141",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "T46C120 YHDK F63/F94",
+    "aliases": [
+      "T46C120 YHDK F63/F94"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 69.0,
+    "margen_pct": 23.0,
+    "stock_actual": 5,
+    "stock_reservado": 0,
+    "stock_disponible": 5,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-221",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "TC-004",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "EJE ROTATIVO ESTÁNDAR",
+    "aliases": [
+      "EJE ROTATIVO ESTÁNDAR"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 700000.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-222",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "TC-017",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "TINTA LITRO SUBLI CY",
+    "aliases": [
+      "TINTA LITRO SUBLI CY"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 180000.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-223",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "TC-020",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "RESMA DE PAPEL A4 PREMIUN",
+    "aliases": [
+      "RESMA DE PAPEL A4 PREMIUN"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INSUMOS",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 90000.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-224",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "TC-033",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "CAMEO PLUS",
+    "aliases": [
+      "CAMEO PLUS"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "COMERCIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3300000.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": false,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-225",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "TC-046",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "MAQUIINA DE COSER OVERLOCK IND WILPEX",
+    "aliases": [
+      "MAQUIINA DE COSER OVERLOCK IND WILPEX"
+    ],
+    "proveedor": "Todo Costura",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "GS",
+    "costo": 3200000.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  },
+  {
+    "id_solpro": "PRD-226",
+    "ids_externos": {
+      "id_calculadora": "",
+      "id_maestro": "SC-142",
+      "cod_ventas": ""
+    },
+    "nombre_canonico": "IMP EPSON F6470 IMPARABLES SIN TINTAS",
+    "aliases": [
+      "IMP EPSON F6470 IMPARABLES SIN TINTAS"
+    ],
+    "proveedor": "Sol Control",
+    "linea": "INDUSTRIAL",
+    "tipo": "insumo",
+    "moneda_costo": "USD",
+    "costo": 6474.0,
+    "margen_pct": 23.0,
+    "stock_actual": 0,
+    "stock_reservado": 0,
+    "stock_disponible": 0,
+    "credito_habilitado": true,
+    "activo": true
+  }
+]

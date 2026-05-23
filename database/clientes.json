@@ -1,0 +1,68 @@
+[
+    {
+        "nombre": "MATIAS FRANCO",
+        "ruc": "4203529-5",
+        "direccion": "ASUNCION",
+        "telefono": ""
+    },
+    {
+        "nombre": "EVELYN MARTINEZ",
+        "ruc": "4203529-5",
+        "direccion": "CORONEL OVIEDO ",
+        "telefono": ""
+    },
+    {
+        "nombre": "ANGEL AGUILAR",
+        "ruc": "4708529-0",
+        "direccion": "ASUNCION",
+        "telefono": ""
+    },
+    {
+        "nombre": "ROCIO FERREIRA",
+        "ruc": "5568327-4",
+        "direccion": "ASUNCION",
+        "telefono": ""
+    },
+    {
+        "nombre": "GRUPO VARGAS S.R.L",
+        "ruc": "80054675-0",
+        "direccion": "ENCARNACION",
+        "telefono": ""
+    },
+    {
+        "nombre": "RAUL BENITEZ",
+        "ruc": "3609171-5",
+        "direccion": "ASUNCION ",
+        "telefono": ""
+    },
+    {
+        "nombre": "HERNAN VIERA",
+        "ruc": "5099651-7",
+        "direccion": "ASUNCION",
+        "telefono": ""
+    },
+    {
+        "nombre": "INTER GROUP S.A",
+        "ruc": "80081374-0",
+        "direccion": "SAN LORENZO ",
+        "telefono": ""
+    },
+    {
+        "nombre": "ADALBERTO DUARTE",
+        "ruc": "",
+        "direccion": "",
+        "telefono": ""
+    },
+    {
+        "nombre": "ALBERT COMERCIAL",
+        "ruc": "",
+        "direccion": "",
+        "telefono": ""
+    },
+    {
+        "nombre": "GRUPO UTEX E.A.S",
+        "ruc": "",
+        "direccion": "",
+        "telefono": ""
+    }
+]

@@ -1,0 +1,23 @@
+{
+  "ultima_actualizacion": "2026-05-22",
+  "actualizado_por": "Administrador SOLPRO",
+  "dolar_mercado": 6250,
+  "banda_piso": 6400,
+  "banda_techo": 6600,
+  "historico": [
+    {
+      "fecha": "2026-05-22",
+      "dolar_mercado": 6500,
+      "banda_piso": 6650,
+      "banda_techo": 6850,
+      "actualizado_por": "Administrador SOLPRO"
+    },
+    {
+      "fecha": "2026-05-22",
+      "dolar_mercado": 6250,
+      "banda_piso": 6400,
+      "banda_techo": 6600,
+      "actualizado_por": "Sistema (default)"
+    }
+  ]
+}

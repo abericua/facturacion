@@ -1,0 +1,1834 @@
+[
+  {
+    "id_solpro": "CLI-001",
+    "ruc": "4203529-5",
+    "nombre_canonico": "MATIAS FRANCO",
+    "aliases": [
+      "MATIAS FRANCO"
+    ],
+    "direccion": "ASUNCION",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-002",
+    "ruc": "4203529-5",
+    "nombre_canonico": "EVELYN MARTINEZ",
+    "aliases": [
+      "EVELYN MARTINEZ"
+    ],
+    "direccion": "CORONEL OVIEDO ",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-003",
+    "ruc": "4708529-0",
+    "nombre_canonico": "ANGEL AGUILAR",
+    "aliases": [
+      "ANGEL AGUILAR"
+    ],
+    "direccion": "ASUNCION",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-004",
+    "ruc": "5568327-4",
+    "nombre_canonico": "ROCIO FERREIRA",
+    "aliases": [
+      "ROCIO FERREIRA"
+    ],
+    "direccion": "ASUNCION",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-005",
+    "ruc": "80054675-0",
+    "nombre_canonico": "GRUPO VARGAS S.R.L",
+    "aliases": [
+      "GRUPO VARGAS S.R.L",
+      "BRUPO VARGAS S.R.L",
+      "GRUPO VARGAS SRL",
+      "JESSY LENS S.R.L",
+      "JESSI LENS S.R.L"
+    ],
+    "direccion": "ENCARNACION",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-006",
+    "ruc": "3609171-5",
+    "nombre_canonico": "RAUL BENITEZ",
+    "aliases": [
+      "RAUL BENITEZ"
+    ],
+    "direccion": "ASUNCION ",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-007",
+    "ruc": "5099651-7",
+    "nombre_canonico": "HERNAN VIERA",
+    "aliases": [
+      "HERNAN VIERA"
+    ],
+    "direccion": "ASUNCION",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-008",
+    "ruc": "80081374-0",
+    "nombre_canonico": "INTER GROUP S.A",
+    "aliases": [
+      "INTER GROUP S.A"
+    ],
+    "direccion": "SAN LORENZO ",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-009",
+    "ruc": "",
+    "nombre_canonico": "WIDMER GRAPHIC",
+    "aliases": [
+      "WIDMER GRAPHIC"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-010",
+    "ruc": "",
+    "nombre_canonico": "TECNOTEXTIL E.A.S",
+    "aliases": [
+      "TECNOTEXTIL E.A.S",
+      "TEXNOTEXTIL E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-011",
+    "ruc": "",
+    "nombre_canonico": "LUAN DEPORTES S.A",
+    "aliases": [
+      "LUAN DEPORTES S.A"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-012",
+    "ruc": "",
+    "nombre_canonico": "EPSON ARGENTINA S.R.L",
+    "aliases": [
+      "EPSON ARGENTINA S.R.L",
+      "EPSON ARGENTINA",
+      "EPSON ARGENTINA SRL"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-013",
+    "ruc": "",
+    "nombre_canonico": "GRUPO UTEX E.A.S",
+    "aliases": [
+      "GRUPO UTEX E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-014",
+    "ruc": "",
+    "nombre_canonico": "JUAN RAMON ROMAN",
+    "aliases": [
+      "JUAN RAMON ROMAN"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-015",
+    "ruc": "",
+    "nombre_canonico": "DIVINO NIÑO",
+    "aliases": [
+      "DIVINO NIÑO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-016",
+    "ruc": "",
+    "nombre_canonico": "REINA BENITEZ",
+    "aliases": [
+      "REINA BENITEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-017",
+    "ruc": "",
+    "nombre_canonico": "ANULADO",
+    "aliases": [
+      "ANULADO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": false
+  },
+  {
+    "id_solpro": "CLI-018",
+    "ruc": "",
+    "nombre_canonico": "DIEGO BORDON",
+    "aliases": [
+      "DIEGO BORDON"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-019",
+    "ruc": "",
+    "nombre_canonico": "MIRTHA ELIZABETH",
+    "aliases": [
+      "MIRTHA ELIZABETH"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-020",
+    "ruc": "",
+    "nombre_canonico": "EUCLIDES JABIER VERA",
+    "aliases": [
+      "EUCLIDES JABIER VERA",
+      "EUCLIDES VERA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-021",
+    "ruc": "",
+    "nombre_canonico": "GABRIELA SALGUEIRO",
+    "aliases": [
+      "GABRIELA SALGUEIRO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-022",
+    "ruc": "",
+    "nombre_canonico": "PASCUALA DAVALOS",
+    "aliases": [
+      "PASCUALA DAVALOS"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-023",
+    "ruc": "",
+    "nombre_canonico": "OSVAL GIMENEZ",
+    "aliases": [
+      "OSVAL GIMENEZ",
+      "OSVAL JIMENEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-024",
+    "ruc": "",
+    "nombre_canonico": "ROBERTO DUTRA",
+    "aliases": [
+      "ROBERTO DUTRA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-025",
+    "ruc": "",
+    "nombre_canonico": "ANGEL ALMADA",
+    "aliases": [
+      "ANGEL ALMADA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-026",
+    "ruc": "",
+    "nombre_canonico": "ALCIDES VALDEZ",
+    "aliases": [
+      "ALCIDES VALDEZ",
+      "ALCIDEZ VALDEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-027",
+    "ruc": "",
+    "nombre_canonico": "HUGO RENE GARAY",
+    "aliases": [
+      "HUGO RENE GARAY"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-028",
+    "ruc": "",
+    "nombre_canonico": "OSCAR SAMUDIO",
+    "aliases": [
+      "OSCAR SAMUDIO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-029",
+    "ruc": "",
+    "nombre_canonico": "NAYELI LEDESMA",
+    "aliases": [
+      "NAYELI LEDESMA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-030",
+    "ruc": "",
+    "nombre_canonico": "ARNALDO CORONEL",
+    "aliases": [
+      "ARNALDO CORONEL"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-031",
+    "ruc": "",
+    "nombre_canonico": "GRUPO VIBE E.A.S",
+    "aliases": [
+      "GRUPO VIBE E.A.S",
+      "GRUPO VIBER E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-032",
+    "ruc": "",
+    "nombre_canonico": "DAIANA ALBINO",
+    "aliases": [
+      "DAIANA ALBINO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-033",
+    "ruc": "",
+    "nombre_canonico": "LUIS CASCO",
+    "aliases": [
+      "LUIS CASCO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-034",
+    "ruc": "",
+    "nombre_canonico": "CARLOS FERREIRA",
+    "aliases": [
+      "CARLOS FERREIRA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-035",
+    "ruc": "",
+    "nombre_canonico": "CYV COMPANY E.A.S",
+    "aliases": [
+      "CYV COMPANY E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-036",
+    "ruc": "",
+    "nombre_canonico": "LUJAN FERNANDEZ",
+    "aliases": [
+      "LUJAN FERNANDEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-037",
+    "ruc": "",
+    "nombre_canonico": "ANGEL BAUMANN",
+    "aliases": [
+      "ANGEL BAUMANN"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-038",
+    "ruc": "",
+    "nombre_canonico": "JULIO CESAR BENITEZ",
+    "aliases": [
+      "JULIO CESAR BENITEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-039",
+    "ruc": "",
+    "nombre_canonico": "SPORT LOVERS S.A",
+    "aliases": [
+      "SPORT LOVERS S.A"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-040",
+    "ruc": "",
+    "nombre_canonico": "AMADO BOGADO",
+    "aliases": [
+      "AMADO BOGADO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-041",
+    "ruc": "",
+    "nombre_canonico": "FATIMA GOMEZ",
+    "aliases": [
+      "FATIMA GOMEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-042",
+    "ruc": "",
+    "nombre_canonico": "JUANA CARDOZO",
+    "aliases": [
+      "JUANA CARDOZO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-043",
+    "ruc": "",
+    "nombre_canonico": "MARIO GODOY",
+    "aliases": [
+      "MARIO GODOY"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-044",
+    "ruc": "",
+    "nombre_canonico": "CARLOS MENDOZA",
+    "aliases": [
+      "CARLOS MENDOZA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-045",
+    "ruc": "",
+    "nombre_canonico": "BEATRIZ ORTIZ",
+    "aliases": [
+      "BEATRIZ ORTIZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-046",
+    "ruc": "",
+    "nombre_canonico": "JUANA ALARCON",
+    "aliases": [
+      "JUANA ALARCON"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-047",
+    "ruc": "",
+    "nombre_canonico": "ELIANA LOPEZ",
+    "aliases": [
+      "ELIANA LOPEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-048",
+    "ruc": "",
+    "nombre_canonico": "LEYDI GONZALEZ",
+    "aliases": [
+      "LEYDI GONZALEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-049",
+    "ruc": "",
+    "nombre_canonico": "ROMINA FIGUEREDO",
+    "aliases": [
+      "ROMINA FIGUEREDO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-050",
+    "ruc": "",
+    "nombre_canonico": "MARIA VALENZUELA",
+    "aliases": [
+      "MARIA VALENZUELA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-051",
+    "ruc": "",
+    "nombre_canonico": "GRACIELA OVIEDO",
+    "aliases": [
+      "GRACIELA OVIEDO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-052",
+    "ruc": "",
+    "nombre_canonico": "MARIA ARRANZ",
+    "aliases": [
+      "MARIA ARRANZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-053",
+    "ruc": "",
+    "nombre_canonico": "FULVIA CACERES",
+    "aliases": [
+      "FULVIA CACERES"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-054",
+    "ruc": "",
+    "nombre_canonico": "LIDIA SAAVEDRA",
+    "aliases": [
+      "LIDIA SAAVEDRA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-055",
+    "ruc": "",
+    "nombre_canonico": "ROMINA BORJA",
+    "aliases": [
+      "ROMINA BORJA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-056",
+    "ruc": "",
+    "nombre_canonico": "ALBERT COMERCIAL",
+    "aliases": [
+      "ALBERT COMERCIAL"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-057",
+    "ruc": "",
+    "nombre_canonico": "INDUSTRIAS FYC S.R.L",
+    "aliases": [
+      "INDUSTRIAS FYC S.R.L"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-058",
+    "ruc": "",
+    "nombre_canonico": "IRENE MERELES",
+    "aliases": [
+      "IRENE MERELES"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-059",
+    "ruc": "",
+    "nombre_canonico": "DERLIS SALINAS",
+    "aliases": [
+      "DERLIS SALINAS"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-060",
+    "ruc": "",
+    "nombre_canonico": "SERGIO GRECO",
+    "aliases": [
+      "SERGIO GRECO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-061",
+    "ruc": "",
+    "nombre_canonico": "EVA PRIETO",
+    "aliases": [
+      "EVA PRIETO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-062",
+    "ruc": "",
+    "nombre_canonico": "EVANGELICA FRANCO",
+    "aliases": [
+      "EVANGELICA FRANCO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-063",
+    "ruc": "",
+    "nombre_canonico": "SIN NOMBRE",
+    "aliases": [
+      "SIN NOMBRE"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": false
+  },
+  {
+    "id_solpro": "CLI-064",
+    "ruc": "",
+    "nombre_canonico": "ISIDRO RUIZ DIAZ",
+    "aliases": [
+      "ISIDRO RUIZ DIAZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-065",
+    "ruc": "",
+    "nombre_canonico": "TANIA RIQUELME",
+    "aliases": [
+      "TANIA RIQUELME"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-066",
+    "ruc": "",
+    "nombre_canonico": "MARIO GONZALEZ",
+    "aliases": [
+      "MARIO GONZALEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-067",
+    "ruc": "",
+    "nombre_canonico": "LILIANA LOPEZ",
+    "aliases": [
+      "LILIANA LOPEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-068",
+    "ruc": "",
+    "nombre_canonico": "ANALIA CANDIA",
+    "aliases": [
+      "ANALIA CANDIA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-069",
+    "ruc": "",
+    "nombre_canonico": "AZZIO CREACIONES E.A.S",
+    "aliases": [
+      "AZZIO CREACIONES E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-070",
+    "ruc": "",
+    "nombre_canonico": "ADALBERTO DUARTE",
+    "aliases": [
+      "ADALBERTO DUARTE"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-071",
+    "ruc": "",
+    "nombre_canonico": "YANINA SCHUARTZMAN",
+    "aliases": [
+      "YANINA SCHUARTZMAN"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-072",
+    "ruc": "",
+    "nombre_canonico": "URUTAU E.A.S",
+    "aliases": [
+      "URUTAU E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-073",
+    "ruc": "",
+    "nombre_canonico": "TAMARA SOSA",
+    "aliases": [
+      "TAMARA SOSA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-074",
+    "ruc": "",
+    "nombre_canonico": "FANY BENITEZ",
+    "aliases": [
+      "FANY BENITEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-075",
+    "ruc": "",
+    "nombre_canonico": "DRUID SPORT E.A.S",
+    "aliases": [
+      "DRUID SPORT E.A.S"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-076",
+    "ruc": "",
+    "nombre_canonico": "MARLENE DUARTE",
+    "aliases": [
+      "MARLENE DUARTE"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-077",
+    "ruc": "",
+    "nombre_canonico": "CARLOS BOGADO",
+    "aliases": [
+      "CARLOS BOGADO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-078",
+    "ruc": "",
+    "nombre_canonico": "RONALD ORTIZ",
+    "aliases": [
+      "RONALD ORTIZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-079",
+    "ruc": "",
+    "nombre_canonico": "FABIANA AGUILERA",
+    "aliases": [
+      "FABIANA AGUILERA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-080",
+    "ruc": "",
+    "nombre_canonico": "MARIO ANDRES BAEZ",
+    "aliases": [
+      "MARIO ANDRES BAEZ",
+      "ANDRES BAEZ",
+      "MARIO BAEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-081",
+    "ruc": "",
+    "nombre_canonico": "LILIAN FLORENTIN",
+    "aliases": [
+      "LILIAN FLORENTIN"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-082",
+    "ruc": "",
+    "nombre_canonico": "LETICIA IGLESIA COLMAN",
+    "aliases": [
+      "LETICIA IGLESIA COLMAN"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-083",
+    "ruc": "",
+    "nombre_canonico": "IRENEO MERELES",
+    "aliases": [
+      "IRENEO MERELES"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-084",
+    "ruc": "",
+    "nombre_canonico": "ANGEL GODOY",
+    "aliases": [
+      "ANGEL GODOY"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-085",
+    "ruc": "",
+    "nombre_canonico": "ALBERTO RAMIRES",
+    "aliases": [
+      "ALBERTO RAMIRES"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-086",
+    "ruc": "",
+    "nombre_canonico": "ARIANE CONTRERA",
+    "aliases": [
+      "ARIANE CONTRERA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-087",
+    "ruc": "",
+    "nombre_canonico": "MANUEL AGUILAR",
+    "aliases": [
+      "MANUEL AGUILAR"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-088",
+    "ruc": "",
+    "nombre_canonico": "ALEJANDRO HERMOSILLA",
+    "aliases": [
+      "ALEJANDRO HERMOSILLA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-089",
+    "ruc": "",
+    "nombre_canonico": "LUIS ADORNO",
+    "aliases": [
+      "LUIS ADORNO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-090",
+    "ruc": "",
+    "nombre_canonico": "DIONISIO COLMAN",
+    "aliases": [
+      "DIONISIO COLMAN"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-091",
+    "ruc": "",
+    "nombre_canonico": "ADRIAN RUIZ DIAZ",
+    "aliases": [
+      "ADRIAN RUIZ DIAZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-092",
+    "ruc": "",
+    "nombre_canonico": "CHEMISE S.A",
+    "aliases": [
+      "CHEMISE S.A"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-093",
+    "ruc": "",
+    "nombre_canonico": "HR SPORT",
+    "aliases": [
+      "HR SPORT"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-094",
+    "ruc": "",
+    "nombre_canonico": "HUGO MORINIGO",
+    "aliases": [
+      "HUGO MORINIGO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-095",
+    "ruc": "",
+    "nombre_canonico": "JULIO GONZALES",
+    "aliases": [
+      "JULIO GONZALES"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-096",
+    "ruc": "",
+    "nombre_canonico": "MARIELA LOPEZ",
+    "aliases": [
+      "MARIELA LOPEZ"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-097",
+    "ruc": "",
+    "nombre_canonico": "MARIELA MEDINA",
+    "aliases": [
+      "MARIELA MEDINA"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-098",
+    "ruc": "",
+    "nombre_canonico": "JESSICA PORTILLO",
+    "aliases": [
+      "JESSICA PORTILLO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-099",
+    "ruc": "",
+    "nombre_canonico": "STEVEN ARAUJO",
+    "aliases": [
+      "STEVEN ARAUJO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-100",
+    "ruc": "",
+    "nombre_canonico": "MAQUICENTRO SRL",
+    "aliases": [
+      "MAQUICENTRO SRL"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-101",
+    "ruc": "",
+    "nombre_canonico": "LETICIA CACERES",
+    "aliases": [
+      "LETICIA CACERES"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-102",
+    "ruc": "",
+    "nombre_canonico": "GABRIEL MELGAREJO",
+    "aliases": [
+      "GABRIEL MELGAREJO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-103",
+    "ruc": "",
+    "nombre_canonico": "LUIS CARRILLO",
+    "aliases": [
+      "LUIS CARRILLO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-104",
+    "ruc": "",
+    "nombre_canonico": "FATIMA CASTILLO",
+    "aliases": [
+      "FATIMA CASTILLO"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-105",
+    "ruc": "",
+    "nombre_canonico": "ARTEMERA S.A",
+    "aliases": [
+      "ARTEMERA S.A"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-106",
+    "ruc": "",
+    "nombre_canonico": "RODRIGO RIVAS",
+    "aliases": [
+      "RODRIGO RIVAS"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  },
+  {
+    "id_solpro": "CLI-107",
+    "ruc": "",
+    "nombre_canonico": "SIN LIMITES EMPRENDIMIENTO EAS",
+    "aliases": [
+      "SIN LIMITES EMPRENDIMIENTO EAS"
+    ],
+    "direccion": "",
+    "telefono": "",
+    "email": "",
+    "tipo": "persona_fisica",
+    "categoria": "contado",
+    "linea_credito_habilitada": false,
+    "notas": "",
+    "fecha_alta": "2026-05-21",
+    "activo": true
+  }
+]

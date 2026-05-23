@@ -1,0 +1,27 @@
+{
+    "bancos": [
+        {
+            "id": "c1",
+            "banco": "Atlas",
+            "nombre": "Atlas Cta Cte GS",
+            "moneda": "GS",
+            "saldo_inicial": 0
+        },
+        {
+            "id": "c2",
+            "banco": "Ueno",
+            "nombre": "Ueno Digital GS",
+            "moneda": "GS",
+            "saldo_inicial": 0
+        },
+        {
+            "id": "c3",
+            "banco": "FIC",
+            "nombre": "FIC Inversiones GS",
+            "moneda": "GS",
+            "saldo_inicial": 0
+        }
+    ],
+    "egresos": [],
+    "iva_records": {}
+}
