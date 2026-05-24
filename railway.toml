@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+# FastAPI arranca primero en puerto 8000 (interno al contenedor).
+# Streamlit arranca en $PORT (el único puerto público que Railway expone).
+# El sleep garantiza que la BD esté lista antes de que Streamlit arranque.
+startCommand = "python database.py && uvicorn api:app --host 0.0.0.0 --port 8000 --daemon & sleep 4 && streamlit run main_portal.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
+
+# Variables de entorno requeridas en Railway (Settings → Variables):
+#
+#   DATA_DIR            = /app/data          (volumen persistente)
+#   SYSTEM_PEPPER       = <valor-secreto>
+#   JWT_SECRET          = <valor-secreto>
+#   ENV_MODE            = PRODUCTION
+#   GOOGLE_API_KEY      = <tu-clave-gemini>  (si usas IA en producción)
+#   ALLOWED_ORIGINS     = https://facturacion.solpropy.com/

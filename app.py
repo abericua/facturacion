@@ -4,7 +4,6 @@ import os
 import json
 import hashlib
 import base64
-from db_sgsp import (init_db, upsert_pago, conciliar_pago, get_resumen, get_pagos)
 from sync_service import (
     sync_pago, sync_pedido, sync_tipo_cambio,
     sync_clientes_bulk, sync_productos_bulk
@@ -26,7 +25,7 @@ SYSTEM_PEPPER  = os.environ.get("SYSTEM_PEPPER", "SOLPRO_ULTRA_SECRET_2026_#!")
 def inicializar_tipo_cambio():
     import json
     from datetime import datetime
-    tc_path = os.path.join(BASE_DIR, 'database', 'master_tipo_cambio.json')
+    tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
     if not os.path.exists(tc_path):
         return
     with open(tc_path, 'r', encoding='utf-8') as f:
@@ -43,42 +42,8 @@ def inicializar_tipo_cambio():
         with open(tc_path, 'w', encoding='utf-8') as f:
             json.dump(tc, f, indent=2, ensure_ascii=False)
 
-
-
 def run_facturador_app():
-    init_db()
     inicializar_tipo_cambio()
-    
-    params = st.query_params
-    if params.get("api") == "resumen":
-        import json as _json
-        resumen = get_resumen()
-        st.json(resumen)
-        st.stop()
-
-    if params.get("api") == "pagos":
-        pagos = get_pagos(
-            conciliado=params.get("conciliado"),
-            desde=params.get("desde"),
-            hasta=params.get("hasta")
-        )
-        st.json(pagos)
-        st.stop()
-
-    if params.get("api") == "conciliar":
-        id_pago = params.get("id")
-        if id_pago:
-            ok = conciliar_pago(id_pago, True)
-            st.json({"ok": ok, "id_pago": id_pago})
-        st.stop()
-
-    if params.get("api") == "desconciliar":
-        id_pago = params.get("id")
-        if id_pago:
-            ok = conciliar_pago(id_pago, False)
-            st.json({"ok": ok, "id_pago": id_pago})
-        st.stop()
-
     if 'user' in st.session_state and 'user_data' not in st.session_state:
         st.session_state.user_data = st.session_state.user
     elif 'user' in st.session_state:
@@ -380,12 +345,12 @@ def run_facturador_app():
     @st.cache_data(ttl=30)
     def load_products(dolar_mercado=None):
         import json, sys
-        sys.path.insert(0, BASE_DIR)
+        sys.path.insert(0, os.path.join(BASE_DIR, '..', 'Calculadora de precios solpro'))
         from calcular_precio_final import calcular
-        master_path = os.path.join(BASE_DIR, 'database', 'master_productos.json')
+        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_productos.json')
 
         if dolar_mercado is None:
-            tc_path = os.path.join(BASE_DIR, 'database', 'master_tipo_cambio.json')
+            tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
             try:
                 with open(tc_path, 'r') as f: tc = json.load(f)
                 dolar_mercado = tc.get('dolar_mercado', 0) or 6250
@@ -418,7 +383,7 @@ def run_facturador_app():
     @st.cache_data(ttl=30)
     def load_clients():
         import json
-        master_path = os.path.join(BASE_DIR, 'database', 'master_clientes.json')
+        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_clientes.json')
         all_clients = {}
         if os.path.exists(master_path):
             with open(master_path, 'r', encoding='utf-8') as f:
@@ -511,7 +476,7 @@ def run_facturador_app():
     def validate_stock(inventory_log):
         import json
         master_path = os.path.join(
-            BASE_DIR, 'database',
+            BASE_DIR, '..', 'database',
             'master_productos.json')
         if not os.path.exists(master_path):
             return True, ""
@@ -576,7 +541,7 @@ def run_facturador_app():
 
     def descontar_stock(items_entregados):
         import json
-        master_path = os.path.join(BASE_DIR, 'database', 'master_productos.json')
+        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_productos.json')
         if not os.path.exists(master_path): return
         with open(master_path, 'r', encoding='utf-8') as f: productos = json.load(f)
         for item in items_entregados:
@@ -590,7 +555,7 @@ def run_facturador_app():
 
     def reservar_stock(items):
         import json
-        master_path = os.path.join(BASE_DIR, 'database', 'master_productos.json')
+        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_productos.json')
         if not os.path.exists(master_path): return
         with open(master_path, 'r', encoding='utf-8') as f: productos = json.load(f)
         for item in items:
@@ -604,9 +569,9 @@ def run_facturador_app():
     def registrar_pedido(venta_data):
         import json, uuid
         from datetime import datetime
-        pedidos_path = os.path.join(BASE_DIR, 'database', 'pedidos.json')
-        items_path = os.path.join(BASE_DIR, 'database', 'pedido_items.json')
-        pagos_path = os.path.join(BASE_DIR, 'database', 'pagos.json')
+        pedidos_path = os.path.join(BASE_DIR, '..', 'database', 'pedidos.json')
+        items_path = os.path.join(BASE_DIR, '..', 'database', 'pedido_items.json')
+        pagos_path = os.path.join(BASE_DIR, '..', 'database', 'pagos.json')
 
         pedidos, items, pagos = [], [], []
         if os.path.exists(pedidos_path):
@@ -696,10 +661,25 @@ def run_facturador_app():
         with open(pedidos_path, 'w', encoding='utf-8') as f: json.dump(pedidos, f, indent=2, ensure_ascii=False)
         with open(items_path, 'w', encoding='utf-8') as f: json.dump(items, f, indent=2, ensure_ascii=False)
         with open(pagos_path, 'w', encoding='utf-8') as f: json.dump(pagos, f, indent=2, ensure_ascii=False)
+        
+        # -- SYNC API --
         try:
-            upsert_pago(pagos[-1])
-        except Exception:
-            pass
+            sync_pedido(venta_data)
+            if venta_data.get("monto_señado_gs", 0) > 0:
+                pago = {
+                    "id_pago": f"pago_{venta_data['id_pedido']}",
+                    "id_pedido": venta_data['id_pedido'],
+                    "fecha_pago": venta_data['fecha_pedido'],
+                    "tipo": "sena",
+                    "monto_gs": venta_data['monto_señado_gs'],
+                    "forma_pago": "Efectivo", # Default provisorio
+                    "nro_documento": venta_data.get('nro_factura_sena', ''),
+                    "tipo_documento": venta_data.get('tipo_doc_sena', 'recibo')
+                }
+                sync_pago(pago)
+        except Exception as e:
+            print(f"Error llamando a sync: {e}")
+
         return id_pedido
 
     def log_sales(sales_list, venta_data=None):
@@ -1115,7 +1095,7 @@ def run_facturador_app():
         else:
             ai_url = "http://localhost:1234/v1"
 
-        tc_path = os.path.join(BASE_DIR, 'database', 'master_tipo_cambio.json')
+        tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
         banda_piso = 0
         banda_techo = 0
         ultima_actualizacion = 'N/A'
@@ -1651,7 +1631,7 @@ def run_facturador_app():
     if True:
         with tab6:
             st.header("📦 PEDIDOS PENDIENTES")
-            pedidos_path = os.path.join(BASE_DIR, 'database', 'pedidos.json')
+            pedidos_path = os.path.join(BASE_DIR, '..', 'database', 'pedidos.json')
             if os.path.exists(pedidos_path):
                 import json
                 with open(pedidos_path, 'r', encoding='utf-8') as f:
@@ -1687,14 +1667,14 @@ def run_facturador_app():
                                 with open(pedidos_path, 'w', encoding='utf-8') as f:
                                     json.dump(pedidos_all, f, indent=2, ensure_ascii=False)
 
-                                items_path = os.path.join(BASE_DIR, 'database', 'pedido_items.json')
+                                items_path = os.path.join(BASE_DIR, '..', 'database', 'pedido_items.json')
                                 items_all = []
                                 if os.path.exists(items_path):
                                     with open(items_path, 'r', encoding='utf-8') as f: items_all = json.load(f)
                                 items_del_pedido = [i for i in items_all if i['id_pedido'] == p_liq['id_pedido']]
                                 descontar_stock(items_del_pedido)
 
-                                pagos_path = os.path.join(BASE_DIR, 'database', 'pagos.json')
+                                pagos_path = os.path.join(BASE_DIR, '..', 'database', 'pagos.json')
                                 pagos_all = []
                                 if os.path.exists(pagos_path):
                                     with open(pagos_path, 'r', encoding='utf-8') as f: pagos_all = json.load(f)
@@ -1726,7 +1706,7 @@ def run_facturador_app():
         if not is_admin:
             st.warning("⚠️ Acceso restringido. Solo Administración puede modificar el tipo de cambio.")
         else:
-            tc_path = os.path.join(BASE_DIR, 'database', 'master_tipo_cambio.json')
+            tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
             tc = {}
             if os.path.exists(tc_path):
                 with open(tc_path, 'r', encoding='utf-8') as f:
