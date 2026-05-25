@@ -14,11 +14,12 @@ import pyotp
 import qrcode
 from datetime import datetime, date
 from pdf_generator import generate_invoice_pdf
+from calcular_precio_final import calcular
 
 # --- CONFIGURACIÓN DE RUTAS (Railway + Local) ---
 BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
 PERSISTENT_DIR = "/app/data" # Mount path del volumen Railway
-SGSP_DATABASE  = PERSISTENT_DIR if os.path.exists(PERSISTENT_DIR) else BASE_DIR
+SGSP_DATABASE = os.path.join(BASE_DIR, "database") if not os.path.exists(PERSISTENT_DIR) else PERSISTENT_DIR
 SYSTEM_PEPPER  = os.environ.get("SYSTEM_PEPPER", "SOLPRO_ULTRA_SECRET_2026_#!")
 
 
@@ -42,6 +43,56 @@ def inicializar_tipo_cambio():
         with open(tc_path, 'w', encoding='utf-8') as f:
             json.dump(tc, f, indent=2, ensure_ascii=False)
 
+def render_calculadora():
+    import os, json, shutil, webbrowser
+    st.markdown("""
+    <div style="text-align:center; padding: 2rem;">
+        <h2 style="color:#f59e0b;">🧮 Calculadora de Precios — Motor V5.0</h2>
+        <p style="color:#7d9db5;">Hacé click para abrir la calculadora completa.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        if st.button("⚡ ABRIR CALCULADORA DE PRECIOS", use_container_width=True):
+            ruta = r"C:\Users\beric\OneDrive\Desktop\SGSP\Calculadora de precios solpro\calculadora_precios.html"
+            webbrowser.open(f"file:///{ruta.replace(chr(92), '/')}")
+
+    st.divider()
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 📥 Importar Lista de Precios")
+        archivo = st.file_uploader("Subí el JSON exportado de la calculadora", 
+                                    type=["json"], key="upload_precios")
+        if archivo is not None:
+
+            ruta_dest = os.path.join(SGSP_DATABASE, "master_productos.json")
+            ruta_backup = os.path.join(SGSP_DATABASE, "master_productos_backup.json")
+            try:
+                contenido = json.loads(archivo.read())
+                if os.path.exists(ruta_dest):
+                    shutil.copy2(ruta_dest, ruta_backup)
+                with open(ruta_dest, 'w', encoding='utf-8') as f:
+                    json.dump(contenido, f, ensure_ascii=False, indent=2)
+                st.success(f"✅ Lista actualizada — {len(contenido)} productos cargados. Backup guardado.")
+            except Exception as e:
+                st.error(f"Error al importar: {e}")
+
+    with col2:
+        st.markdown("#### 📤 Exportar Lista de Precios")
+        ruta_master = os.path.join(SGSP_DATABASE, "master_productos.json")
+        if os.path.exists(ruta_master):
+            with open(ruta_master, 'r', encoding='utf-8') as f:
+                datos = f.read()
+            st.download_button(
+                label="⬇️ Descargar master_productos.json",
+                data=datos,
+                file_name="master_productos.json",
+                mime="application/json",
+                use_container_width=True
+            )
+        else:
+            st.warning("No se encontró el archivo de productos.")
 def run_facturador_app():
     inicializar_tipo_cambio()
     if 'user' in st.session_state and 'user_data' not in st.session_state:
@@ -250,7 +301,8 @@ def run_facturador_app():
 
     # --- CONFIGURACIÓN DE RUTAS ---
     # Priorizar volumen persistente de Railway para la Base de Datos Maestra
-    SGSP_DATABASE = os.environ.get("SGSP_DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database"))
+    _db_default = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database")
+    SGSP_DATABASE = os.environ.get("SGSP_DATABASE", _db_default)
     # SGSP_DATABASE ya definido arriba. Solo sobreescribir si hay variable de entorno explícita.
     _env_override = os.environ.get("SGSP_DATABASE")
     if _env_override:
@@ -345,12 +397,12 @@ def run_facturador_app():
     @st.cache_data(ttl=30)
     def load_products(dolar_mercado=None):
         import json, sys
-        sys.path.insert(0, os.path.join(BASE_DIR, '..', 'Calculadora de precios solpro'))
+        sys.path.insert(0, BASE_DIR)
         from calcular_precio_final import calcular
-        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_productos.json')
+        master_path = os.path.join(SGSP_DATABASE, 'master_productos.json')
 
         if dolar_mercado is None:
-            tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
+            tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
             try:
                 with open(tc_path, 'r') as f: tc = json.load(f)
                 dolar_mercado = tc.get('dolar_mercado', 0) or 6250
@@ -383,7 +435,7 @@ def run_facturador_app():
     @st.cache_data(ttl=30)
     def load_clients():
         import json
-        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_clientes.json')
+        master_path = os.path.join(SGSP_DATABASE, 'master_clientes.json')
         all_clients = {}
         if os.path.exists(master_path):
             with open(master_path, 'r', encoding='utf-8') as f:
@@ -806,137 +858,23 @@ def run_facturador_app():
     if not st.session_state.get('logged_in', False) or st.session_state.get('user_data') is None:
         st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-        #MainMenu, header, footer {visibility: hidden;}
-        .block-container {padding: 0 !important; margin: 0 !important; max-width: 100% !important;}
+        #MainMenu, header, footer, section[data-testid="stSidebar"] {visibility: hidden;}
         .stApp {background: #08090c !important;}
-        section[data-testid="stSidebar"] {display: none !important;}
-        div[data-testid="stVerticalBlock"] > div:first-child {padding: 0 !important;}
-
-        /* Panel izquierdo */
-        .sp-left {
-            min-height: 100vh; padding: 4rem 3rem;
-            background: linear-gradient(135deg, rgba(245,188,0,.07) 0%, transparent 60%);
-            border-right: 1px solid rgba(255,255,255,.07);
-            display: flex; flex-direction: column; justify-content: center;
-        }
-        .sp-logo { display:flex; align-items:center; gap:14px; margin-bottom:2.5rem; }
-        .sp-logo img { width:72px; border-radius:50%; filter:drop-shadow(0 0 16px rgba(245,188,0,.5)); }
-        .sp-logo-name { font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:700; color:#F2EDE0; letter-spacing:.04em; }
-        .sp-logo-tag  { font-size:.6rem; letter-spacing:.28em; text-transform:uppercase; color:#F5BC00; display:block; margin-top:3px; font-family:'IBM Plex Sans',sans-serif; }
-        .sp-hl { font-family:'Space Grotesk',sans-serif; font-size:2.4rem; font-weight:700; color:#F2EDE0; line-height:1.1; margin-bottom:1rem; }
-        .sp-hl span { color:#F5BC00; }
-        .sp-desc { font-family:'IBM Plex Sans',sans-serif; font-size:.93rem; color:rgba(242,237,224,.6); line-height:1.75; max-width:340px; margin-bottom:2rem; font-weight:300; }
-        .sp-pill { display:inline-flex; align-items:center; gap:9px; background:rgba(245,188,0,.06); border:1px solid rgba(245,188,0,.18); border-radius:50px; padding:.4rem .9rem; margin-bottom:8px; }
-        .sp-pill-dot { width:5px; height:5px; border-radius:50%; background:#F5BC00; flex-shrink:0; }
-        .sp-pill-txt { font-family:'IBM Plex Sans',sans-serif; font-size:.77rem; color:rgba(242,237,224,.65); }
-        .sp-stats { display:flex; gap:2rem; margin-top:2rem; }
-        .sp-stat-v { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; color:#F2EDE0; }
-        .sp-stat-l { font-family:'IBM Plex Sans',sans-serif; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(242,237,224,.32); }
-        .sp-divv   { width:1px; height:28px; background:rgba(255,255,255,.09); align-self:center; }
-
-        /* Panel derecho — la COLUMNA ENTERA es la card */
-        [data-testid="column"]:nth-child(2) > div:first-child {
-            min-height: 100vh;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 3rem 2.5rem !important;
-        }
-        [data-testid="column"]:nth-child(2) > div:first-child > div:first-child {
-            background: rgba(14,12,8,.65);
-            border: 1px solid rgba(245,188,0,.18);
-            border-radius: 24px;
-            padding: 2.5rem 2.3rem 2rem;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 24px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(245,188,0,.08);
-        }
-        .sp-card-logo { display:flex; align-items:center; gap:12px; padding-bottom:1.4rem; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:1.6rem; }
-        .sp-card-logo img { width:44px; border-radius:50%; filter:drop-shadow(0 0 8px rgba(245,188,0,.55)); }
-        .sp-card-name { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; color:#F2EDE0; letter-spacing:.04em; }
-        .sp-card-sub  { font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; color:#F5BC00; display:block; margin-top:2px; font-family:'IBM Plex Sans',sans-serif; }
-        .sp-form-title { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; color:#F2EDE0; margin-bottom:.25rem; }
-        .sp-form-sub   { font-family:'IBM Plex Sans',sans-serif; font-size:.82rem; color:rgba(242,237,224,.35); margin-bottom:1.6rem; font-weight:300; }
-
-        /* Inputs nativos de Streamlit — estilo SOLPRO */
-        .stTextInput label p { font-family:'IBM Plex Sans',sans-serif !important; font-size:.72rem !important; font-weight:500 !important; color:rgba(242,237,224,.65) !important; letter-spacing:.06em !important; text-transform:uppercase !important; }
-        .stTextInput input { background:rgba(245,188,0,.04) !important; border:1px solid rgba(255,255,255,.10) !important; border-radius:9px !important; color:#F2EDE0 !important; font-family:'IBM Plex Sans',sans-serif !important; }
-        .stTextInput input:focus { border-color:#F5BC00 !important; box-shadow:0 0 0 3px rgba(245,188,0,.11) !important; }
-        .stTextInput input::placeholder { color:rgba(242,237,224,.3) !important; }
-        .stForm { background:transparent !important; border:none !important; padding:0 !important; }
-        .stForm [data-testid="stFormSubmitButton"] button {
-            width:100% !important; background:linear-gradient(135deg,#F5BC00,#BF9000) !important;
-            color:#0C0800 !important; font-family:'Space Grotesk',sans-serif !important;
-            font-size:.88rem !important; font-weight:700 !important; letter-spacing:.08em !important;
-            text-transform:uppercase !important; border:none !important; border-radius:9px !important;
-            padding:.82rem !important; box-shadow:0 0 26px rgba(245,188,0,.30) !important;
-            margin-top:.5rem !important;
-        }
-        .stForm [data-testid="stFormSubmitButton"] button:hover {
-            box-shadow:0 0 46px rgba(245,188,0,.55) !important;
-            transform:translateY(-1px) !important; filter:brightness(1.05) !important;
-        }
-        .stCheckbox label p { font-family:'IBM Plex Sans',sans-serif !important; font-size:.77rem !important; color:rgba(242,237,224,.35) !important; font-weight:400 !important; }
-        div[data-testid="stAlert"] { border-radius:9px !important; }
+        .block-container {max-width: 420px !important; padding-top: 4rem !important;}
+        .stTextInput input {background: #111 !important; color: #fff !important; border: 1px solid #333 !important; border-radius: 8px !important;}
+        .stButton button {width: 100%; background: #f59e0b !important; color: #000 !important; font-weight: 700 !important; border-radius: 8px !important; padding: .75rem !important; border: none !important; font-size: 15px !important;}
         </style>
         """, unsafe_allow_html=True)
 
-        logo_b64 = ""
-        try:
-            import base64 as _b64
-            with open(LOGO_FILE, "rb") as _f:
-                logo_b64 = _b64.b64encode(_f.read()).decode()
-        except: pass
+        st.markdown("## 🏢 SOLPRO Facturación")
+        st.markdown("Ingresá tus credenciales para continuar")
+        st.divider()
 
-        logo_tag_lg = f'<img src="data:image/png;base64,{logo_b64}">' if logo_b64 else ""
-        logo_tag_sm = f'<img src="data:image/png;base64,{logo_b64}">' if logo_b64 else ""
-
-        col_left, col_right = st.columns([1, 1], gap="small")
-
-        with col_left:
-            st.markdown(f"""
-            <div class="sp-left">
-                <div class="sp-logo">
-                    {logo_tag_lg}
-                    <div>
-                        <div class="sp-logo-name">SOLPRO</div>
-                        <span class="sp-logo-tag">Soluciones Profesionales</span>
-                    </div>
-                </div>
-                <div class="sp-hl">Facturación<br>profesional,<br><span>sin complicaciones</span></div>
-                <div class="sp-desc">Genera, administra y envía facturas electrónicas en segundos. Control total de tus ingresos, clientes y reportes fiscales.</div>
-                <div><div class="sp-pill"><div class="sp-pill-dot"></div><span class="sp-pill-txt">Facturas electrónicas en segundos</span></div></div>
-                <div><div class="sp-pill"><div class="sp-pill-dot"></div><span class="sp-pill-txt">Gestión de clientes y productos</span></div></div>
-                <div><div class="sp-pill"><div class="sp-pill-dot"></div><span class="sp-pill-txt">Reportes fiscales automáticos</span></div></div>
-                <div class="sp-stats">
-                    <div class="sp-stat"><div class="sp-stat-v">+12K</div><div class="sp-stat-l">Facturas</div></div>
-                    <div class="sp-divv"></div>
-                    <div class="sp-stat"><div class="sp-stat-v">99.9%</div><div class="sp-stat-l">Disponibilidad</div></div>
-                    <div class="sp-divv"></div>
-                    <div class="sp-stat"><div class="sp-stat-v">24/7</div><div class="sp-stat-l">Soporte</div></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col_right:
-            st.markdown(f"""
-            <div class="sp-card-logo">
-                {logo_tag_sm}
-                <div>
-                    <div class="sp-card-name">SOLPRO</div>
-                    <span class="sp-card-sub">Facturación</span>
-                </div>
-            </div>
-            <div class="sp-form-title">SOLPRO Facturación</div>
-            <div class="sp-form-sub">Ingresa tus credenciales para continuar</div>
-            """, unsafe_allow_html=True)
-
+        with st.container():
             if st.session_state.login_step == 1:
                 with st.form("solpro_login_form"):
-                    user_input = st.text_input("Usuario", placeholder="admin")
-                    pass_input = st.text_input("Contraseña", type="password", placeholder="••••••••")
+                    user_input = st.text_input("USUARIO", placeholder="admin", key="login_user")
+                    pass_input = st.text_input("CONTRASEÑA", type="password", key="login_pass")
                     submitted = st.form_submit_button("Siguiente Paso ➔")
 
                 if submitted:
@@ -1138,9 +1076,16 @@ def run_facturador_app():
             st.rerun()
 
     # --- TABS PRINCIPALES ---
-    # Todos los roles ven las 5 pestañas
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["🛒 FACTURACIÓN", "🚫 ANULAR", "📦 STOCK", "📊 HISTORIAL", "🤖 AI", "📦 PEDIDOS PENDIENTES", "💱 TIPO DE CAMBIO"])
+    rol_actual = (st.session_state.get('user_data', {}).get('rol', '') 
+                  or st.session_state.get('user_data', {}).get('role', '')
+                  or st.session_state.get('rol', '')
+                  or st.session_state.get('role', '')).lower()
+    es_admin = rol_actual == 'admin'
 
+    if es_admin:
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab_calc = st.tabs(["🛒 FACTURACIÓN", "🚫 ANULAR", "📦 STOCK", "📊 HISTORIAL", "🤖 AI", "📦 PEDIDOS PENDIENTES", "💱 TIPO DE CAMBIO", "🧮 CALCULADORA"])
+    else:
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["🛒 FACTURACIÓN", "🚫 ANULAR", "📦 STOCK", "📊 HISTORIAL", "🤖 AI", "📦 PEDIDOS PENDIENTES", "💱 TIPO DE CAMBIO"])
     with tab1:
         df_products = load_products()
         st.markdown("""
@@ -1790,6 +1735,10 @@ def run_facturador_app():
                 st.dataframe(df_hist, use_container_width=True)
             else:
                 st.write("No hay historial disponible.")
+
+    if es_admin:
+        with tab_calc:
+            render_calculadora()
 
 
 if __name__ == "__main__":

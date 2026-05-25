@@ -1,6 +1,6 @@
 import FinanzasPro from './FinanzasPro.jsx';
 import { useState, useEffect } from "react";
-import SyncBridge from './SyncBridge.js';
+
 import VentasAnalytics from './VentasAnalytics.jsx';
 import DashboardReal from './DashboardReal.jsx';
 import CalculadoraPrecios from './CalculadoraPrecios.jsx';
@@ -831,16 +831,10 @@ DB.obtenerConfig('migracion_completada').then(async (migrado) => {
 
 export default function BackOffice() {  const [active, setActive] = useState('dashboard');
   const [time]  = useState(new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
-  const [syncStatus, setSyncStatus] = useState('idle');
+
   const current = NAV.find(n=>n.id===active);
 
-  useEffect(() => {
-    const unsubscribe = SyncBridge.onStatusChange(({ status }) => {
-      setSyncStatus(status);
-    });
-    SyncBridge.autoSync().catch(console.error);
-    return () => unsubscribe();
-  }, []);
+
 
   return (
     <div style={{display:'flex',height:'100vh',background:T.bg,fontFamily:"'DM Sans',sans-serif",overflow:'hidden'}}>
@@ -936,16 +930,7 @@ export default function BackOffice() {  const [active, setActive] = useState('da
             <span style={{color:T.textMuted,fontSize:11,fontFamily:"'DM Sans',sans-serif"}}>{current?.desc}</span>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <div
-              title={syncStatus === 'ok' ? 'Sincronizado con Railway' : syncStatus === 'syncing' ? 'Sincronizando...' : syncStatus === 'error' ? 'Error de sync' : 'Sin sincronizar'}
-              style={{
-                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                background: syncStatus === 'ok' ? '#34d399' : syncStatus === 'syncing' ? '#f59e0b' : syncStatus === 'error' ? '#f87171' : '#3d5470',
-                animation: syncStatus === 'syncing' ? 'pulse 1s ease-in-out infinite' : 'none',
-                cursor: 'pointer',
-              }}
-              onClick={() => SyncBridge.autoSync()}
-            />
+
             <div style={{padding:'5px 10px',background:T.card,border:`1px solid ${T.border}`,borderRadius:5,
               color:T.textMuted,fontSize:10,fontFamily:"'JetBrains Mono',monospace"}}>
               Dic 2024 · {time}

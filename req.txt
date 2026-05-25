@@ -1,0 +1,149 @@
+<USER_REQUEST>
+Hola puedes veridicar porque no funciona la pagina de backoffice por favor
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-25T06:29:57-03:00.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.1 Pro (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>
+
+<USER_REQUEST>
+hazlo tu por favor
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-25T06:34:15-03:00.
+</ADDITIONAL_METADATA>
+
+<USER_REQUEST>
+sigue sin funcionar
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-25T06:36:59-03:00.
+</ADDITIONAL_METADATA>
+
+<USER_REQUEST>
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-25T06:41:05-03:00.
+</ADDITIONAL_METADATA>
+
+<USER_REQUEST>
+Continue
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-25T06:41:49-03:00.
+</ADDITIONAL_METADATA>
+
+<USER_REQUEST>
+En app.py hacé estos cambios:
+
+1. Después de los imports del principio, agregá:
+from calcular_precio_final import calcular
+
+2. Antes de la función main() o donde se definen las páginas/tabs,
+agregá esta función completa:
+
+def render_calculadora():
+    st.subheader("🧮 Calculadora de Precios — Motor V5.0")
+    
+    try:
+        import json, os
+        mtc_path = os.path.join(os.path.dirname(__file__), 'database', 'master_tipo_cambio.json')
+        dolar = 7650
+        if os.path.exists(mtc_path):
+            with open(mtc_path) as f:
+                mtc = json.load(f)
+                dolar = mtc.get('dolar_mercado', 7650)
+    except:
+        dolar = 7650
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.metric("USD Mercado Hoy", f"₲ {dolar:,.0f}")
+        st.metric("Banda Piso (+150)", f"₲ {dolar+150:,.0f}")
+        st.metric("Banda Techo (+350)", f"₲ {dolar+350:,.0f}")
+
+    st.divider()
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        costo = st.number_input("Costo", min_value=0.0, value=0.0, step=0.01)
+    with col2:
+        moneda = st.selectbox("Moneda", ["USD", "GS"])
+    with col3:
+        margen = st.number_input("Margen %", min_value=0.0, max_value=99.0, value=23.0, step=0.5)
+    with col4:
+        linea = st.selectbox("Línea", ["INDUSTRIAL", "COMERCIAL"])
+
+    if st.button("⚡ Calcular", use_container_width=True) and costo > 0:
+        r = calcular(costo, moneda, margen, linea, dolar_mercado=dolar)
+        
+        st.divider()
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("💵 Precio Contado", f"₲ {r['precio_contado']:,.0f}")
+        with col2:
+            st.metric("📱 Precio QR (+4%)", f"₲ {r['precio_qr']:,.0f}")
+        with col3:
+            if r['credito_bloqueado']:
+                st.metric("🏦 Crédito Industrial", "🔒 Solo Industrial")
+            else:
+                st.metric("🏦 Crédito Industrial", f"₲ {r['precio_credito']:,.0f}")
+
+3. Buscá donde se define la navegación por tabs o páginas según el rol
+del usuario (donde se chequea st.session_state['role'] o similar)
+y agregá la calculadora para el rol Admin:
+
+if st.session_state.get('role') == 'Admin' or st.session_state.get('usuario', {}).get('role') == 'Admin':
+    if st.sidebar.button("🧮 Calculadora de Precios"):
+        st.session_state['pagina'] = 'calculadora'
+
+Y en el bloque de renderizado de páginas agregá:
+elif st.session_state.get('pagina') == 'calculadora':
+    render_calculadora()
+
+No toques nada más. Si no encontrás exactamente dónde agregar el 
+punto 3, mostrá las líneas 1-50 del archivo para que yo vea la 
+estructura de navegación.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-25T06:53:03-03:00.
+</ADDITIONAL_METADATA>
+
+
+
+
+
+Created At: 2026-05-25T09:54:17Z
+Completed At: 2026-05-25T09:54:25Z
+
+				The command failed with exit code: 1
+				Output:
+				Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json; [print(json.loads(line)['content']) for line in open(r'C:\Users\beric\.gemini\antigravity\brain\72710db1-bb29-4d53-a5ee-0540f651ab8c\.system_generated\logs\transcript.jsonl', encoding='utf-8') if 'USER_INPUT' in line]
+                  ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\beric\AppData\Local\Python\pythoncore-3.14-64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f9ee' in position 291: character maps to <undefined>
+
+
+
+
+
+Created At: 2026-05-25T09:54:32Z
+Completed At: 2026-05-25T09:54:39Z
+
+				The command failed with exit code: 1
+				Output:
+				Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json; f = open('req.txt', 'w', encoding='utf-8'); [f.write(json.loads(line)['content'] + '\n\n') for line in open(r'C:\Users\beric\.gemini\antigravity\brain\72710db1-bb29-4d53-a5ee-0540f651ab8c\.system_generated\logs\transcript.jsonl', encoding='utf-8') if 'USER_INPUT' in line]; f.close()
+                                                                      ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+KeyError: 'content'
+
+
+
