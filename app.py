@@ -314,7 +314,18 @@ def run_facturador_app():
     OUTPUT_DIR = os.path.join(SGSP_DATABASE, "Facturas_Emitidas")
 
     # Inicialización de carpeta de datos si es persistente
-
+    import shutil
+    if SGSP_DATABASE != _db_default and not os.path.exists(USERS_FILE):
+        if not os.path.exists(SGSP_DATABASE):
+            os.makedirs(SGSP_DATABASE, exist_ok=True)
+        print(f"[{datetime.now()}] Inicializando volumen persistente desde {_db_default} a {SGSP_DATABASE}...")
+        for item in os.listdir(_db_default):
+            src = os.path.join(_db_default, item)
+            dst = os.path.join(SGSP_DATABASE, item)
+            if os.path.isfile(src) and not os.path.exists(dst):
+                shutil.copy2(src, dst)
+        print(f"[{datetime.now()}] Inicialización de volumen completa.")
+        
     # Sincronizacion desactivada para evitar pisar datos de la database maestra
     LOGO_FILE = os.path.join(os.path.dirname(BASE_DIR), "LOGO  2D FONDO NEGRO 2026.png")
 
