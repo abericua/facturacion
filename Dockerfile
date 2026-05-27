@@ -26,3 +26,4 @@ EXPOSE 8501
 
 # Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
 CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false
+
