@@ -318,7 +318,8 @@ def run_facturador_app():
     if SGSP_DATABASE != _db_default and not os.path.exists(USERS_FILE):
         if not os.path.exists(SGSP_DATABASE):
             os.makedirs(SGSP_DATABASE, exist_ok=True)
-        print(f"[{datetime.now()}] Inicializando volumen persistente desde {_db_default} a {SGSP_DATABASE}...")
+        from datetime import datetime as _dt
+        print(f"[{_dt.now()}] Inicializando volumen persistente desde {_db_default} a {SGSP_DATABASE}...")
         for item in os.listdir(_db_default):
             src = os.path.join(_db_default, item)
             dst = os.path.join(SGSP_DATABASE, item)
