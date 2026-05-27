@@ -21,5 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el resto del código del proyecto
 COPY . .
 
-# Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
-CMD ["sh", "-c", "streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"]
+# Exponer el puerto 8501
+EXPOSE 8501
+
+# Comando para ejecutar la aplicación usando el puerto 8501
+CMD ["sh", "-c", "streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"]
