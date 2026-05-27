@@ -2,13 +2,13 @@ import FinanzasPro from './FinanzasPro.jsx';
 import { useState, useEffect } from "react";
 
 import VentasAnalytics from './VentasAnalytics.jsx';
-import DashboardReal from './DashboardReal.jsx';
+// import DashboardReal from './DashboardReal.jsx';
 import CalculadoraPrecios from './CalculadoraPrecios.jsx';
-import ConciliacionBancaria from './ConciliacionBancaria.jsx';
-import ImpositivoDNIT from './ImpositivoDNIT.jsx';
+// import ConciliacionBancaria from './ConciliacionBancaria.jsx';
+// import ImpositivoDNIT from './ImpositivoDNIT.jsx';
 import CargadorDocumentos from './CargadorDocumentos.jsx';
 import DashboardReal2026 from './DashboardReal2026.jsx';
-import IPSCalculator from './IPSCalculator.jsx';
+// import IPSCalculator from './IPSCalculator.jsx';
 import ImportadorCompras from './ImportadorCompras.jsx';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -814,10 +814,10 @@ const NAV = [
   {id:'pedidos',     label:'Pedidos',             Icon:ShoppingCart,    desc:'Gestion de ordenes'},
   {id:'ventas',      label:'Analitica Ventas',    Icon:BarChart2,       desc:'Reportes y tendencias'},
   {id:'calculadora', label:'Calculadora Precios', Icon:DollarSign,      desc:'Motor v5.0'},
-  {id:'bancos',      label:'Bancos / Conciliación', Icon:Building2,       desc:'Extractos GS + USD'},
-  {id:'impositivo',  label:'Impositivo DNIT',     Icon:FileText,        desc:'Calendario, Anticipos, Retenciones'},
+  // {id:'bancos',      label:'Bancos / Conciliación', Icon:Building2,       desc:'Extractos GS + USD'},
+  // {id:'impositivo',  label:'Impositivo DNIT',     Icon:FileText,        desc:'Calendario, Anticipos, Retenciones'},
   {id:'cargador', label:'Cargar Documentos', Icon:FolderOpen, desc:'PDFs y Excel locales'},
-  {id:'ips', label:'Calculadora IPS', Icon:Calculator, desc:'Aportes Obrero-Patronales'},
+  // {id:'ips', label:'Calculadora IPS', Icon:Calculator, desc:'Aportes Obrero-Patronales'},
   {id:'importador', label:'Importar Compras', Icon:Truck, desc:'Sol Control · Todo Costura'},
 ];
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
@@ -829,12 +829,11 @@ DB.obtenerConfig('migracion_completada').then(async (migrado) => {
   }
 }).catch(console.error);
 
-export default function BackOffice() {  const [active, setActive] = useState('dashboard');
+export default function BackOffice() {
+  const [active, setActive] = useState('dashboard');
   const [time]  = useState(new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
 
   const current = NAV.find(n=>n.id===active);
-
-
 
   return (
     <div style={{display:'flex',height:'100vh',background:T.bg,fontFamily:"'DM Sans',sans-serif",overflow:'hidden'}}>
@@ -961,12 +960,13 @@ export default function BackOffice() {  const [active, setActive] = useState('da
           {active==='pedidos'    && <Pedidos/>}
           {active==='ventas'     && <VentasAnalytics/>}
           {active==='calculadora'&& <CalculadoraPrecios/>}
-          {active==='bancos'     && <ConciliacionBancaria/>}
-          {active==='impositivo' && <ImpositivoDNIT/>}
+          {/* {active==='bancos'     && <ConciliacionBancaria/>} */}
+          {/* {active==='impositivo' && <ImpositivoDNIT/>} */}
           {active==='cargador' && <CargadorDocumentos/>}
-          {active==='ips' && <IPSCalculator/>}
+          {/* {active==='ips' && <IPSCalculator/>} */}
           {active==='importador' && <ImportadorCompras/>}
-        </main>      </div>
+        </main>
+      </div>
     </div>
   );
 }

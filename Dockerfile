@@ -24,5 +24,5 @@ COPY . .
 # Exponer el puerto 8501
 EXPOSE 8501
 
-# Comando para ejecutar la aplicación usando el puerto 8501
-CMD ["sh", "-c", "streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"]
+# Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
+CMD sh -c "streamlit run app.py --server.port ${PORT:-8501} --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"
