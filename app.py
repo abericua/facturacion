@@ -371,10 +371,28 @@ def run_facturador_app():
 
     def load_users():
         import json
+        ADMIN_HASH = "5497feda4f88c5ebadc4de1587dd3828ca535bf85f4b5e91aa7e8a8c13178622"
+        default_users = [
+            {
+                "usuario": "admin",
+                "password": ADMIN_HASH,
+                "rol": "admin",
+                "nombre": "Administrador SOLPRO",
+                "totp_secret": ""
+            }
+        ]
         if os.path.exists(USERS_FILE):
-            with open(USERS_FILE, 'r', encoding='utf-8', errors='replace') as f:
-                return json.load(f)
-        return []
+            try:
+                with open(USERS_FILE, 'r', encoding='utf-8', errors='replace') as f:
+                    users = json.load(f)
+                if users:
+                    return users
+            except:
+                pass
+        os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
+        with open(USERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(default_users, f, ensure_ascii=False, indent=2)
+        return default_users
 
     def save_users(users):
         import json
