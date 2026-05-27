@@ -1,16 +1,28 @@
-FROM python:3.11-slim
+FROM python:3.10-slim-bookworm
 
+# Evitar que Python genere archivos .pyc y habilitar logs en tiempo real
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Directorio de trabajo
 WORKDIR /app
 
+# Instalar dependencias del sistema necesarias
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar archivos de dependencias e instalar
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copiar el resto del código del proyecto
 COPY . .
 
-ENV STREAMLIT_SERVER_HEADLESS=true
-ENV STREAMLIT_SERVER_ENABLE_CORS=false
-ENV STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
+# Exponer el puerto que usará Streamlit
+EXPOSE 8501
 
-# Puerto dinámico inyectado por Railway via $PORT — no hardcodear EXPOSE
-
-CMD ["sh", "-c", "streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"]
+# Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
+CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false
