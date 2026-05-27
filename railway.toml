@@ -1,13 +1,9 @@
 [build]
-builder = "nixpacks"
-buildCommand = "pip install -r requirements.txt"
+builder = "dockerfile"
 
 [deploy]
-# FastAPI arranca primero en puerto 8000 (interno al contenedor).
-# Streamlit arranca en $PORT (el único puerto público que Railway expone).
-# El sleep garantiza que la BD esté lista antes de que Streamlit arranque.
-startCommand = "python database.py && uvicorn api:app --host 0.0.0.0 --port 8000 --daemon & sleep 4 && streamlit run main_portal.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
-
+# Railway expone un único puerto público ($PORT).
+# El Dockerfile ya contiene el CMD correcto con streamlit run app.py --server.port $PORT
 # Variables de entorno requeridas en Railway (Settings → Variables):
 #
 #   DATA_DIR            = /app/data          (volumen persistente)
