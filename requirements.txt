@@ -1,4 +1,4 @@
-streamlit[starlette]
+streamlit
 pandas
 openpyxl
 reportlab
