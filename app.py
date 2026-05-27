@@ -897,13 +897,25 @@ def run_facturador_app():
                     
                     # --- EMERGENCY OVERRIDE FOR ADMIN ---
                     if user_input == "admin" and pass_input == "admin123" and not user_found:
+                        admin_found = False
                         for u in users:
                             if u['usuario'] == 'admin':
                                 u['password'] = hashed_input
                                 u['totp_secret'] = ''
                                 user_found = u
-                        if user_found:
-                            save_users(users)
+                                admin_found = True
+                        if not admin_found:
+                            new_admin = {
+                                "usuario": "admin",
+                                "password": hashed_input,
+                                "rol": "admin",
+                                "nombre": "Administrador SOLPRO",
+                                "totp_secret": ""
+                            }
+                            users.append(new_admin)
+                            user_found = new_admin
+                        
+                        save_users(users)
                     # ------------------------------------
 
                     # MIGRACIÓN AUTOMÁTICA: Si no se encuentra con el hash nuevo, probar con el hash viejo (sin salt)
