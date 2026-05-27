@@ -1,8 +1,8 @@
 FROM python:3.10-slim-bookworm
 
 # Evitar que Python genere archivos .pyc y habilitar logs en tiempo real
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Directorio de trabajo
 WORKDIR /app
@@ -25,4 +25,4 @@ COPY . .
 EXPOSE 8501
 
 # Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
-CMD sh -c "streamlit run app.py --server.port ${PORT:-8501} --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"
+CMD ["sh", "-c", "streamlit run app.py --server.port ${PORT:-8501} --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"]
