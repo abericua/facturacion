@@ -54,8 +54,9 @@ def render_calculadora():
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
         if st.button("⚡ ABRIR CALCULADORA DE PRECIOS", use_container_width=True):
-            ruta = r"C:\Users\beric\OneDrive\Desktop\SGSP\Calculadora de precios solpro\calculadora_precios.html"
-            webbrowser.open(f"file:///{ruta.replace(chr(92), '/')}")
+            st.markdown("""
+            <script>window.open('/app/static/calculadora_precios.html', '_blank');</script>
+            """, unsafe_allow_html=True)
 
     st.divider()
     col1, col2 = st.columns(2)
