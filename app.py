@@ -307,6 +307,19 @@ def run_facturador_app():
     _env_override = os.environ.get("SGSP_DATABASE")
     if _env_override:
         SGSP_DATABASE = _env_override
+
+    # Copiar archivos del repo al volumen si no existen
+    import shutil
+    _repo_db = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database")
+    if os.path.exists(_repo_db) and _repo_db != SGSP_DATABASE:
+        os.makedirs(SGSP_DATABASE, exist_ok=True)
+        for _fname in os.listdir(_repo_db):
+            _src = os.path.join(_repo_db, _fname)
+            _dst = os.path.join(SGSP_DATABASE, _fname)
+            if os.path.isfile(_src) and not os.path.exists(_dst):
+                shutil.copy2(_src, _dst)
+                print(f"[INIT] Copiado al volumen: {_fname}")
+
     PRODUCTS_FILE = os.path.join(SGSP_DATABASE, "productos_maestros.csv") # Unificado a CSV
     CLIENTS_FILE = os.path.join(SGSP_DATABASE, "clientes.json")
     SALES_FILE = os.path.join(SGSP_DATABASE, "VENTAS TOTALES 2026.xlsx")
