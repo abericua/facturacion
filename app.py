@@ -44,7 +44,7 @@ def inicializar_tipo_cambio():
             json.dump(tc, f, indent=2, ensure_ascii=False)
 
 def render_calculadora():
-    import os, json, shutil, webbrowser
+    import webbrowser
     st.markdown("""
     <div style="text-align:center; padding: 2rem;">
         <h2 style="color:#f59e0b;">🧮 Calculadora de Precios — Motor V5.0</h2>
@@ -53,47 +53,8 @@ def render_calculadora():
     """, unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        if st.button("⚡ ABRIR CALCULADORA DE PRECIOS", use_container_width=True):
-            st.markdown("""
-            <script>window.open('/app/static/calculadora_precios.html', '_blank');</script>
-            """, unsafe_allow_html=True)
-
-    st.divider()
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### 📥 Importar Lista de Precios")
-        archivo = st.file_uploader("Subí el JSON exportado de la calculadora", 
-                                    type=["json"], key="upload_precios")
-        if archivo is not None:
-
-            ruta_dest = os.path.join(SGSP_DATABASE, "master_productos.json")
-            ruta_backup = os.path.join(SGSP_DATABASE, "master_productos_backup.json")
-            try:
-                contenido = json.loads(archivo.read())
-                if os.path.exists(ruta_dest):
-                    shutil.copy2(ruta_dest, ruta_backup)
-                with open(ruta_dest, 'w', encoding='utf-8') as f:
-                    json.dump(contenido, f, ensure_ascii=False, indent=2)
-                st.success(f"✅ Lista actualizada — {len(contenido)} productos cargados. Backup guardado.")
-            except Exception as e:
-                st.error(f"Error al importar: {e}")
-
-    with col2:
-        st.markdown("#### 📤 Exportar Lista de Precios")
-        ruta_master = os.path.join(SGSP_DATABASE, "master_productos.json")
-        if os.path.exists(ruta_master):
-            with open(ruta_master, 'r', encoding='utf-8') as f:
-                datos = f.read()
-            st.download_button(
-                label="⬇️ Descargar master_productos.json",
-                data=datos,
-                file_name="master_productos.json",
-                mime="application/json",
-                use_container_width=True
-            )
-        else:
-            st.warning("No se encontró el archivo de productos.")
+        url = "https://facturacion.solpropy.com/app/static/calculadora_precios.html"
+        st.link_button("⚡ ABRIR CALCULADORA DE PRECIOS", url, use_container_width=True)
 def run_facturador_app():
     inicializar_tipo_cambio()
     if 'user' in st.session_state and 'user_data' not in st.session_state:
