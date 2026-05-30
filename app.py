@@ -1091,7 +1091,10 @@ def run_facturador_app():
                 st.success(f"Sync OK: {res.get('creados', 0)} creados, {res.get('actualizados', 0)} actualizados.")
         
         if c2.button("Sincronizar Productos"):
-            res = sync_productos_bulk(load_products())
+            import json as _json
+            df_prod = load_products()
+            records = _json.loads(df_prod.to_json(orient='records', force_ascii=False))
+            res = sync_productos_bulk(records)
             if "error" in res:
                 st.error(f"Error: {res['error']}")
             else:
