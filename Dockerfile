@@ -24,5 +24,6 @@ COPY . .
 # Exponer el puerto 8501
 EXPOSE 8501
 
-# Comando para ejecutar la aplicación usando la variable de entorno PORT de Railway
-CMD ["sh", "-c", "streamlit run app.py --server.port ${PORT:-8501} --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false"]
+# Comando dinámico inteligente según el servicio de Railway
+CMD ["sh", "-c", "if [ \"$RAILWAY_SERVICE_NAME\" = \"SOLPRO-MASTER-TEC\" ]; then uvicorn api:app --host 0.0.0.0 --port ${PORT:-8080}; else streamlit run app.py --server.port ${PORT:-8501} --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false; fi"]
+
