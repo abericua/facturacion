@@ -11,9 +11,9 @@ __pycache__
 .DS_Store
 Facturas_Emitidas/*.pdf
 scratch/
-*.bat
-*.txt
-!requirements.txt
+PerfilUsuarioContraseña.txt
+TALONARIOS DE FACTURAS HABILITADAS.txt
+temp_log.txt
 LOGO*.png
 ISOLOGO*.png
 factura*.png
