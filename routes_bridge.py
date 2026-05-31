@@ -246,6 +246,73 @@ def sync_iva(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# CLIENTES (Directorio maestro)
+# ══════════════════════════════════════════════════════════════════════════
+CLIENTES_FILE = os.path.join(DATA_DIR, "master_clientes.json")
+
+@router.get("/clientes")
+def get_clientes(x_api_key: Optional[str] = Header(None)):
+    """Lee el directorio de clientes del volumen Railway."""
+    _check_key(x_api_key)
+    if not os.path.exists(CLIENTES_FILE):
+        return {"records": [], "total": 0}
+    with open(CLIENTES_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    # Soporta dict {ruc: {...}} y lista [...]
+    if isinstance(data, dict):
+        records = list(data.values())
+    else:
+        records = data
+    return {"records": records, "total": len(records)}
+
+
+from fastapi import Request
+
+@router.post("/clientes/sync")
+async def sync_clientes(request: Request, x_api_key: Optional[str] = Header(None)):
+    """Sincroniza clientes — acepta lista JSON directa o {records:[...]}."""
+    _check_key(x_api_key)
+    body = await request.json()
+
+    if isinstance(body, list):
+        records = body
+    elif isinstance(body, dict):
+        records = body.get("records", list(body.values()))
+    else:
+        raise HTTPException(status_code=400, detail="Formato de payload inválido.")
+
+    os.makedirs(DATA_DIR, exist_ok=True)
+    creados = actualizados = 0
+
+    # Cargar existentes
+    existing = {}
+    if os.path.exists(CLIENTES_FILE):
+        with open(CLIENTES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        existing = data if isinstance(data, dict) else {str(c.get('ruc', i)): c for i, c in enumerate(data)}
+
+    for cliente in records:
+        key = str(cliente.get('ruc') or cliente.get('RUC') or cliente.get('id', ''))
+        if key in existing:
+            existing[key].update(cliente)
+            actualizados += 1
+        else:
+            existing[key] = cliente
+            creados += 1
+
+    with open(CLIENTES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(existing, f, ensure_ascii=False, indent=2, default=str)
+
+    return {
+        "status":      "synced",
+        "creados":     creados,
+        "actualizados": actualizados,
+        "total":       len(existing),
+        "ts":          datetime.utcnow().isoformat(),
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # PRODUCTOS (Catálogo maestro — CalculadoraPrecios)
 # ══════════════════════════════════════════════════════════════════════════
 @router.get("/productos")

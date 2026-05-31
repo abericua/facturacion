@@ -80,7 +80,8 @@ def sync_productos_bulk(productos_list):
     try:
         clean_list = clean_keys(productos_list)
         with httpx.Client(timeout=30.0) as client:
-            r = client.post(f"{API_BASE_URL}/productos/sync", json=clean_list)
+            # El endpoint espera SyncPayload: {"records": [...]}
+            r = client.post(f"{API_BASE_URL}/productos/sync", json={"records": clean_list})
             if r.status_code == 200:
                 return r.json()
             return {"error": f"HTTP {r.status_code}"}
