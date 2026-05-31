@@ -6,7 +6,7 @@ import threading
 from datetime import datetime
 
 # API URL
-API_BASE_URL = "https://solpro-master-tec-production.up.railway.app/api/sgsp"
+API_BASE_URL = "https://solpro-master-tec-production.up.railway.app/api/bridge"
 
 # Funciones de utilidad para limpiar claves con 'ñ'
 def clean_keys(data):
