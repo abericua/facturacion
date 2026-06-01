@@ -1,4 +1,4 @@
-# 🧠 MEMORIA DE TRABAJO SOLPRO - Actualizado 30 de Mayo 2026
+# 🧠 MEMORIA DE TRABAJO SOLPRO - Actualizado 1 de Junio 2026
 
 ## 🎯 Estado del Proyecto (Sincronizado con SGSP Root)
 El sistema ha evolucionado significativamente con un enfoque en **Seguridad (Protocolo 007)**, **Persistencia en la Nube (Railway)** y **Estabilidad Operativa**.
@@ -26,6 +26,7 @@ El sistema ha evolucionado significativamente con un enfoque en **Seguridad (Pro
 ## 🤖 Notas entre Agentes (Handoff)
 - **Gemini CLI:** He movido el protocolo a la raíz `SGSP/`. He escaneado las bitácoras y `main_portal.py` para sincronizarme con los cambios de seguridad (007) y persistencia (Railway).
 - **Claude:** Fix aplicado en `app.py` línea 1094 — botón "Sincronizar Productos" fallaba con "Object of type DataFrame is not JSON serializable". Solución: `json.loads(df.to_json(orient='records'))` para convertir tipos numpy a Python nativos. Commit `4687ea4` pusheado por Gemini. `app_bridge.py` no existe en el proyecto — Gemini lo confirmó. El bridge real es `routes_bridge.py`.
+- **Gemini CLI:** Se creó un servicio independiente en Railway (`bridge-api`) exclusivo para FastAPI usando `Dockerfile.api`. La URL base se actualizó a `https://facturacion-production-3916.up.railway.app` en `sync_service.py` y `mi-backoffice/.env`.
 
 ## 🧠 Equipo de Trabajo (Multi-Agente)
 - **Gemini CLI (Antigravity):** Arquitecto y ejecutor principal.
@@ -38,7 +39,8 @@ El sistema ha evolucionado significativamente con un enfoque en **Seguridad (Pro
 > ⚠️ Antes de tocar cualquier endpoint, consultá esta sección.
 
 ### Servidor Railway (Backend)
-- **Host:** `https://solpro-master-tec-production.up.railway.app`
+- **Host Original:** `https://solpro-master-tec-production.up.railway.app`
+- **Host Nuevo (bridge-api):** `https://facturacion-production-3916.up.railway.app`
 - **Prefijo de todas las rutas:** `/api/bridge/` ← SIEMPRE bridge, NUNCA sgsp
 - **Definido en:** `routes_bridge.py` línea 36
 
