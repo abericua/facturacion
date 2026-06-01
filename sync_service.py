@@ -4,7 +4,7 @@ import os
 import threading
 from datetime import datetime
 
-API_BASE_URL = "https://solpro-master-tec-production.up.railway.app/api/bridge"
+API_BASE_URL = "https://facturacion-production-3916.up.railway.app/api/bridge"
 BRIDGE_KEY = os.environ.get("BRIDGE_API_KEY", "sgsp-bridge-2026")
 
 
