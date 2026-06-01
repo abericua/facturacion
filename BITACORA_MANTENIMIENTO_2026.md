@@ -111,3 +111,83 @@
   - Saneamiento de f-strings en `st.markdown` para evitar rotura del parser de markdown en producción.
 
 **Estado del Sistema:** [INTEGRIDAD MATEMÁTICA 100% - INTERFAZ PREMIUM RESTAURADA - PRODUCCIÓN ACTIVA]
+
+---
+
+## 2026-05-31 — Fix Sincronización Clientes y Productos (ERROR 405/403)
+
+### Problema
+Los botones "Sincronizar Clientes" y "Sincronizar Productos" del portal Streamlit
+llevaban semanas fallando con errores HTTP 405 y luego 403.
+
+### Causa raíz (3 bugs encadenados)
+1. **`routes_bridge.py`** — El endpoint `POST /api/bridge/clientes/sync` no existía.
+   Railway devolvía 405 porque la ruta nunca fue creada.
+
+2. **`sync_service.py`** — Ninguna función enviaba el header `x-api-key`.
+   Sin autenticación, Railway devuelve 403 (clave inválida).
+
+3. **`sync_service.py`** — `sync_productos_bulk` enviaba la lista cruda al endpoint
+   que esperaba `{"records": [...]}`, causando error 422.
+
+### Solución aplicada
+- **`routes_bridge.py`**: Se agregaron `GET /api/bridge/clientes` y
+  `POST /api/bridge/clientes/sync` con lógica upsert por RUC.
+- **`sync_service.py`**: Reescrito limpio con función `_headers()` centralizada
+  que incluye `x-api-key: sgsp-bridge-2026` en todas las llamadas.
+  Payload de productos corregido a `{"records": [...]}`.
+
+### ⚠️ REGLAS — NO MODIFICAR SIN LEER ESTO
+
+1. **`sync_service.py`** — La función `_headers()` es CRÍTICA. Si se elimina
+   o se llama sin ella, la sincronización vuelve a fallar con 403.
+
+2. **`routes_bridge.py`** — El endpoint `/clientes/sync` usa `Request` de FastAPI
+   (no `SyncPayload`) porque el portal envía lista JSON directa, no `{"records":[]}`.
+   No cambiar la firma del endpoint.
+
+3. **`BRIDGE_KEY`** — La clave por defecto es `sgsp-bridge-2026`. Si se cambia
+   la variable de entorno `BRIDGE_API_KEY` en Railway, debe cambiarse también
+   en `sync_service.py` o configurarse como variable de entorno en el servicio
+   de Streamlit (`facturacion`).
+
+4. **Dockerfile** — Antigravity modificó el Dockerfile en un deploy anterior
+   para usar arranque condicional por `$RAILWAY_SERVICE_NAME`. NO revertir
+   ese cambio o el servicio FastAPI dejará de arrancar.
+
+### Verificación
+```
+curl https://solpro-master-tec-production.up.railway.app/api/bridge/status
+# Debe retornar: {"status":"ok",...}
+
+curl -X POST https://solpro-master-tec-production.up.railway.app/api/bridge/clientes/sync \
+  -H "x-api-key: sgsp-bridge-2026" \
+  -H "Content-Type: application/json" \
+  -d "[]"
+# Debe retornar: {"status":"synced","creados":0,"actualizados":0,...}
+```
+
+### Deploy
+- Commit: `5cde63c` en `abericua/facturacion` (rama `main`)
+- Fecha: 2026-05-31
+- Resuelto por: Claude + Antigravity
+
+---
+
+## 2026-06-01 — Desacoplamiento de API (Nuevo Servicio bridge-api)
+
+### Problema
+El servicio `solpro-facturacion` (Streamlit) y la API FastAPI convivían en un mismo despliegue con lógica de arranque condicional en el `Dockerfile`. Esto podía generar complicaciones en escalabilidad y en el ciclo de vida de los contenedores en Railway.
+
+### Solución aplicada
+- Se creó un `Dockerfile.api` independiente y exclusivo para la API FastAPI del bridge.
+- Se levantó un nuevo servicio en Railway llamado `bridge-api` conectado al mismo repositorio.
+- Se configuró el servicio con un volumen persistente en `/app/data` y la variable `DATA_DIR=/app/data`.
+- Se actualizaron las referencias de red para apuntar al nuevo endpoint (`https://facturacion-production-3916.up.railway.app`):
+  - `sync_service.py` (`API_BASE_URL`)
+  - `mi-backoffice/.env` (`VITE_BRIDGE_URL`)
+
+### Deploy
+- Commits: `e3d7ab2` (Dockerfile), `79bd25c` (sync_service), `b987305` (mi-backoffice/.env) en rama `main`
+- Fecha: 2026-06-01
+- Ejecutado por: Antigravity + Usuario
