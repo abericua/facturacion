@@ -87,7 +87,7 @@ export const SyncBridge = {
     if (!res.ok) throw new Error(`Ventas pull error: HTTP ${res.status}`);
     const { records } = await res.json();
     if (records && records.length > 0) {
-      await DB.guardarVentas(records);
+      await DB.guardarCatalogo('ventas', records);
     }
     return records?.length || 0;
   },

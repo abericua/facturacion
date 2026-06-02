@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { FolderOpen, FileText, File, AlertCircle, CheckCircle, Upload, Building2, ShoppingCart, Calendar } from 'lucide-react';
 import DB from './db.js';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker?url';
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
 const T = {
   bg: '#07080f',
@@ -68,7 +69,6 @@ export default function CargadorDocumentos() {
       const base64 = await leerComoBase64(archivo);
 
       // Extraer texto del PDF
-      const pdfjsLib = window.pdfjsLib;
       pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
       const arrayBuffer = await archivo.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
