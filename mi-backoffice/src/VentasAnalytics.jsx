@@ -251,12 +251,17 @@ export default function VentasAnalytics() {
   const [cmpYear1,   setCmpYear1]   = useState('2024');
   const [cmpYear2,   setCmpYear2]   = useState('2025');
 
-  // Load CSV
+  const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
+  const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
+  const bh = { 'x-api-key': BRIDGE_KEY };
+
+  // Load CSV desde bridge Railway
   useEffect(() => {
-    fetch('/BBDD_VENTAS_24_AL_26.csv')
-      .then(r => { if (!r.ok) throw new Error('No se encontró el archivo CSV'); return r.text(); })
+    fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`, { headers: bh })
+      .then(r => { if (!r.ok) throw new Error('Sin datos de ventas en Railway'); return r.text(); })
       .then(txt => { setData(parseCSV(txt)); setLoading(false); })
       .catch(e  => { setError(e.message); setLoading(false); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Derived state
@@ -1042,15 +1047,22 @@ function TabStock({data, fmtN}) {
   const [soloAlerta, setSoloAlerta] = useState(false);
 
   useEffect(()=>{
-    fetch('/COMPRAS_SOL_CONTROL_2015_2026.csv')
-      .then(r=>r.text())
-      .then(txt=>{
-        const lines=txt.trim().split('\n');
-        const headers=lines[0].split(',');
-        const rows=lines.slice(1).map(l=>{
-          const vals=l.split(',');
-          return headers.reduce((o,h,i)=>({...o,[h.trim()]:vals[i]?.trim()}),{});
-        });
+    const BU=import.meta.env.VITE_BRIDGE_URL||'https://facturacion-production-3916.up.railway.app';
+    const BK=import.meta.env.VITE_BRIDGE_KEY||'sgsp-bridge-2026';
+    fetch(`${BU}/api/bridge/compras`,{headers:{'x-api-key':BK}})
+      .then(r=>r.json())
+      .then(json=>{
+        // Adaptar JSON de compras al formato esperado por la tabla
+        const rows=(json.records||[]).flatMap(c=>
+          (c.items||[]).map(it=>({
+            CODIGO: it.codigo||'',
+            DESCRIPCION: it.descripcion||c.concepto||'',
+            CANTIDAD: String(it.cantidad||0),
+            PRECIO_USD: String(it.precio_unit_usd||0),
+            PROVEEDOR: c.proveedor||'',
+            FECHA: c.fecha||'',
+          }))
+        );
         setCompras(rows);
         setLoading(false);
       })

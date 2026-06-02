@@ -531,32 +531,79 @@ function Finanzas() {
 
 // ── INVENTARIO ───────────────────────────────────────────────────────────────
 function Inventario() {
-  const [tab,    setTab]    = useState('stock');
-  const [search, setSearch] = useState('');
+  const [tab,      setTab]      = useState('stock');
+  const [search,   setSearch]   = useState('');
+  const [prods,    setProds]    = useState([]);
+  const [compras,  setCompras]  = useState([]);
+  const [loadingP, setLoadingP] = useState(true);
 
-  const totalValue    = inventory.reduce((a,b)=>a+b.stock*b.precio,0);
-  const lowStockCount = inventory.filter(i=>i.stock<i.min).length;
-  const activeSuppl   = suppliers.filter(s=>s.estado==='activo').length;
+  useEffect(() => {
+    // Cargar catálogo de productos desde IndexedDB (sincronizado desde Railway)
+    import('./db.js').then(({ default: DB }) => {
+      DB.obtenerCatalogo('productos').then(cat => {
+        const lista = cat?.productos || [];
+        setProds(lista);
+        setLoadingP(false);
+      }).catch(() => setLoadingP(false));
 
-  const filtered = inventory.filter(i=>
-    i.nombre.toLowerCase().includes(search.toLowerCase())||
-    i.cat.toLowerCase().includes(search.toLowerCase())||
+      // Cargar compras para stats de proveedores
+      DB.obtenerTodasCompras().then(c => setCompras(c || [])).catch(()=>{});
+    });
+  }, []);
+
+  // Adaptar catálogo al formato de la tabla
+  const inventory = prods.map((p, i) => ({
+    id:        p.ID_Ref || `PRD-${String(i+1).padStart(3,'0')}`,
+    nombre:    p.Nombre || p.nombre || '—',
+    cat:       p.Linea  || p.linea  || 'OTRO',
+    stock:     parseInt(p.Stock)  || 0,
+    min:       5, // mínimo operativo por defecto
+    precio:    parseFloat(p.Costo_Compra) || 0,
+    moneda:    p.Moneda_Costo || 'GS',
+    proveedor: p.Proveedor || p.proveedor || '—',
+  }));
+
+  // Stats de proveedores reales desde compras
+  const provStats = {};
+  compras.forEach(c => {
+    const k = c.proveedor || 'Desconocido';
+    if (!provStats[k]) provStats[k] = { nombre: k, facturas: 0, ncs: 0, totalUSD: 0, ivaTotal: 0 };
+    if (c.tipo === 'FAC') { provStats[k].facturas++; provStats[k].totalUSD += c.subtotal_usd || 0; }
+    else                  { provStats[k].ncs++; }
+    provStats[k].ivaTotal += c.iva_total || 0;
+  });
+  const suppliersReal = Object.values(provStats).sort((a,b) => b.totalUSD - a.totalUSD);
+
+  const totalValue    = inventory.reduce((a,b) => a + (b.stock * b.precio), 0);
+  const lowStockCount = inventory.filter(i => i.stock > 0 && i.stock < i.min).length;
+  const sinStock      = inventory.filter(i => i.stock === 0).length;
+
+  const filtered = inventory.filter(i =>
+    i.nombre.toLowerCase().includes(search.toLowerCase()) ||
+    i.cat.toLowerCase().includes(search.toLowerCase())    ||
     i.proveedor.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Chart: stock vs min by product (top 8)
-  const stockChartData = inventory.slice(0,8).map(i=>({
-    name:i.id.replace('PRD-0','P'),
-    stock:i.stock, min:i.min
+  const stockChartData = inventory.filter(p => p.stock > 0).slice(0, 8).map(i => ({
+    name:  i.id.length > 8 ? i.id.substring(0,8) : i.id,
+    stock: i.stock, min: i.min,
   }));
+
+  if (loadingP) return (
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'40vh',gap:12,color:T.textSecondary,fontFamily:"'DM Sans',sans-serif",fontSize:13}}>
+      <div style={{width:24,height:24,border:`2px solid ${T.border}`,borderTop:`2px solid ${T.accent}`,borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      Cargando catálogo desde Railway…
+    </div>
+  );
 
   return (
     <div style={{display:'flex',flexDirection:'column',gap:14}}>
       <div style={{display:'flex',gap:10}}>
-        <KPICard label="Productos"         value={inventory.length} Icon={Package}       color={T.accent} isNumber/>
-        <KPICard label="Valor Total"        value={totalValue}       Icon={DollarSign}    color={T.green}  trend={4.3}/>
-        <KPICard label="Alertas Stock Bajo" value={lowStockCount}    Icon={AlertTriangle} color={T.red}    isNumber/>
-        <KPICard label="Proveedores Activos"value={activeSuppl}      Icon={Users}         color={T.cyan}   isNumber/>
+        <KPICard label="Productos en Catálogo" value={inventory.length}  Icon={Package}       color={T.accent} isNumber/>
+        <KPICard label="Sin Stock"              value={sinStock}          Icon={AlertTriangle} color={T.red}    isNumber/>
+        <KPICard label="Stock Bajo Mínimo"      value={lowStockCount}     Icon={AlertTriangle} color={T.accent} isNumber/>
+        <KPICard label="Proveedores"            value={suppliersReal.length || 2} Icon={Users} color={T.cyan}  isNumber/>
       </div>
 
       {/* Stock chart */}
@@ -632,40 +679,28 @@ function Inventario() {
 
       {tab==='suppliers' && (
         <div>
-          <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
-            <button style={{display:'flex',alignItems:'center',gap:6,padding:'7px 14px',background:T.accentBg,
-              border:`1px solid ${T.accentBorder}`,borderRadius:6,color:T.accent,fontSize:12,fontWeight:700,
-              fontFamily:"'DM Sans',sans-serif",cursor:'pointer'}}>
-              <Plus size={13}/> Nuevo Proveedor
-            </button>
-          </div>
-          <TableWrap>
-            <THead cols={['ID','Proveedor','Contacto','Categoría','Calificación','OC Activas','Monto Compras','Estado']}/>
-            <tbody>
-              {suppliers.map(s=>(
-                <TRow key={s.id}>
-                  <TD mono><span style={{color:T.textMuted,fontSize:11}}>{s.id}</span></TD>
-                  <TD>
-                    <div>
-                      <div style={{fontWeight:600,fontSize:13,color:T.textPrimary,fontFamily:"'DM Sans',sans-serif"}}>{s.nombre}</div>
-                      <div style={{color:T.textMuted,fontSize:10,fontFamily:"'DM Sans',sans-serif",marginTop:1}}>{s.email}</div>
-                    </div>
-                  </TD>
-                  <TD muted>{s.contacto}</TD>
-                  <TD muted>{s.cat}</TD>
-                  <TD>
-                    <div style={{display:'flex',alignItems:'center',gap:4}}>
-                      <Star size={12} fill={T.accent} color={T.accent}/>
-                      <span style={{color:T.accent,fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:13}}>{s.rating}</span>
-                    </div>
-                  </TD>
-                  <TD mono><span style={{color:s.ordenes>0?T.cyan:T.textMuted}}>{s.ordenes}</span></TD>
-                  <TD mono><span style={{color:T.green,fontWeight:600}}>{fmt(s.monto)}</span></TD>
-                  <TD><Badge status={s.estado}/></TD>
-                </TRow>
-              ))}
-            </tbody>
-          </TableWrap>
+          {suppliersReal.length === 0 ? (
+            <div style={{textAlign:'center',padding:'40px 20px',color:T.textMuted,fontFamily:"'DM Sans',sans-serif",fontSize:13}}>
+              Importá facturas de compras para ver estadísticas de proveedores.
+            </div>
+          ) : (
+            <TableWrap>
+              <THead cols={['Proveedor','Facturas','Notas de Crédito','Total Comprado U$','IVA Crédito ₲']}/>
+              <tbody>
+                {suppliersReal.map((s,i)=>(
+                  <TRow key={i}>
+                    <TD>
+                      <div style={{fontWeight:700,fontSize:13,color:T.textPrimary,fontFamily:"'DM Sans',sans-serif"}}>{s.nombre}</div>
+                    </TD>
+                    <TD mono><span style={{color:T.cyan}}>{s.facturas}</span></TD>
+                    <TD mono><span style={{color:s.ncs>0?T.accent:T.textMuted}}>{s.ncs}</span></TD>
+                    <TD mono><span style={{color:T.green,fontWeight:600}}>U$ {new Intl.NumberFormat('es-PY',{minimumFractionDigits:2}).format(s.totalUSD)}</span></TD>
+                    <TD mono><span style={{color:T.textSecondary}}>{fmt(s.ivaTotal)}</span></TD>
+                  </TRow>
+                ))}
+              </tbody>
+            </TableWrap>
+          )}
         </div>
       )}
     </div>

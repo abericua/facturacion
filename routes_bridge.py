@@ -13,6 +13,7 @@ import json
 import pandas as pd
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Header
+from fastapi.responses import PlainTextResponse
 from typing import Optional, List, Any
 from pydantic import BaseModel
 
@@ -329,6 +330,61 @@ def get_productos_bridge(x_api_key: Optional[str] = Header(None)):
     df = df.where(pd.notna(df), None)
     records = df.to_dict(orient='records')
     return {"records": records, "total": len(records)}
+
+
+@router.get("/ventas/csv")
+def get_ventas_csv(x_api_key: Optional[str] = Header(None)):
+    """
+    Sirve VENTAS TOTALES 2026.xlsx como CSV semicolon-delimited.
+    Formato esperado por DashboardReal2026 y VentasAnalytics:
+    FECHA;CANTIDAD;DESCRIPCION;CODIGO
+    """
+    _check_key(x_api_key)
+    if not os.path.exists(SALES_FILE):
+        return PlainTextResponse("FECHA;CANTIDAD;DESCRIPCION;CODIGO\n", media_type="text/csv; charset=utf-8")
+
+    df = pd.read_excel(SALES_FILE)
+    mask = (
+        df['DESCRIPCION'].astype(str).str.upper().str.contains(EXCLUIR_VENTAS, na=False) |
+        df['CLIENTE'].astype(str).str.upper().str.contains('ANULADO', na=False)
+    )
+    df = df[~mask].copy()
+
+    df['FECHA_DT'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
+    df = df[df['FECHA_DT'].notna()]
+
+    MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+    df['FECHA_CSV'] = df['FECHA_DT'].apply(
+        lambda d: f"{d.day:02d}-{MESES_CORTO[d.month-1]}-{str(d.year)[2:]}"
+    )
+
+    qty_col = 'CANTIDAD' if 'CANTIDAD' in df.columns else None
+
+    lines = ['FECHA;CANTIDAD;DESCRIPCION;CODIGO']
+    for _, row in df.iterrows():
+        qty  = int(row[qty_col]) if qty_col and pd.notna(row[qty_col]) else 1
+        desc = str(row.get('DESCRIPCION', '')).replace(';', ',').strip()
+        code = str(row.get('CODIGO', row.get('COD', ''))).replace(';', ',').strip()
+        lines.append(f"{row['FECHA_CSV']};{qty};{desc};{code}")
+
+    return PlainTextResponse('\n'.join(lines), media_type="text/csv; charset=utf-8")
+
+
+@router.get("/productos/csv")
+def get_productos_csv(x_api_key: Optional[str] = Header(None)):
+    """
+    Sirve productos_maestros.csv directamente como texto.
+    Usado por CalculadoraPrecios y DashboardReal2026.
+    """
+    _check_key(x_api_key)
+    if not os.path.exists(PRODUCTOS_CSV):
+        return PlainTextResponse(
+            "Nombre,ID_Ref,Proveedor,Linea,Costo_Compra,Moneda_Costo,Margen_Pct\n",
+            media_type="text/csv; charset=utf-8"
+        )
+    with open(PRODUCTOS_CSV, 'r', encoding='utf-8-sig') as f:
+        content = f.read()
+    return PlainTextResponse(content, media_type="text/csv; charset=utf-8")
 
 
 @router.post("/productos/sync")

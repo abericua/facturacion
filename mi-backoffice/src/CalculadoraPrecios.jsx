@@ -374,20 +374,20 @@ export default function CalculadoraPrecios() {
       if (catalogo && catalogo.productos && catalogo.productos.length > 0) {
         setProductos(catalogo.productos);
       } else {
-        fetch('/LISTA_PRECIOS_SOLPRO_2026.csv')
-          .then(res => {
-            if (!res.ok) throw new Error('Network response was not ok');
-            return res.text();
-          })
+        // Fallback: cargar desde bridge Railway
+        const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
+        const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
+        fetch(`${BRIDGE_URL}/api/bridge/productos/csv`, { headers: { 'x-api-key': BRIDGE_KEY } })
+          .then(res => { if (!res.ok) throw new Error('Sin catálogo en Railway'); return res.text(); })
           .then(async text => {
             const parsed = parseCatalogCSV(text);
             if (parsed.length > 0) {
               setProductos(parsed);
               await DB.guardarCatalogo('productos', parsed);
-              console.log(`✅ Auto-cargados ${parsed.length} productos desde CSV.`);
+              console.log(`✅ Auto-cargados ${parsed.length} productos desde Railway.`);
             }
           })
-          .catch(err => console.log('Info: No se encontró lista predeterminada o error al cargarla:', err));
+          .catch(err => console.log('Info: Railway sin catálogo aún:', err));
       }
     };
     cargarCatalogoInicial();

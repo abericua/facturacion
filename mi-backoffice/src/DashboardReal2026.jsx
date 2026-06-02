@@ -165,10 +165,14 @@ export default function DashboardReal() {
   const bandaPiso  = usdMercado + BANDA_PISO_PTS;
   const bandaTecho = usdMercado + BANDA_TECHO_PTS;
 
+  const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
+  const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
+  const bh = { 'x-api-key': BRIDGE_KEY };
+
   useEffect(()=>{
     Promise.all([
-      fetch('/BBDD_VENTAS_24_AL_26.csv').then(r=>{ if(!r.ok) throw new Error('No se encontró ventas'); return r.text(); }),
-      fetch('/LISTA_PRECIOS_SOLPRO_2026.csv').then(r=>{ if(!r.ok) throw new Error('No se encontró precios'); return r.text(); })
+      fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`,    { headers: bh }).then(r=>{ if(!r.ok) throw new Error('Sin ventas en Railway — verificá que VENTAS TOTALES 2026.xlsx esté en el volumen'); return r.text(); }),
+      fetch(`${BRIDGE_URL}/api/bridge/productos/csv`, { headers: bh }).then(r=>{ if(!r.ok) throw new Error('Sin catálogo en Railway'); return r.text(); })
     ])
     .then(([txtVentas, txtPrecios])=>{
       const map = parsePricesCSV(txtPrecios);
