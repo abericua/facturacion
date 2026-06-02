@@ -157,6 +157,7 @@ export default function DashboardReal() {
   const [usdMercado, setUsdMercado] = useState(7650);
   const [editUsd,    setEditUsd]    = useState(false);
   const [tempUsd,    setTempUsd]    = useState('7650');
+  const [tcGuardado, setTcGuardado] = useState(false); // feedback visual al guardar
   const [tab,        setTab]        = useState('mensual');
   const [yearFilter, setYearFilter] = useState('Todos');
   const [compras, setCompras] = useState([]);
@@ -168,6 +169,14 @@ export default function DashboardReal() {
   const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
   const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
   const bh = { 'x-api-key': BRIDGE_KEY };
+
+  // Cargar TC guardado al iniciar
+  useEffect(()=>{
+    DB.obtenerConfig('tipo_cambio_usd').then(cfg=>{
+      if (cfg?.valor) { setUsdMercado(cfg.valor); setTempUsd(String(cfg.valor)); }
+    }).catch(()=>{});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   useEffect(()=>{
     Promise.all([
@@ -367,14 +376,28 @@ export default function DashboardReal() {
                 <input value={tempUsd} onChange={e=>setTempUsd(e.target.value)} autoFocus
                   style={{background:T.card,border:`1px solid ${T.accent}`,borderRadius:5,padding:'4px 8px',
                     color:T.textPrimary,fontSize:14,fontFamily:"'JetBrains Mono',monospace",width:90,outline:'none'}}/>
-                <button onClick={()=>{ setUsdMercado(parseInt(tempUsd.replace(/\D/g,''))||7650); setEditUsd(false); }}
+                <button onClick={async ()=>{
+                  const tc = parseInt(tempUsd.replace(/\D/g,''))||7650;
+                  setUsdMercado(tc);
+                  setEditUsd(false);
+                  // Guardar en IndexedDB para que persista entre sesiones
+                  await DB.guardarConfig('tipo_cambio_usd', tc);
+                  setTcGuardado(true);
+                  setTimeout(()=>setTcGuardado(false), 2500);
+                }}
                   style={{background:T.green,border:'none',borderRadius:4,padding:'5px 10px',color:'#000',fontSize:11,fontWeight:700,cursor:'pointer'}}>
-                  ✓ OK
+                  ✓ Guardar
                 </button>
               </div>
             ) : (
-              <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
                 <span style={{color:T.textPrimary,fontSize:20,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{fmtGs(usdMercado)}</span>
+                {tcGuardado && (
+                  <span style={{fontSize:10,fontWeight:700,color:T.green,fontFamily:"'DM Sans',sans-serif",
+                    background:T.greenBg,border:'1px solid rgba(52,211,153,0.3)',borderRadius:4,padding:'2px 8px'}}>
+                    ✓ Guardado
+                  </span>
+                )}
                 <button onClick={()=>{ setTempUsd(String(usdMercado)); setEditUsd(true); }}
                   style={{background:'transparent',border:`1px solid ${T.border}`,borderRadius:4,padding:'3px 8px',
                     color:T.textMuted,fontSize:10,cursor:'pointer',display:'flex',alignItems:'center',gap:3,fontFamily:"'DM Sans',sans-serif"}}>

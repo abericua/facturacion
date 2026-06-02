@@ -347,6 +347,7 @@ export default function CalculadoraPrecios() {
   const [usdMercado,setUsdMercado]=useState(7650);
   const [editUsd,   setEditUsd]   =useState(false);
   const [tempUsd,   setTempUsd]   =useState('7650');
+  const [tcGuardado,setTcGuardado]=useState(false);
   const [cfg,       setCfg]       =useState(CFG_DEFAULT);
   const [productos, setProductos] =useState([]);
   const [selected,  setSelected]  =useState(null);
@@ -517,14 +518,27 @@ export default function CalculadoraPrecios() {
                 <input value={tempUsd} onChange={e=>setTempUsd(e.target.value)} autoFocus
                   style={{background:T.card,border:`1px solid ${T.accent}`,borderRadius:5,padding:'4px 7px',
                     color:T.textPrimary,fontSize:15,fontFamily:"'JetBrains Mono',monospace",width:80,outline:'none',fontWeight:700}}/>
-                <button onClick={async ()=>{const tc=parseInt(tempUsd.replace(/\D/g,''))||7650; await DB.guardarConfig('tipo_cambio_usd', tc); setUsdMercado(tc); setEditUsd(false);}}
-                  style={{background:T.green,border:'none',borderRadius:4,padding:'4px 8px',color:'#000',fontSize:10,fontWeight:700,cursor:'pointer'}}>OK</button>
+                <button onClick={async ()=>{
+                  const tc=parseInt(tempUsd.replace(/\D/g,''))||7650;
+                  await DB.guardarConfig('tipo_cambio_usd', tc);
+                  setUsdMercado(tc);
+                  setEditUsd(false);
+                  setTcGuardado(true);
+                  setTimeout(()=>setTcGuardado(false), 2500);
+                }}
+                  style={{background:T.green,border:'none',borderRadius:4,padding:'4px 8px',color:'#000',fontSize:10,fontWeight:700,cursor:'pointer'}}>✓ Guardar</button>
                 <button onClick={()=>setEditUsd(false)}
                   style={{background:'transparent',border:`1px solid ${T.border}`,borderRadius:4,padding:'4px 7px',color:T.textMuted,cursor:'pointer',fontSize:10}}>X</button>
               </div>
             ):(
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
                 <span style={{color:T.textPrimary,fontSize:18,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{fmtRate(usdMercado)}</span>
+                {tcGuardado && (
+                  <span style={{fontSize:9,fontWeight:700,color:T.green,fontFamily:"'DM Sans',sans-serif",
+                    background:T.greenBg,border:'1px solid rgba(52,211,153,0.3)',borderRadius:3,padding:'2px 6px'}}>
+                    ✓ Guardado
+                  </span>
+                )}
                 <button onClick={()=>{setTempUsd(String(usdMercado));setEditUsd(true);}}
                   style={{background:'transparent',border:`1px solid ${T.border}`,borderRadius:4,padding:'2px 6px',
                     color:T.textMuted,fontSize:9,cursor:'pointer',display:'flex',alignItems:'center',gap:2}}>
