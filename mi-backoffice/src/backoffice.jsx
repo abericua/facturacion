@@ -1,5 +1,5 @@
 import FinanzasPro from './FinanzasPro.jsx';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import VentasAnalytics from './VentasAnalytics.jsx';
 // import DashboardReal from './DashboardReal.jsx';
@@ -708,135 +708,204 @@ function Inventario() {
 }
 
 // ── PEDIDOS ───────────────────────────────────────────────────────────────────
+const MESES_CORTO_P = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const EXCLUIR_P = /SEÑA|ANTICIPO|ACEPTACION DE PAGO|CANCELACION DE COMPRA/i;
+
+function parsearFechaVenta(str) {
+  if (!str) return null;
+  // Soporta "15/04/2026", "15-abr-26", "2026-04-15"
+  const iso = String(str).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) return new Date(parseInt(iso[1]), parseInt(iso[2])-1, parseInt(iso[3]));
+  const dmy = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (dmy) { const y=parseInt(dmy[3])<100?2000+parseInt(dmy[3]):parseInt(dmy[3]); return new Date(y,parseInt(dmy[2])-1,parseInt(dmy[1])); }
+  return null;
+}
+
 function Pedidos() {
-  const [filter, setFilter] = useState('todos');
-  const [search, setSearch] = useState('');
+  const [ventas,   setVentas]   = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState('');
+  const [filter,   setFilter]   = useState('todos');
+  const [search,   setSearch]   = useState('');
+  const [yearFilt, setYearFilt] = useState('Todos');
 
-  const cnt = {
-    todos:       orders.length,
-    entregado:   orders.filter(o=>o.estado==='entregado').length,
-    en_tránsito: orders.filter(o=>o.estado==='en_tránsito').length,
-    procesando:  orders.filter(o=>o.estado==='procesando').length,
-    cancelado:   orders.filter(o=>o.estado==='cancelado').length,
-  };
-  const revenue = orders.filter(o=>o.estado!=='cancelado').reduce((a,b)=>a+b.monto,0);
+  const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
+  const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
 
-  const filtered = orders.filter(o=>{
-    const mf = filter==='todos'||o.estado===filter;
-    const ms = !search||o.cliente.toLowerCase().includes(search.toLowerCase())||o.id.toLowerCase().includes(search.toLowerCase());
+  useEffect(()=>{
+    fetch(`${BRIDGE_URL}/api/bridge/ventas`, { headers: { 'x-api-key': BRIDGE_KEY } })
+      .then(r=>{ if(!r.ok) throw new Error(`Error ${r.status}`); return r.json(); })
+      .then(json=>{
+        const rows = (json.records || []).map((r, i)=>{
+          const desc   = String(r.DESCRIPCION || r.descripcion || '').trim();
+          const cliente= String(r.CLIENTE     || r.cliente     || '—').trim();
+          const fecha  = parsearFechaVenta(r.FECHA || r.fecha);
+          const anulado= /ANULADO/i.test(cliente) || EXCLUIR_P.test(desc);
+          const montoGs= parseFloat(r['PRECIO GS'] || r.precio_gs || 0) || 0;
+          const montoUSD=parseFloat(r['PRECIO USD']|| r.precio_usd|| 0) || 0;
+          return {
+            id:      `VTA-${String(i+1).padStart(4,'0')}`,
+            nro:     r.NUMERO || r.numero || '',
+            cliente,
+            desc,
+            montoGs,
+            montoUSD,
+            fecha,
+            fechaStr: fecha
+              ? `${fecha.getDate()} ${MESES_CORTO_P[fecha.getMonth()]} ${fecha.getFullYear()}`
+              : String(r.FECHA || '—'),
+            estado: anulado ? 'cancelado' : 'entregado',
+            year:  fecha ? fecha.getFullYear() : null,
+            month: fecha ? fecha.getMonth() : null,
+          };
+        });
+        setVentas(rows);
+        setLoading(false);
+      })
+      .catch(e=>{ setError(e.message); setLoading(false); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+
+  const years = useMemo(()=>['Todos',...[...new Set(ventas.map(v=>v.year).filter(Boolean))].sort()],[ventas]);
+
+  const byYear = useMemo(()=>yearFilt==='Todos'?ventas:ventas.filter(v=>v.year===parseInt(yearFilt)),[ventas,yearFilt]);
+
+  const cnt = useMemo(()=>({
+    todos:     byYear.length,
+    entregado: byYear.filter(v=>v.estado==='entregado').length,
+    cancelado: byYear.filter(v=>v.estado==='cancelado').length,
+  }),[byYear]);
+
+  const revenueGs = useMemo(()=>byYear.filter(v=>v.estado==='entregado').reduce((a,b)=>a+b.montoGs,0),[byYear]);
+
+  const filtered = useMemo(()=>byYear.filter(v=>{
+    const mf = filter==='todos'||v.estado===filter;
+    const ms = !search||v.cliente.toLowerCase().includes(search.toLowerCase())||v.desc.toLowerCase().includes(search.toLowerCase())||v.nro.toLowerCase().includes(search.toLowerCase());
     return mf&&ms;
-  });
+  }),[byYear,filter,search]);
 
-  const statusDist = [
-    {name:'Entregados', value:cnt.entregado,   color:T.green},
-    {name:'En Tránsito',value:cnt.en_tránsito, color:T.cyan},
-    {name:'Procesando', value:cnt.procesando,  color:T.accent},
-    {name:'Cancelados', value:cnt.cancelado,   color:T.red},
-  ];
+  // Ventas mensuales para gráfico
+  const mensual = useMemo(()=>{
+    const m={};
+    byYear.filter(v=>v.estado==='entregado'&&v.fecha).forEach(v=>{
+      const k=`${v.year}-${String(v.month+1).padStart(2,'0')}`;
+      if(!m[k]) m[k]={label:`${MESES_CORTO_P[v.month]} ${v.year}`,gs:0,cnt:0};
+      m[k].gs+=v.montoGs; m[k].cnt++;
+    });
+    return Object.values(m).sort((a,b)=>a.label.localeCompare(b.label)).slice(-12);
+  },[byYear]);
 
-  const filterDefs = [
-    {id:'todos',      label:'Todos',      color:T.textSecondary},
-    {id:'entregado',  label:'Entregados', color:T.green},
-    {id:'en_tránsito',label:'En Tránsito',color:T.cyan},
-    {id:'procesando', label:'Procesando', color:T.accent},
-    {id:'cancelado',  label:'Cancelados', color:T.red},
-  ];
+  if (loading) return (
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'40vh',gap:12,color:T.textSecondary,fontFamily:"'DM Sans',sans-serif",fontSize:13}}>
+      <div style={{width:24,height:24,border:`2px solid ${T.border}`,borderTop:`2px solid ${T.accent}`,borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      Cargando ventas desde Railway…
+    </div>
+  );
+
+  if (error) return (
+    <div style={{textAlign:'center',padding:'40px 20px',color:T.red,fontFamily:"'DM Sans',sans-serif"}}>
+      <AlertTriangle size={28} style={{marginBottom:8}}/>
+      <p style={{fontWeight:600,marginBottom:4}}>No se pudo cargar ventas</p>
+      <p style={{color:T.textMuted,fontSize:12}}>{error}</p>
+      <p style={{color:T.textMuted,fontSize:11,marginTop:8}}>Verificá que el bridge esté online y que VENTAS TOTALES 2026.xlsx esté en el volumen Railway.</p>
+    </div>
+  );
 
   return (
     <div style={{display:'flex',flexDirection:'column',gap:14}}>
-      <div style={{display:'flex',gap:10}}>
-        <KPICard label="Total Pedidos"    value={cnt.todos}         Icon={ShoppingCart} color={T.accent} isNumber trend={8.2}/>
-        <KPICard label="Entregados"       value={cnt.entregado}     Icon={CheckCircle}  color={T.green}  isNumber/>
-        <KPICard label="En Tránsito"      value={cnt.en_tránsito}   Icon={Truck}        color={T.cyan}   isNumber/>
-        <KPICard label="Cancelados"       value={cnt.cancelado}     Icon={XCircle}      color={T.red}    isNumber/>
+      {/* Filtro de año */}
+      <div style={{display:'flex',alignItems:'center',gap:8}}>
+        <span style={{color:T.textMuted,fontSize:10,fontWeight:700,letterSpacing:'0.1em',fontFamily:"'DM Sans',sans-serif"}}>AÑO</span>
+        {years.map(y=>(
+          <FilterChip key={y} label={String(y)} active={yearFilt===y} color={T.accent} onClick={()=>setYearFilt(y)}/>
+        ))}
       </div>
 
-      {/* Charts */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 270px',gap:12}}>
+      {/* KPIs */}
+      <div style={{display:'flex',gap:10}}>
+        <KPICard label="Total Ventas"  value={cnt.todos}     Icon={ShoppingCart} color={T.accent} isNumber/>
+        <KPICard label="Efectivas"     value={cnt.entregado} Icon={CheckCircle}  color={T.green}  isNumber/>
+        <KPICard label="Anuladas"      value={cnt.cancelado} Icon={XCircle}      color={T.red}    isNumber/>
+        <KPICard label="Facturado ₲"   value={fmtK(revenueGs)} Icon={DollarSign} color={T.cyan}/>
+      </div>
+
+      {/* Gráfico mensual */}
+      {mensual.length > 0 && (
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'16px 18px'}}>
-          <SecHeader title="Monto por Pedido — Diciembre 2024"/>
-          <ResponsiveContainer width="100%" height={195}>
-            <BarChart data={orders.map(o=>({name:o.id.replace('ORD-24',''),monto:o.monto,estado:o.estado}))} margin={{top:5,right:5,bottom:0,left:0}}>
+          <SecHeader title={`Ventas Mensuales — Últimos ${mensual.length} meses`}/>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={mensual} margin={{top:5,right:5,bottom:0,left:0}}>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
-              <XAxis dataKey="name" tick={{fill:T.textMuted,fontSize:10,fontFamily:"'DM Sans',sans-serif"}} axisLine={false} tickLine={false}/>
-              <YAxis tickFormatter={v=>`$${v/1000}K`} tick={{fill:T.textMuted,fontSize:10}} axisLine={false} tickLine={false} width={46}/>
+              <XAxis dataKey="label" tick={{fill:T.textMuted,fontSize:10,fontFamily:"'DM Sans',sans-serif"}} axisLine={false} tickLine={false}/>
+              <YAxis tickFormatter={v=>v>=1000000?`${(v/1000000).toFixed(0)}M`:v>=1000?`${(v/1000).toFixed(0)}K`:v} tick={{fill:T.textMuted,fontSize:10}} axisLine={false} tickLine={false} width={38}/>
               <Tooltip content={<ChartTip/>}/>
-              <Bar dataKey="monto" name="Monto" radius={[4,4,0,0]} maxBarSize={22}>
-                {orders.map((o,i)=><Cell key={i} fill={ST[o.estado].color} fillOpacity={0.8}/>)}
-              </Bar>
+              <Bar dataKey="gs" name="Ventas ₲" fill={T.accent} fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={28}/>
             </BarChart>
           </ResponsiveContainer>
         </div>
+      )}
 
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'16px 18px'}}>
-          <SecHeader title="Distribución de Estados"/>
-          <ResponsiveContainer width="100%" height={140}>
-            <PieChart>
-              <Pie data={statusDist} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={3} dataKey="value">
-                {statusDist.map((e,i)=><Cell key={i} fill={e.color} opacity={0.85}/>)}
-              </Pie>
-              <Tooltip contentStyle={{background:T.cardB,border:`1px solid ${T.border}`,borderRadius:8,fontFamily:"'DM Sans',sans-serif",fontSize:12}}/>
-            </PieChart>
-          </ResponsiveContainer>
-          <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:2}}>
-            {statusDist.map(s=>(
-              <div key={s.name} style={{display:'flex',alignItems:'center',gap:7}}>
-                <div style={{width:7,height:7,borderRadius:'50%',background:s.color,flexShrink:0}}/>
-                <span style={{color:T.textSecondary,fontSize:11,flex:1,fontFamily:"'DM Sans',sans-serif"}}>{s.name}</span>
-                <span style={{color:T.textPrimary,fontSize:11,fontFamily:"'JetBrains Mono',monospace",fontWeight:600}}>{s.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Filters + table */}
+      {/* Filtros + tabla */}
       <div>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,gap:12,flexWrap:'wrap'}}>
           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-            {filterDefs.map(f=>(
-              <FilterChip key={f.id} label={`${f.label} (${cnt[f.id]})`} active={filter===f.id} color={f.color} onClick={()=>setFilter(f.id)}/>
+            {[
+              {id:'todos',     label:'Todas',    color:T.textSecondary},
+              {id:'entregado', label:'Efectivas',color:T.green},
+              {id:'cancelado', label:'Anuladas', color:T.red},
+            ].map(f=>(
+              <FilterChip key={f.id} label={`${f.label} (${cnt[f.id]??byYear.length})`} active={filter===f.id} color={f.color} onClick={()=>setFilter(f.id)}/>
             ))}
           </div>
-          <SearchBar value={search} onChange={setSearch} placeholder="Buscar cliente o ID..." width={220}/>
+          <SearchBar value={search} onChange={setSearch} placeholder="Buscar cliente, descripción o N°..." width={240}/>
         </div>
+
         <TableWrap>
-          <THead cols={['Pedido','Cliente','Ciudad','Items','Monto','Fecha','Estado']}/>
+          <THead cols={['N° Fact.','Cliente','Descripción','Monto ₲','Monto U$','Fecha','Estado']}/>
           <tbody>
-            {filtered.map(o=>(
-              <TRow key={o.id}>
-                <TD mono><span style={{color:T.accent}}>{o.id}</span></TD>
-                <TD><span style={{fontWeight:600}}>{o.cliente}</span></TD>
-                <TD muted>{o.ciudad}</TD>
-                <TD mono><span style={{color:T.textSecondary}}>{o.items}</span></TD>
-                <TD mono><span style={{fontWeight:700}}>{fmt(o.monto)}</span></TD>
-                <TD muted>{o.fecha}</TD>
-                <TD><Badge status={o.estado}/></TD>
+            {filtered.slice(0,200).map((v,i)=>(
+              <TRow key={i}>
+                <TD mono><span style={{color:T.textMuted,fontSize:10}}>{v.nro||v.id}</span></TD>
+                <TD><span style={{fontWeight:600,color:T.textPrimary}}>{v.cliente}</span></TD>
+                <TD muted><span style={{fontSize:11,maxWidth:220,display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.desc||'—'}</span></TD>
+                <TD mono><span style={{color:v.montoGs>0?T.textPrimary:T.textMuted,fontWeight:v.montoGs>0?600:400}}>{v.montoGs>0?fmt(v.montoGs):'—'}</span></TD>
+                <TD mono><span style={{color:v.montoUSD>0?T.green:T.textMuted}}>{v.montoUSD>0?`U$ ${new Intl.NumberFormat('es-PY',{minimumFractionDigits:2}).format(v.montoUSD)}`:'—'}</span></TD>
+                <TD muted>{v.fechaStr}</TD>
+                <TD><Badge status={v.estado}/></TD>
               </TRow>
             ))}
           </tbody>
         </TableWrap>
-        {filtered.length===0&&(
-          <div style={{textAlign:'center',padding:'32px 16px',color:T.textMuted,fontFamily:"'DM Sans',sans-serif",fontSize:13}}>
-            No se encontraron pedidos con ese criterio.
+
+        {filtered.length===0 && (
+          <div style={{textAlign:'center',padding:'32px',color:T.textMuted,fontFamily:"'DM Sans',sans-serif",fontSize:13}}>
+            No se encontraron ventas con ese criterio.
+          </div>
+        )}
+        {filtered.length>200 && (
+          <div style={{textAlign:'center',padding:'10px',color:T.textMuted,fontFamily:"'DM Sans',sans-serif",fontSize:11}}>
+            Mostrando 200 de {filtered.length} resultados. Usá el buscador para filtrar.
           </div>
         )}
       </div>
 
-      {/* Revenue summary */}
-      <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'14px 18px',display:'flex',gap:24,flexWrap:'wrap'}}>
-        {[
-          {label:'Ingresos del Mes (sin cancelados)', value:fmt(revenue), color:T.green},
-          {label:'Pedido Promedio', value:fmt(Math.round(revenue/(cnt.todos-cnt.cancelado))), color:T.cyan},
-          {label:'Tasa de Cancelación', value:`${((cnt.cancelado/cnt.todos)*100).toFixed(1)}%`, color:T.red},
-          {label:'Tasa de Entrega', value:`${((cnt.entregado/cnt.todos)*100).toFixed(1)}%`, color:T.green},
-        ].map(s=>(
-          <div key={s.label}>
-            <div style={{color:T.textMuted,fontSize:10,fontWeight:700,letterSpacing:'0.08em',marginBottom:4,fontFamily:"'DM Sans',sans-serif"}}>{s.label.toUpperCase()}</div>
-            <div style={{color:s.color,fontSize:18,fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{s.value}</div>
-          </div>
-        ))}
-      </div>
+      {/* Resumen */}
+      {cnt.todos > 0 && (
+        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'14px 18px',display:'flex',gap:24,flexWrap:'wrap'}}>
+          {[
+            {label:'Facturado Total ₲',    value:fmt(revenueGs),                                                          color:T.green},
+            {label:'Promedio por Venta',   value:cnt.entregado>0?fmt(Math.round(revenueGs/cnt.entregado)):'—',            color:T.cyan},
+            {label:'Tasa de Anulación',    value:`${cnt.todos>0?((cnt.cancelado/cnt.todos)*100).toFixed(1):0}%`,          color:T.red},
+            {label:'Ventas Efectivas',     value:`${cnt.todos>0?((cnt.entregado/cnt.todos)*100).toFixed(1):0}%`,          color:T.green},
+          ].map(s=>(
+            <div key={s.label}>
+              <div style={{color:T.textMuted,fontSize:9,fontWeight:700,letterSpacing:'0.08em',marginBottom:4,fontFamily:"'DM Sans',sans-serif"}}>{s.label.toUpperCase()}</div>
+              <div style={{color:s.color,fontSize:17,fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
