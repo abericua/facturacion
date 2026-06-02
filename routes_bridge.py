@@ -345,6 +345,96 @@ def sync_productos(payload: SyncPayload, x_api_key: Optional[str] = Header(None)
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# STOCK (desde ImportadorCompras → productos_maestros.csv)
+# ══════════════════════════════════════════════════════════════════════════
+@router.post("/stock/sync")
+def sync_stock(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
+    """
+    Recibe items agregados desde ImportadorCompras (codigo, descripcion,
+    cantidad, precio_unit_usd) y actualiza la columna 'Stock' en
+    productos_maestros.csv usando matching por código o descripción.
+    """
+    _check_key(x_api_key)
+    if not payload.records:
+        raise HTTPException(status_code=400, detail="Sin items de stock.")
+
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    # Leer CSV actual (o crear vacío con columnas base)
+    if os.path.exists(PRODUCTOS_CSV):
+        df = pd.read_csv(PRODUCTOS_CSV)
+    else:
+        df = pd.DataFrame(columns=["Nombre","ID_Ref","Proveedor","Linea",
+                                    "Costo_Compra","Moneda_Costo","Margen_Pct"])
+
+    # Asegurar columnas de stock y costo actualizado
+    if "Stock" not in df.columns:
+        df["Stock"] = 0
+    if "Costo_USD" not in df.columns:
+        df["Costo_USD"] = 0.0
+    if "Codigo_Proveedor" not in df.columns:
+        df["Codigo_Proveedor"] = ""
+
+    df["Stock"] = pd.to_numeric(df["Stock"], errors="coerce").fillna(0)
+
+    actualizados = 0
+    nuevos = 0
+
+    for item in payload.records:
+        cod   = str(item.get("codigo", "")).strip().upper()
+        desc  = str(item.get("descripcion", "")).strip().upper()
+        qty   = float(item.get("cantidad", 0))
+        precio = float(item.get("precio_unit_usd", 0) or 0)
+
+        if not cod or qty <= 0:
+            continue
+
+        # 1. Match por Codigo_Proveedor exacto
+        mask = df["Codigo_Proveedor"].astype(str).str.upper() == cod
+        # 2. Si no matchea, buscar por código en el Nombre o ID_Ref
+        if not mask.any():
+            mask = (
+                df["Nombre"].astype(str).str.upper().str.contains(cod, na=False) |
+                df["ID_Ref"].astype(str).str.upper().str.contains(cod, na=False)
+            )
+
+        if mask.any():
+            df.loc[mask, "Stock"] += qty
+            if precio > 0:
+                df.loc[mask, "Costo_Compra"] = precio
+                df.loc[mask, "Moneda_Costo"] = "USD"
+            df.loc[mask, "Codigo_Proveedor"] = cod
+            actualizados += 1
+        else:
+            # Producto nuevo — agregarlo al CSV
+            nuevo = {
+                "Nombre":           desc or cod,
+                "ID_Ref":           cod,
+                "Proveedor":        "SOL CONTROL / TODO COSTURA",
+                "Linea":            "INSUMOS",
+                "Costo_Compra":     precio,
+                "Moneda_Costo":     "USD",
+                "Margen_Pct":       15.0,
+                "Stock":            qty,
+                "Costo_USD":        precio,
+                "Codigo_Proveedor": cod,
+            }
+            df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
+            nuevos += 1
+
+    df["Stock"] = df["Stock"].astype(int)
+    df.to_csv(PRODUCTOS_CSV, index=False, encoding="utf-8-sig")
+
+    return {
+        "status":      "synced",
+        "actualizados": actualizados,
+        "nuevos":       nuevos,
+        "total_csv":    len(df),
+        "ts":           datetime.utcnow().isoformat(),
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # RESUMEN FINANCIERO (para Dashboard)
 # ══════════════════════════════════════════════════════════════════════════
 @router.get("/dashboard/resumen")

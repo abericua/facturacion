@@ -2,12 +2,13 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Upload, FileText, CheckCircle, XCircle, Clock,
   Trash2, Download, RefreshCw, AlertTriangle, Zap,
-  Building2, TrendingDown
+  Building2, TrendingDown, Package, CloudUpload
 } from "lucide-react";
 
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import DB from './db.js';
+import { SyncBridge } from './SyncBridge.js';
 // ── THEME (mismo T del backoffice) ────────────────────────────────────────────
 const T = {
   bg:           '#07080f',
@@ -187,7 +188,8 @@ export default function ImportadorCompras() {
       }
     }).catch(()=>{});
   }, []);
-  const [processing, setProcessing] = useState(false);
+  const [processing,   setProcessing]   = useState(false);
+  const [stockSync,    setStockSync]    = useState({ status: 'idle', msg: '' }); // idle|syncing|ok|error
   const [provFilter, setProvFilter] = useState('todos');
   const [drag, setDrag]           = useState(false);
   const [detailId, setDetailId]   = useState(null);
@@ -316,6 +318,23 @@ export default function ImportadorCompras() {
   const neto      = enPYG ? netoPYG   : netoUSD;
   const moneda    = enPYG ? '₲' : 'U$';
 
+  // ── Sincronizar Stock con Railway ─────────────────────────────────────────
+  const sincronizarStock = async () => {
+    setStockSync({ status: 'syncing', msg: 'Agregando items…' });
+    try {
+      const stockItems = await DB.agregarStockDesdeCompras();
+      if (!stockItems.length) {
+        setStockSync({ status: 'error', msg: 'No hay items con código para sincronizar.' });
+        return;
+      }
+      setStockSync({ status: 'syncing', msg: `Enviando ${stockItems.length} productos a Railway…` });
+      const actualizados = await SyncBridge.pushStock(stockItems);
+      setStockSync({ status: 'ok', msg: `✅ ${actualizados} productos actualizados en facturación.` });
+    } catch (e) {
+      setStockSync({ status: 'error', msg: `Error: ${e.message}` });
+    }
+  };
+
   // ── Exportar ──────────────────────────────────────────────────────────────
   const exportJSON = () => {
     const payload = {
@@ -377,9 +396,44 @@ export default function ImportadorCompras() {
             Procesá kuDEs de Sol Control y Todo Costura — extracción automática con IA
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           {records.length > 0 && (
             <>
+              {/* ── SYNC STOCK ── */}
+              <button
+                onClick={sincronizarStock}
+                disabled={stockSync.status === 'syncing'}
+                title="Agrega las cantidades compradas al stock de facturación en Railway"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '7px 14px',
+                  background: stockSync.status === 'ok'    ? T.greenBg
+                            : stockSync.status === 'error' ? T.redBg
+                            : T.purpleBg,
+                  border: `1px solid ${
+                    stockSync.status === 'ok'    ? 'rgba(52,211,153,0.3)'
+                  : stockSync.status === 'error' ? 'rgba(248,113,113,0.3)'
+                  : 'rgba(167,139,250,0.3)'}`,
+                  borderRadius: 6,
+                  color: stockSync.status === 'ok'    ? T.green
+                       : stockSync.status === 'error' ? T.red
+                       : T.purple,
+                  fontSize: 11, fontWeight: 700,
+                  fontFamily: "'DM Sans',sans-serif", cursor: stockSync.status === 'syncing' ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.05em', opacity: stockSync.status === 'syncing' ? 0.6 : 1,
+                }}
+              >
+                {stockSync.status === 'syncing'
+                  ? <><RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} /> Sincronizando…</>
+                  : <><Package size={12} /> Sync Stock</>
+                }
+              </button>
+              {stockSync.msg && (
+                <span style={{ fontSize: 10, color: stockSync.status === 'ok' ? T.green : stockSync.status === 'error' ? T.red : T.textMuted, fontFamily: "'DM Sans',sans-serif", maxWidth: 200 }}>
+                  {stockSync.msg}
+                </span>
+              )}
+
               <button onClick={exportJSON} style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '7px 14px', background: T.greenBg,

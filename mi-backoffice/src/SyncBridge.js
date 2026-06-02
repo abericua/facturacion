@@ -169,6 +169,24 @@ export const SyncBridge = {
     return records.length;
   },
 
+  /**
+   * Envía el stock agregado desde ImportadorCompras al bridge Railway.
+   * El backend actualiza la columna Stock en productos_maestros.csv.
+   * @param {Array} stockItems — resultado de DB.agregarStockDesdeCompras()
+   */
+  async pushStock(stockItems) {
+    if (!stockItems || stockItems.length === 0) return 0;
+
+    const res = await fetchWithTimeout(`${BRIDGE_URL}/api/bridge/stock/sync`, {
+      method: 'POST',
+      headers: buildHeaders(),
+      body: JSON.stringify({ records: stockItems }),
+    });
+    if (!res.ok) throw new Error(`Stock push error: HTTP ${res.status}`);
+    const json = await res.json();
+    return json.actualizados || stockItems.length;
+  },
+
   async pushProductos() {
     const catalogo = await DB.obtenerCatalogo('productos');
     if (!catalogo?.productos?.length) return 0;

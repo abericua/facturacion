@@ -394,6 +394,43 @@ class SolProDB {
     return this.getByIndex('compras_proveedores', 'anio', anio);
   }
 
+  /**
+   * Agrega todos los items[] de compras en un mapa de stock por código.
+   * FAC suma cantidades, NC resta.
+   * Retorna Array<{codigo, descripcion, cantidad, precio_unit_usd}>
+   */
+  async agregarStockDesdeCompras() {
+    const compras = await this.getAll('compras_proveedores');
+    const mapa = {}; // {codigo: {codigo, descripcion, cantidad, precio_unit_usd}}
+
+    for (const compra of compras) {
+      const items = compra.items || [];
+      const signo = compra.tipo === 'NC' ? -1 : 1;
+
+      for (const item of items) {
+        const cod = (item.codigo || '').trim().toUpperCase();
+        if (!cod) continue;
+
+        if (!mapa[cod]) {
+          mapa[cod] = {
+            codigo:         cod,
+            descripcion:    item.descripcion || '',
+            cantidad:       0,
+            precio_unit_usd: item.precio_unit_usd || 0,
+          };
+        }
+        mapa[cod].cantidad += (item.cantidad || 0) * signo;
+        // Actualizar precio al más reciente (facturas más nuevas al final)
+        if (item.precio_unit_usd) {
+          mapa[cod].precio_unit_usd = item.precio_unit_usd;
+        }
+      }
+    }
+
+    // Descartar ítems sin código o cantidad negativa residual
+    return Object.values(mapa).filter(i => i.codigo && i.cantidad > 0);
+  }
+
   async limpiarCompras() {
     if (!this.isReady) await this.init();
     return new Promise((resolve, reject) => {
