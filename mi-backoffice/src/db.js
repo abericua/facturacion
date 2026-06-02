@@ -395,15 +395,20 @@ class SolProDB {
   }
 
   /**
-   * Agrega todos los items[] de compras en un mapa de stock por código.
+   * Agrega los items[] de compras AÚN NO SINCRONIZADAS (stock_sincronizado !== true).
    * FAC suma cantidades, NC resta.
-   * Retorna Array<{codigo, descripcion, cantidad, precio_unit_usd}>
+   * Retorna { items: Array<{codigo,descripcion,cantidad,precio_unit_usd}>, ids: number[] }
+   * donde ids son los IDs de las compras procesadas (para marcarlas después).
    */
   async agregarStockDesdeCompras() {
     const compras = await this.getAll('compras_proveedores');
-    const mapa = {}; // {codigo: {codigo, descripcion, cantidad, precio_unit_usd}}
+    const pendientes = compras.filter(c => !c.stock_sincronizado);
 
-    for (const compra of compras) {
+    const mapa = {};
+    const ids  = [];
+
+    for (const compra of pendientes) {
+      ids.push(compra.id);
       const items = compra.items || [];
       const signo = compra.tipo === 'NC' ? -1 : 1;
 
@@ -413,22 +418,62 @@ class SolProDB {
 
         if (!mapa[cod]) {
           mapa[cod] = {
-            codigo:         cod,
-            descripcion:    item.descripcion || '',
-            cantidad:       0,
+            codigo:          cod,
+            descripcion:     item.descripcion || '',
+            cantidad:        0,
             precio_unit_usd: item.precio_unit_usd || 0,
           };
         }
         mapa[cod].cantidad += (item.cantidad || 0) * signo;
-        // Actualizar precio al más reciente (facturas más nuevas al final)
         if (item.precio_unit_usd) {
           mapa[cod].precio_unit_usd = item.precio_unit_usd;
         }
       }
     }
 
-    // Descartar ítems sin código o cantidad negativa residual
-    return Object.values(mapa).filter(i => i.codigo && i.cantidad > 0);
+    const items = Object.values(mapa).filter(i => i.codigo && i.cantidad > 0);
+    return { items, ids, pendientes: pendientes.length };
+  }
+
+  /**
+   * Marca las compras con los IDs dados como stock_sincronizado = true.
+   * Se llama después de un pushStock exitoso.
+   */
+  async marcarComprasSincronizadas(ids) {
+    if (!ids || !ids.length) return;
+    if (!this.isReady) await this.init();
+
+    for (const id of ids) {
+      await new Promise((resolve, reject) => {
+        const tx = this.db.transaction(['compras_proveedores'], 'readwrite');
+        const store = tx.objectStore('compras_proveedores');
+        const req = store.get(id);
+        req.onsuccess = () => {
+          const record = req.result;
+          if (record) {
+            record.stock_sincronizado = true;
+            record.fecha_sync_stock = new Date().toISOString();
+            store.put(record);
+          }
+          resolve();
+        };
+        req.onerror = () => reject(req.error);
+      });
+    }
+  }
+
+  /**
+   * Resetea el flag stock_sincronizado en TODAS las compras.
+   * Usar solo para re-sincronización forzada completa.
+   */
+  async resetearFlagsStock() {
+    const compras = await this.getAll('compras_proveedores');
+    for (const c of compras) {
+      c.stock_sincronizado = false;
+      delete c.fecha_sync_stock;
+      await this.put('compras_proveedores', c);
+    }
+    return compras.length;
   }
 
   async limpiarCompras() {

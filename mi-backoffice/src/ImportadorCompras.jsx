@@ -318,18 +318,34 @@ export default function ImportadorCompras() {
   const neto      = enPYG ? netoPYG   : netoUSD;
   const moneda    = enPYG ? '₲' : 'U$';
 
-  // ── Sincronizar Stock con Railway ─────────────────────────────────────────
-  const sincronizarStock = async () => {
-    setStockSync({ status: 'syncing', msg: 'Agregando items…' });
+  // ── Sincronizar Stock con Railway (idempotente) ───────────────────────────
+  const sincronizarStock = async ({ forzar = false } = {}) => {
+    setStockSync({ status: 'syncing', msg: 'Calculando pendientes…' });
     try {
-      const stockItems = await DB.agregarStockDesdeCompras();
-      if (!stockItems.length) {
-        setStockSync({ status: 'error', msg: 'No hay items con código para sincronizar.' });
+      // Si forzar=true, resetear todos los flags primero
+      if (forzar) {
+        await DB.resetearFlagsStock();
+        setStockSync({ status: 'syncing', msg: 'Flags reseteados, re-sincronizando todo…' });
+      }
+
+      const { items, ids, pendientes } = await DB.agregarStockDesdeCompras();
+
+      if (!pendientes) {
+        setStockSync({ status: 'ok', msg: '✅ Todo ya sincronizado. Sin compras nuevas.' });
         return;
       }
-      setStockSync({ status: 'syncing', msg: `Enviando ${stockItems.length} productos a Railway…` });
-      const actualizados = await SyncBridge.pushStock(stockItems);
-      setStockSync({ status: 'ok', msg: `✅ ${actualizados} productos actualizados en facturación.` });
+      if (!items.length) {
+        setStockSync({ status: 'error', msg: `${pendientes} compras pendientes pero sin items con código válido.` });
+        return;
+      }
+
+      setStockSync({ status: 'syncing', msg: `Enviando ${items.length} productos (${pendientes} facturas)…` });
+      const actualizados = await SyncBridge.pushStock(items);
+
+      // Marcar como sincronizadas SOLO si el push fue exitoso
+      await DB.marcarComprasSincronizadas(ids);
+
+      setStockSync({ status: 'ok', msg: `✅ ${actualizados} productos actualizados · ${pendientes} facturas marcadas.` });
     } catch (e) {
       setStockSync({ status: 'error', msg: `Error: ${e.message}` });
     }
@@ -401,9 +417,9 @@ export default function ImportadorCompras() {
             <>
               {/* ── SYNC STOCK ── */}
               <button
-                onClick={sincronizarStock}
+                onClick={() => sincronizarStock()}
                 disabled={stockSync.status === 'syncing'}
-                title="Agrega las cantidades compradas al stock de facturación en Railway"
+                title="Sincroniza solo las facturas nuevas (no duplica)"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '7px 14px',
@@ -419,8 +435,10 @@ export default function ImportadorCompras() {
                        : stockSync.status === 'error' ? T.red
                        : T.purple,
                   fontSize: 11, fontWeight: 700,
-                  fontFamily: "'DM Sans',sans-serif", cursor: stockSync.status === 'syncing' ? 'not-allowed' : 'pointer',
-                  letterSpacing: '0.05em', opacity: stockSync.status === 'syncing' ? 0.6 : 1,
+                  fontFamily: "'DM Sans',sans-serif",
+                  cursor: stockSync.status === 'syncing' ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.05em',
+                  opacity: stockSync.status === 'syncing' ? 0.6 : 1,
                 }}
               >
                 {stockSync.status === 'syncing'
@@ -428,8 +446,36 @@ export default function ImportadorCompras() {
                   : <><Package size={12} /> Sync Stock</>
                 }
               </button>
+
+              {/* ── FORZAR RE-SYNC TOTAL ── */}
+              <button
+                onClick={() => {
+                  if (window.confirm('⚠️ Esto re-sincroniza TODAS las facturas desde cero.\nUsá solo si el stock en Railway está desactualizado.\n¿Continuar?')) {
+                    sincronizarStock({ forzar: true });
+                  }
+                }}
+                disabled={stockSync.status === 'syncing'}
+                title="Re-sincroniza todo desde cero (resetea flags)"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '7px 10px', background: 'transparent',
+                  border: `1px solid ${T.border}`, borderRadius: 6,
+                  color: T.textMuted, fontSize: 10, cursor: 'pointer',
+                  fontFamily: "'DM Sans',sans-serif",
+                  opacity: stockSync.status === 'syncing' ? 0.4 : 1,
+                }}
+              >
+                <AlertTriangle size={11} /> Re-sync total
+              </button>
+
               {stockSync.msg && (
-                <span style={{ fontSize: 10, color: stockSync.status === 'ok' ? T.green : stockSync.status === 'error' ? T.red : T.textMuted, fontFamily: "'DM Sans',sans-serif", maxWidth: 200 }}>
+                <span style={{
+                  fontSize: 10,
+                  color: stockSync.status === 'ok'    ? T.green
+                       : stockSync.status === 'error' ? T.red
+                       : T.textMuted,
+                  fontFamily: "'DM Sans',sans-serif", maxWidth: 220,
+                }}>
                   {stockSync.msg}
                 </span>
               )}
