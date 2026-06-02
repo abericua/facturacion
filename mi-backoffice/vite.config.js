@@ -9,5 +9,11 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-  }
+  },
+  optimizeDeps: {
+    exclude: ['pdfjs-dist'],
+  },
+  worker: {
+    format: 'es',
+  },
 })
