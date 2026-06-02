@@ -1,4 +1,5 @@
 import FinanzasPro from './FinanzasPro.jsx';
+import ConciliacionBancaria from './ConciliacionBancaria.jsx';
 import { useState, useEffect, useMemo } from "react";
 
 import VentasAnalytics from './VentasAnalytics.jsx';
@@ -918,7 +919,7 @@ const NAV = [
   {id:'pedidos',     label:'Pedidos',             Icon:ShoppingCart,    desc:'Gestion de ordenes'},
   {id:'ventas',      label:'Analitica Ventas',    Icon:BarChart2,       desc:'Reportes y tendencias'},
   {id:'calculadora', label:'Calculadora Precios', Icon:DollarSign,      desc:'Motor v5.0'},
-  // {id:'bancos',      label:'Bancos / Conciliación', Icon:Building2,       desc:'Extractos GS + USD'},
+  {id:'bancos',      label:'Bancos / Conciliación', Icon:Building2,       desc:'Extractos GS + USD'},
   // {id:'impositivo',  label:'Impositivo DNIT',     Icon:FileText,        desc:'Calendario, Anticipos, Retenciones'},
   {id:'cargador', label:'Cargar Documentos', Icon:FolderOpen, desc:'PDFs y Excel locales'},
   // {id:'ips', label:'Calculadora IPS', Icon:Calculator, desc:'Aportes Obrero-Patronales'},
@@ -1064,7 +1065,7 @@ export default function BackOffice() {
           {active==='pedidos'    && <Pedidos/>}
           {active==='ventas'     && <VentasAnalytics/>}
           {active==='calculadora'&& <CalculadoraPrecios/>}
-          {/* {active==='bancos'     && <ConciliacionBancaria/>} */}
+          {active==='bancos'     && <ConciliacionBancaria/>}
           {/* {active==='impositivo' && <ImpositivoDNIT/>} */}
           {active==='cargador' && <CargadorDocumentos/>}
           {/* {active==='ips' && <IPSCalculator/>} */}

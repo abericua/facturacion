@@ -1818,81 +1818,19 @@ const SBtnLocal = ({id, label, color, seccion, setSeccion}) => (
                 );
               })()}
 
-              {/* Carga PDF */}
-              <div style={{background:T.surface,border:`1px solid ${T.purpleBg}`,borderRadius:10,padding:'14px 16px',borderLeft:`3px solid ${T.purple}`}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
-                  <div>
-                    <div style={{color:T.textPrimary,fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",marginBottom:2}}>
-                      Cargar declaracion jurada PDF
-                    </div>
-                    <div style={{color:T.textMuted,fontSize:9,fontFamily:"'DM Sans',sans-serif"}}>
-                      Subi el PDF de la SET y se extraen los datos automaticamente
-                    </div>
+              {/* Carga PDF — redirige a Cargar Documentos */}
+              <div style={{background:T.surface,border:`1px solid rgba(167,139,250,0.2)`,borderRadius:10,
+                padding:'12px 16px',borderLeft:`3px solid ${T.purple}`,
+                display:'flex',alignItems:'center',gap:12}}>
+                <FileText size={16} color={T.purple}/>
+                <div style={{flex:1}}>
+                  <div style={{color:T.textPrimary,fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",marginBottom:2}}>
+                    Cargá el F120 en el módulo <span style={{color:T.purple}}>"Cargar Documentos"</span>
                   </div>
-                  <label style={{background:T.purpleBg,border:`1px solid ${T.purple}40`,borderRadius:7,
-                    padding:'8px 14px',color:T.purple,fontSize:11,fontWeight:700,cursor:'pointer',
-                    fontFamily:"'DM Sans',sans-serif",display:'flex',alignItems:'center',gap:6,
-                    opacity:pdfLoading?0.6:1,pointerEvents:pdfLoading?'none':'auto'}}>
-                    {pdfLoading ? '⏳ Leyendo PDF...' : '📄 Subir PDF'}
-                    <input type="file" accept=".pdf" style={{display:'none'}}
-                      onChange={e=>{ if(e.target.files[0]) procesarPDF(e.target.files[0]); e.target.value=''; }}/>
-                  </label>
+                  <div style={{color:T.textMuted,fontSize:10,fontFamily:"'DM Sans',sans-serif"}}>
+                    Los datos se sincronizarán automáticamente y aparecerán aquí.
+                  </div>
                 </div>
-
-                {pdfLoading && (
-                  <div style={{display:'flex',alignItems:'center',gap:8,padding:'8px 10px',
-                    background:T.purpleBg,borderRadius:6}}>
-                    <div style={{width:14,height:14,border:`2px solid ${T.purple}`,borderTopColor:'transparent',
-                      borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
-                    <span style={{color:T.purple,fontSize:11,fontFamily:"'DM Sans',sans-serif"}}>
-                      Claude esta leyendo tu declaracion jurada...
-                    </span>
-                    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                  </div>
-                )}
-
-                {pdfError && (
-                  <div style={{background:T.redBg,border:'1px solid rgba(248,113,113,0.3)',borderRadius:6,
-                    padding:'8px 12px',color:T.red,fontSize:11,fontFamily:"'DM Sans',sans-serif"}}>
-                    {pdfError}
-                  </div>
-                )}
-
-                {pdfResult && (
-                  <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                    <div style={{color:T.green,fontSize:10,fontWeight:700,fontFamily:"'DM Sans',sans-serif",
-                      display:'flex',alignItems:'center',gap:5}}>
-                      <Check size={12}/> {pdfResult.aplicado ? '✅ Datos aplicados automaticamente al mes!' : 'PDF leido — verificá los datos'}
-                    </div>
-                    <div style={{background:T.card,borderRadius:7,padding:'10px 12px',
-                      display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-                      {[
-                        {label:'Mes detectado',     val: pdfResult.mes + ' ' + pdfResult.anio,          color:T.cyan},
-                        {label:'RUC',               val: pdfResult.ruc || '—',                           color:T.textSecondary},
-                        {label:'Debito Fiscal',     val: pdfResult.debito_fiscal ? fmtGs(pdfResult.debito_fiscal) : '—',  color:T.red},
-                        {label:'Credito Fiscal',    val: pdfResult.credito_fiscal ? fmtGs(pdfResult.credito_fiscal) : '—', color:T.green},
-                        {label:'Saldo a Pagar',     val: pdfResult.saldo_pagar ? fmtGs(pdfResult.saldo_pagar) : '—',     color:T.accent},
-                        {label:'Razon Social',      val: pdfResult.razon_social || '—',                  color:T.textSecondary},
-                      ].map(({label,val,color})=>(
-                        <div key={label}>
-                          <div style={{color:T.textMuted,fontSize:8,fontWeight:700,letterSpacing:'0.08em',fontFamily:"'DM Sans',sans-serif"}}>{label.toUpperCase()}</div>
-                          <div style={{color,fontSize:11,fontFamily:"'JetBrains Mono',monospace",fontWeight:600,marginTop:2}}>{val}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {pdfResult.notas && (
-                      <div style={{color:T.textMuted,fontSize:9,fontFamily:"'DM Sans',sans-serif",fontStyle:'italic'}}>
-                        {pdfResult.notas}
-                      </div>
-                    )}
-                    <div style={{display:'flex',gap:8}}>
-                      <button onClick={()=>setPdfResult(null)}
-                        style={{background:'transparent',border:`1px solid ${T.border}`,borderRadius:7,
-                          padding:'7px 14px',color:T.textMuted,cursor:'pointer',fontSize:11,
-                          fontFamily:"'DM Sans',sans-serif"}}>Cerrar</button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* KPIs */}
@@ -2145,29 +2083,22 @@ const SBtnLocal = ({id, label, color, seccion, setSeccion}) => (
                 </select>
               </div>
 
-              {/* PDF Upload IRE */}
+              {/* PDF Upload IRE — redirige a Cargar Documentos */}
               <div style={{background:T.surface,border:`1px solid ${T.accentBorder}`,borderRadius:10,
-                padding:'14px 16px',borderLeft:`3px solid ${T.accent}`}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                  <div>
-                    <div style={{color:T.textPrimary,fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",marginBottom:2}}>
-                      Cargar Formulario 500 (IRE) — PDF
-                    </div>
-                    <div style={{color:T.textMuted,fontSize:9,fontFamily:"'DM Sans',sans-serif"}}>
-                      Subi el PDF del Formulario 500 de Marangatu y se cargan todos los datos automaticamente
-                    </div>
+                padding:'12px 16px',borderLeft:`3px solid ${T.accent}`,
+                display:'flex',alignItems:'center',gap:12}}>
+                <FileText size={16} color={T.accent}/>
+                <div style={{flex:1}}>
+                  <div style={{color:T.textPrimary,fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",marginBottom:2}}>
+                    Cargá el Form 500 (IRE) en el módulo <span style={{color:T.accent}}>"Cargar Documentos"</span>
                   </div>
-                  <label style={{background:T.accentBg,border:`1px solid ${T.accentBorder}`,borderRadius:7,
-                    padding:'8px 14px',color:T.accent,fontSize:11,fontWeight:700,cursor:'pointer',
-                    fontFamily:"'DM Sans',sans-serif",display:'flex',alignItems:'center',gap:6,
-                    opacity:ireLoading?0.6:1,pointerEvents:ireLoading?'none':'auto'}}>
-                    {ireLoading ? '⏳ Leyendo...' : '📄 Subir Form 500'}
-                    <input type="file" accept=".pdf" style={{display:'none'}}
-                      onChange={e=>{ if(e.target.files[0]) procesarPDFIRE(e.target.files[0]); e.target.value=''; }}/>
-                  </label>
+                  <div style={{color:T.textMuted,fontSize:10,fontFamily:"'DM Sans',sans-serif"}}>
+                    Los datos del ejercicio fiscal se sincronizarán automáticamente.
+                  </div>
                 </div>
+              </div>
 
-                {ireLoading && (
+              {false && ireLoading && (
                   <div style={{display:'flex',alignItems:'center',gap:8,marginTop:10,padding:'8px 10px',
                     background:T.accentBg,borderRadius:6}}>
                     <div style={{width:14,height:14,border:`2px solid ${T.accent}`,borderTopColor:'transparent',
