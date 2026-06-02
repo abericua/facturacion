@@ -255,12 +255,24 @@ export default function VentasAnalytics() {
   const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
   const bh = { 'x-api-key': BRIDGE_KEY };
 
-  // Load CSV desde bridge Railway
+  // Load CSV desde bridge Railway (con caché local para persistencia entre sesiones)
   useEffect(() => {
-    fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`, { headers: bh })
-      .then(r => { if (!r.ok) throw new Error('Sin datos de ventas en Railway'); return r.text(); })
-      .then(txt => { setData(parseCSV(txt)); setLoading(false); })
-      .catch(e  => { setError(e.message); setLoading(false); });
+    const cargar = async () => {
+      // 1. Caché local primero
+      const cache = await import('./db.js').then(m => m.default.obtenerCatalogo('_cache_ventas_csv')).catch(()=>null);
+      if (cache?.productos) { setData(parseCSV(cache.productos)); setLoading(false); }
+
+      // 2. Actualizar desde Railway
+      try {
+        const txt = await fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`, { headers: bh })
+          .then(r => { if (!r.ok) throw new Error('Sin datos de ventas en Railway'); return r.text(); });
+        import('./db.js').then(m => m.default.guardarCatalogo('_cache_ventas_csv', txt)).catch(()=>{});
+        setData(parseCSV(txt)); setLoading(false);
+      } catch(e) {
+        if (!cache) { setError(e.message); setLoading(false); }
+      }
+    };
+    cargar();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

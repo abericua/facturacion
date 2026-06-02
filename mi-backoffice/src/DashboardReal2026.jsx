@@ -179,16 +179,37 @@ export default function DashboardReal() {
   },[]);
 
   useEffect(()=>{
-    Promise.all([
-      fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`,    { headers: bh }).then(r=>{ if(!r.ok) throw new Error('Sin ventas en Railway — verificá que VENTAS TOTALES 2026.xlsx esté en el volumen'); return r.text(); }),
-      fetch(`${BRIDGE_URL}/api/bridge/productos/csv`, { headers: bh }).then(r=>{ if(!r.ok) throw new Error('Sin catálogo en Railway'); return r.text(); })
-    ])
-    .then(([txtVentas, txtPrecios])=>{
-      const map = parsePricesCSV(txtPrecios);
-      setData(parseSalesCSV(txtVentas, map));
-      setLoading(false);
-    })
-    .catch(e=>{ setError(e.message); setLoading(false); });
+    const cargarDatos = async () => {
+      // 1. Intentar cargar desde caché local (IndexedDB) primero
+      const cacheVentas   = await DB.obtenerCatalogo('_cache_ventas_csv').catch(()=>null);
+      const cachePrecios  = await DB.obtenerCatalogo('_cache_precios_csv').catch(()=>null);
+
+      if (cacheVentas?.productos && cachePrecios?.productos) {
+        const map = parsePricesCSV(cachePrecios.productos);
+        setData(parseSalesCSV(cacheVentas.productos, map));
+        setLoading(false);
+        // Igual intenta actualizar desde Railway en segundo plano
+      }
+
+      // 2. Traer desde Railway (actualiza caché aunque ya había datos locales)
+      try {
+        const [txtVentas, txtPrecios] = await Promise.all([
+          fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`,    { headers: bh }).then(r=>{ if(!r.ok) throw new Error('Sin ventas en Railway'); return r.text(); }),
+          fetch(`${BRIDGE_URL}/api/bridge/productos/csv`, { headers: bh }).then(r=>{ if(!r.ok) throw new Error('Sin catálogo en Railway'); return r.text(); })
+        ]);
+        // Guardar en caché para la próxima sesión
+        await DB.guardarCatalogo('_cache_ventas_csv',  txtVentas);
+        await DB.guardarCatalogo('_cache_precios_csv', txtPrecios);
+        const map = parsePricesCSV(txtPrecios);
+        setData(parseSalesCSV(txtVentas, map));
+        setLoading(false);
+      } catch(e) {
+        // Si falla Railway pero teníamos caché, no mostrar error
+        if (!cacheVentas) { setError(e.message); setLoading(false); }
+      }
+    };
+    cargarDatos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
   useEffect(() => {
