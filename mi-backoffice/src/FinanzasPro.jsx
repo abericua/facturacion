@@ -1026,14 +1026,21 @@ const SBtnLocal = ({id, label, color, seccion, setSeccion}) => (
   const ivaData  = useMemo(() => data.iva || {}, [data.iva]);
   const pagosIVA = data.pagosIva|| [];
   const ireData  = data.ire     || {};
+  const [ivaCreditoCompras, setIvaCreditoCompras] = useState(0);
+  const [comprasResumen,    setComprasResumen]    = useState(null);
 
   useEffect(() => {
     const cargar = async () => {
       const periodo = `${year}-${String(month+1).padStart(2,'0')}`;
+      // Cargar F120 si existe
       const registro = await DB.obtenerIVA(periodo);
       if (registro?.datos) {
         onSave(prevData => ({ ...prevData, iva: { ...(prevData?.iva || {}), [periodo]: registro.datos } }));
       }
+      // Cargar crédito de compras calculado por ImportadorCompras
+      const pl = await DB.get('finanzas_pl', periodo);
+      setIvaCreditoCompras(pl?.datos?.iva_credito_compras || 0);
+      setComprasResumen(pl?.datos?.compras_resumen || null);
     };
     cargar();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1675,6 +1682,141 @@ const SBtnLocal = ({id, label, color, seccion, setSeccion}) => (
                   {years_range.map(y=><option key={y} value={y}>{y}</option>)}
                 </select>
               </div>
+
+              {/* ── PROYECCIÓN IVA A DECLARAR ── */}
+              {(() => {
+                // Vencimiento: día 13 del mes siguiente (RUC -7)
+                const sigMes    = month === 11 ? 0 : month + 1;
+                const sigAnio   = month === 11 ? year + 1 : year;
+                const vencDate  = new Date(sigAnio, sigMes, 13);
+                const hoy       = new Date();
+                hoy.setHours(0,0,0,0);
+                const diasRest  = Math.ceil((vencDate - hoy) / 86400000);
+                const vencStr   = `13 de ${MESES[sigMes]} ${sigAnio}`;
+
+                // Ventas del mes (en GS)
+                const ingresosGs  = data.ingresos[key] || 0;
+                // IVA débito estimado: incluido en precio → ventas × 10/110
+                const debitoEst   = Math.round(ingresosGs * 10 / 110);
+
+                // F120 ya cargado?
+                const tieneF120   = (mesIVA.debito || 0) > 0 || (mesIVA.credito || 0) > 0;
+                const debitoFinal = tieneF120 ? (mesIVA.debito || 0) : debitoEst;
+                const creditoFinal= tieneF120 ? (mesIVA.credito || 0) : ivaCreditoCompras;
+                const saldoFinal  = Math.max(0, debitoFinal - creditoFinal);
+
+                const urgente = diasRest >= 0 && diasRest <= 5;
+                const vencido = diasRest < 0;
+                const colorAlerta = vencido ? T.red : urgente ? T.accent : T.cyan;
+                const bgAlerta    = vencido ? T.redBg : urgente ? T.accentBg : T.cyanBg;
+
+                return (
+                  <div style={{
+                    background: T.surface,
+                    border: `1px solid ${tieneF120 ? 'rgba(52,211,153,0.3)' : colorAlerta+'55'}`,
+                    borderLeft: `3px solid ${tieneF120 ? T.green : colorAlerta}`,
+                    borderRadius: 10, padding: '14px 16px',
+                  }}>
+                    {/* Header */}
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+                      <div>
+                        <div style={{color:T.textPrimary,fontSize:12,fontWeight:700,fontFamily:"'Syne',sans-serif"}}>
+                          {tieneF120 ? '✅ IVA F120 Declarado' : `📊 Proyección IVA — ${MESES[month]} ${year}`}
+                        </div>
+                        <div style={{color:T.textMuted,fontSize:10,fontFamily:"'DM Sans',sans-serif",marginTop:2}}>
+                          {tieneF120
+                            ? 'Datos reales del Formulario 120 cargado'
+                            : `Estimación basada en ventas${ivaCreditoCompras>0?' + crédito de compras importadas':''}`
+                          }
+                        </div>
+                      </div>
+                      {/* Badge vencimiento */}
+                      <div style={{
+                        background: bgAlerta, border: `1px solid ${colorAlerta}40`,
+                        borderRadius: 8, padding: '6px 12px', textAlign: 'center', flexShrink: 0,
+                      }}>
+                        <div style={{color:colorAlerta,fontSize:9,fontWeight:700,letterSpacing:'0.08em',fontFamily:"'DM Sans',sans-serif"}}>
+                          {vencido ? 'VENCIDO' : 'VENCE'}
+                        </div>
+                        <div style={{color:T.textPrimary,fontSize:12,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",whiteSpace:'nowrap'}}>
+                          {vencStr}
+                        </div>
+                        <div style={{color:colorAlerta,fontSize:9,fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>
+                          {vencido
+                            ? `Hace ${Math.abs(diasRest)} días`
+                            : diasRest === 0 ? '¡HOY!'
+                            : `${diasRest} días`
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Números principales */}
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:10}}>
+                      {[
+                        {
+                          l: 'IVA Débito Fiscal',
+                          v: fmtGs(debitoFinal),
+                          c: T.red,
+                          sub: tieneF120 ? 'Del F120' : `Est. 10% s/ ${fmtGs(ingresosGs)}`,
+                        },
+                        {
+                          l: 'IVA Crédito Fiscal',
+                          v: fmtGs(creditoFinal),
+                          c: T.green,
+                          sub: tieneF120
+                            ? 'Del F120'
+                            : ivaCreditoCompras > 0
+                              ? `${comprasResumen?.facturas||0} FAC − ${comprasResumen?.ncs||0} NC`
+                              : 'Sin compras importadas',
+                        },
+                        {
+                          l: saldoFinal > 0 ? 'SALDO A PAGAR' : 'SALDO A FAVOR',
+                          v: fmtGs(saldoFinal),
+                          c: saldoFinal > 0 ? T.accent : T.green,
+                          sub: tieneF120 ? 'Confirmado' : 'Proyectado',
+                        },
+                      ].map(({l,v,c,sub}) => (
+                        <div key={l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:'10px 12px'}}>
+                          <div style={{color:T.textMuted,fontSize:8,fontWeight:700,letterSpacing:'0.1em',fontFamily:"'DM Sans',sans-serif",marginBottom:4}}>{l}</div>
+                          <div style={{color:c,fontSize:15,fontWeight:800,fontFamily:"'JetBrains Mono',monospace",lineHeight:1,marginBottom:3}}>{v}</div>
+                          <div style={{color:T.textMuted,fontSize:9,fontFamily:"'DM Sans',sans-serif"}}>{sub}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Nota para el contador */}
+                    {!tieneF120 && ivaCreditoCompras > 0 && (
+                      <div style={{
+                        background: 'rgba(34,211,238,0.06)', border: '1px solid rgba(34,211,238,0.2)',
+                        borderRadius: 7, padding: '8px 12px', fontSize: 10,
+                        color: T.textSecondary, fontFamily:"'DM Sans',sans-serif", lineHeight: 1.5,
+                      }}>
+                        <strong style={{color:T.cyan}}>Para tu contador:</strong>{' '}
+                        IVA Crédito de compras (Sol Control + Todo Costura) = <strong style={{color:T.green}}>{fmtGs(ivaCreditoCompras)}</strong>.
+                        {comprasResumen?.ncs > 0 && (
+                          <> Incluye {comprasResumen.ncs} nota{comprasResumen.ncs>1?'s':''} de crédito aplicada{comprasResumen.ncs>1?'s':''}.</>
+                        )}
+                        {' '}RUC -7 → declarar antes del {vencStr}.
+                      </div>
+                    )}
+
+                    {/* Si tiene F120 y hay diferencia con las compras importadas */}
+                    {tieneF120 && ivaCreditoCompras > 0 && Math.abs(mesIVA.credito - ivaCreditoCompras) > 1000 && (
+                      <div style={{
+                        background: T.accentBg, border: `1px solid ${T.accentBorder}`,
+                        borderRadius: 7, padding: '8px 12px', fontSize: 10,
+                        color: T.textSecondary, fontFamily:"'DM Sans',sans-serif",
+                      }}>
+                        <strong style={{color:T.accent}}>⚠ Diferencia detectada:</strong>{' '}
+                        El crédito fiscal del F120 ({fmtGs(mesIVA.credito)}) difiere del crédito calculado
+                        desde compras importadas ({fmtGs(ivaCreditoCompras)}).
+                        Diferencia: {fmtGs(Math.abs(mesIVA.credito - ivaCreditoCompras))}. Verificar con tu contador.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Carga PDF */}
               <div style={{background:T.surface,border:`1px solid ${T.purpleBg}`,borderRadius:10,padding:'14px 16px',borderLeft:`3px solid ${T.purple}`}}>
