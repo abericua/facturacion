@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Upload, FileText, CheckCircle, XCircle, Clock,
   Trash2, Download, RefreshCw, AlertTriangle, Zap,
-  Building2, TrendingDown, Package, CloudUpload
+  Building2, TrendingDown, Package
 } from "lucide-react";
 
 import * as pdfjsLib from 'pdfjs-dist';
@@ -189,7 +189,10 @@ export default function ImportadorCompras() {
     }).catch(()=>{});
   }, []);
   const [processing,   setProcessing]   = useState(false);
-  const [stockSync,    setStockSync]    = useState({ status: 'idle', msg: '' }); // idle|syncing|ok|error
+  const [stockSync,    setStockSync]    = useState({ status: 'idle', msg: '' });
+  const [finUpdate,    setFinUpdate]    = useState(null); // null | { periodos, ivaTotal }
+  const [variaciones,  setVariaciones]  = useState([]);
+  const [showVar,      setShowVar]      = useState(false);
   const [provFilter, setProvFilter] = useState('todos');
   const [drag, setDrag]           = useState(false);
   const [detailId, setDetailId]   = useState(null);
@@ -288,8 +291,35 @@ export default function ImportadorCompras() {
         await new Promise(res => setTimeout(res, 10000));
       }
     }
-    setRecords([...existing, ...newResults]);
-    DB.limpiarCompras().then(() => DB.guardarCompras([...existing, ...newResults])).catch(console.error);
+    const allRecords = [...existing, ...newResults];
+    setRecords(allRecords);
+    await DB.limpiarCompras();
+    await DB.guardarCompras(allRecords).catch(console.error);
+
+    // ── Auto-actualizar FinanzasPro (egresos compras_local + IVA crédito) ──
+    try {
+      const periodos = await DB.actualizarEgresosDesdeCompras();
+      // Calcular IVA crédito total para mostrar al usuario
+      const ivaTotal = allRecords
+        .filter(r => r.tipo === 'FAC')
+        .reduce((a, r) => a + (r.iva_total || 0), 0)
+        - allRecords
+        .filter(r => r.tipo === 'NC')
+        .reduce((a, r) => a + (r.iva_total || 0), 0);
+      setFinUpdate({ periodos, ivaTotal: Math.round(ivaTotal) });
+    } catch (e) {
+      console.error('Error actualizando FinanzasPro:', e);
+    }
+
+    // ── Análisis de variación de costos ──
+    try {
+      const vars = await DB.analizarVariacionCostos();
+      setVariaciones(vars);
+      if (vars.length) setShowVar(true);
+    } catch (e) {
+      console.error('Error en análisis de costos:', e);
+    }
+
     setProcessing(false);
   };
 
@@ -715,6 +745,161 @@ export default function ImportadorCompras() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── BANNER FINANZAS AUTO-UPDATE ────────────────────────────────── */}
+      {finUpdate && (
+        <div style={{
+          background: T.greenBg, border: `1px solid rgba(52,211,153,0.25)`,
+          borderRadius: 10, padding: '12px 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <CheckCircle size={16} color={T.green} />
+            <div>
+              <div style={{ color: T.green, fontSize: 12, fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>
+                FinanzasPro actualizado automáticamente
+              </div>
+              <div style={{ color: T.textSecondary, fontSize: 11, fontFamily: "'DM Sans',sans-serif", marginTop: 2 }}>
+                {finUpdate.periodos} período{finUpdate.periodos !== 1 ? 's' : ''} actualizados en Compras Locales
+                {finUpdate.ivaTotal > 0 && (
+                  <span style={{ color: T.cyan, marginLeft: 8 }}>
+                    · IVA Crédito Neto: {fmtGs(finUpdate.ivaTotal)}
+                    <span style={{ color: T.textMuted, marginLeft: 4, fontSize: 10 }}>
+                      (para tu contador)
+                    </span>
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button onClick={() => setFinUpdate(null)} style={{ background: 'none', border: 'none', color: T.textMuted, cursor: 'pointer', padding: 4 }}>
+            <XCircle size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* ── ANÁLISIS DE VARIACIÓN DE COSTOS ────────────────────────────── */}
+      {variaciones.length > 0 && (
+        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden' }}>
+          <button
+            onClick={() => setShowVar(v => !v)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', background: 'transparent', border: 'none', cursor: 'pointer',
+              borderBottom: showVar ? `1px solid ${T.border}` : 'none',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <AlertTriangle size={15} color={variaciones.some(v => !v.favorable) ? T.accent : T.green} />
+              <span style={{ color: T.textPrimary, fontSize: 13, fontWeight: 700, fontFamily: "'Syne',sans-serif" }}>
+                Variación de Costos vs. Catálogo
+              </span>
+              <span style={{
+                padding: '2px 8px', borderRadius: 4, fontSize: 10, fontWeight: 700,
+                background: variaciones.some(v => !v.favorable) ? T.accentBg : T.greenBg,
+                color: variaciones.some(v => !v.favorable) ? T.accent : T.green,
+                fontFamily: "'DM Sans',sans-serif",
+              }}>
+                {variaciones.filter(v => !v.favorable).length} sobre costo · {variaciones.filter(v => v.favorable).length} bajo costo
+              </span>
+            </div>
+            <span style={{ color: T.textMuted, fontSize: 11, fontFamily: "'DM Sans',sans-serif" }}>
+              {showVar ? '▲ Ocultar' : '▼ Ver análisis'}
+            </span>
+          </button>
+
+          {showVar && (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: T.surface }}>
+                    {['Código', 'Descripción', 'Costo Base U$', 'Precio Compra U$', 'Diferencia U$', 'Var %', 'Proveedor'].map(h => (
+                      <th key={h} style={{
+                        padding: '8px 12px', color: T.textMuted, fontSize: 9, fontWeight: 700,
+                        letterSpacing: '0.08em', textAlign: 'left',
+                        borderBottom: `1px solid ${T.border}`, fontFamily: "'DM Sans',sans-serif",
+                        whiteSpace: 'nowrap',
+                      }}>{h.toUpperCase()}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {variaciones.map((v, i) => (
+                    <tr key={i}
+                      style={{ borderBottom: `1px solid ${T.border}` }}
+                      onMouseEnter={e => e.currentTarget.style.background = T.cardB}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <td style={{ padding: '9px 12px', color: T.cyan, fontFamily: "'JetBrains Mono',monospace", fontSize: 11, whiteSpace: 'nowrap' }}>
+                        {v.codigo}
+                      </td>
+                      <td style={{ padding: '9px 12px', color: T.textSecondary, fontFamily: "'DM Sans',sans-serif", fontSize: 11, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {v.descripcion}
+                      </td>
+                      <td style={{ padding: '9px 12px', color: T.textMuted, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>
+                        {fmtNum(v.costo_base_usd)}
+                      </td>
+                      <td style={{ padding: '9px 12px', color: T.textPrimary, fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600 }}>
+                        {fmtNum(v.precio_compra_usd)}
+                      </td>
+                      <td style={{ padding: '9px 12px', fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                        color: v.favorable ? T.green : T.red }}>
+                        {v.favorable ? '' : '+'}{fmtNum(v.diferencia_usd)}
+                      </td>
+                      <td style={{ padding: '9px 12px', fontFamily: "'JetBrains Mono',monospace", fontSize: 12, fontWeight: 700,
+                        color: v.favorable ? T.green : T.red }}>
+                        <span style={{
+                          padding: '2px 7px', borderRadius: 4,
+                          background: v.favorable ? T.greenBg : T.redBg,
+                        }}>
+                          {v.favorable ? '' : '+'}{v.variacion_pct}%
+                        </span>
+                      </td>
+                      <td style={{ padding: '9px 12px', color: T.textMuted, fontFamily: "'DM Sans',sans-serif", fontSize: 11, whiteSpace: 'nowrap' }}>
+                        {v.proveedor}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Resumen de variaciones */}
+              <div style={{ display: 'flex', gap: 24, padding: '12px 16px', background: T.surface, borderTop: `1px solid ${T.border}` }}>
+                {[
+                  {
+                    l: 'Productos sobre costo base',
+                    v: variaciones.filter(x => !x.favorable).length,
+                    c: T.red,
+                    sub: variaciones.filter(x => !x.favorable).length
+                      ? `Máx: +U$ ${fmtNum(Math.max(...variaciones.filter(x => !x.favorable).map(x => x.diferencia_usd)))}`
+                      : '—',
+                  },
+                  {
+                    l: 'Productos bajo costo base',
+                    v: variaciones.filter(x => x.favorable).length,
+                    c: T.green,
+                    sub: variaciones.filter(x => x.favorable).length
+                      ? `Máx ahorro: U$ ${fmtNum(Math.abs(Math.min(...variaciones.filter(x => x.favorable).map(x => x.diferencia_usd))))}`
+                      : '—',
+                  },
+                  {
+                    l: 'Sin datos en catálogo',
+                    v: records.reduce((a, r) => a + (r.items?.filter(it => it.codigo && !variaciones.find(v => v.codigo === (it.codigo||'').toUpperCase())).length || 0), 0),
+                    c: T.textMuted,
+                    sub: 'Actualizar catálogo',
+                  },
+                ].map(({ l, v, c, sub }) => (
+                  <div key={l}>
+                    <div style={{ color: T.textMuted, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', marginBottom: 3, fontFamily: "'DM Sans',sans-serif" }}>{l.toUpperCase()}</div>
+                    <div style={{ color: c, fontSize: 20, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{v}</div>
+                    <div style={{ color: T.textMuted, fontSize: 10, marginTop: 2, fontFamily: "'DM Sans',sans-serif" }}>{sub}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

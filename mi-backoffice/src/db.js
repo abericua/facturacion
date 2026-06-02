@@ -463,6 +463,140 @@ class SolProDB {
   }
 
   /**
+   * Lee el tipo de cambio más reciente guardado en bancos_tc.
+   * Si no hay ninguno, retorna el fallback.
+   */
+  async getUltimoTC(fallback = 7650) {
+    try {
+      const todos = await this.getAll(STORES.bancos_tc);
+      if (!todos.length) return fallback;
+      todos.sort((a, b) => b.fecha.localeCompare(a.fecha));
+      return todos[0].tc_bcp || todos[0].tc_compra || fallback;
+    } catch { return fallback; }
+  }
+
+  /**
+   * Lee todas las compras de proveedores y actualiza la categoría
+   * 'compras_local' de FinanzasPro (finanzas_pl) por período, neteando
+   * FAC - NC. También guarda el IVA crédito neto por período.
+   * @param {number} tcUSD — tipo de cambio USD→GS a usar
+   * @returns {number} cantidad de períodos actualizados
+   */
+  async actualizarEgresosDesdeCompras(tcUSD) {
+    const tc = tcUSD || await this.getUltimoTC();
+    const compras = await this.getAll('compras_proveedores');
+
+    // Agrupar por período
+    const porPeriodo = {};
+    for (const c of compras) {
+      const p = c.periodo;
+      if (!p) continue;
+      if (!porPeriodo[p]) {
+        porPeriodo[p] = { neto_usd: 0, neto_pyg: 0, iva_credito: 0, facturas: 0, ncs: 0 };
+      }
+      const signo = c.tipo === 'NC' ? -1 : 1;
+      porPeriodo[p].neto_usd    += (c.subtotal_usd || 0) * signo;
+      porPeriodo[p].neto_pyg    += (c.subtotal_pyg || 0) * signo;
+      porPeriodo[p].iva_credito += (c.iva_total    || 0) * signo;
+      if (c.tipo === 'FAC') porPeriodo[p].facturas++;
+      else                  porPeriodo[p].ncs++;
+    }
+
+    let actualizados = 0;
+    for (const [periodo, t] of Object.entries(porPeriodo)) {
+      const montoGs = Math.round(t.neto_usd * tc + t.neto_pyg);
+      const ivaGs   = Math.round(Math.abs(t.iva_credito));
+
+      // Leer PL existente y hacer merge
+      const existing = await this.get('finanzas_pl', periodo);
+      const datos    = existing?.datos || {};
+      const egresos  = typeof datos.egresos === 'object' && datos.egresos !== null
+                       ? { ...datos.egresos }
+                       : {};
+
+      egresos.compras_local = montoGs;
+
+      await this.guardarPL(periodo, {
+        ...datos,
+        egresos,
+        iva_credito_compras: ivaGs,
+        compras_resumen: {
+          facturas:  t.facturas,
+          ncs:       t.ncs,
+          neto_usd:  parseFloat(t.neto_usd.toFixed(2)),
+          neto_pyg:  Math.round(t.neto_pyg),
+          iva_credito: ivaGs,
+          tc_usado:  tc,
+          actualizado: new Date().toISOString(),
+        },
+      });
+      actualizados++;
+    }
+    return actualizados;
+  }
+
+  /**
+   * Compara los precios de compra reales (de compras_proveedores.items)
+   * contra el costo base registrado en el catálogo de productos.
+   * Retorna variaciones ordenadas: primero las desfavorables (precio > costo base).
+   */
+  async analizarVariacionCostos() {
+    const compras  = await this.getAll('compras_proveedores');
+    const catalogo = await this.obtenerCatalogo('productos');
+    const prods    = catalogo?.productos || [];
+
+    // Construir mapa catálogo por ID_Ref / código
+    const catMap = {};
+    for (const p of prods) {
+      const id = (p.ID_Ref || p.Codigo_Proveedor || '').trim().toUpperCase();
+      if (id) catMap[id] = p;
+    }
+
+    const variaciones = [];
+    const vistos = new Set(); // evitar duplicados por código
+
+    for (const compra of compras) {
+      for (const item of (compra.items || [])) {
+        const cod = (item.codigo || '').trim().toUpperCase();
+        if (!cod || vistos.has(cod)) continue;
+        const precioCompra = parseFloat(item.precio_unit_usd) || 0;
+        if (!precioCompra) continue;
+
+        // Buscar en catálogo
+        let catProd = catMap[cod];
+        if (!catProd) {
+          catProd = prods.find(p =>
+            (p.Nombre || '').toUpperCase().includes(cod) ||
+            cod.includes((p.ID_Ref || '').toUpperCase())
+          );
+        }
+
+        if (catProd && catProd.Moneda_Costo === 'USD') {
+          const costoBase = parseFloat(catProd.Costo_Compra) || 0;
+          if (!costoBase) continue;
+          const dif = precioCompra - costoBase;
+          const pct = (dif / costoBase) * 100;
+          variaciones.push({
+            codigo:            cod,
+            descripcion:       item.descripcion || catProd.Nombre || cod,
+            precio_compra_usd: precioCompra,
+            costo_base_usd:    costoBase,
+            diferencia_usd:    parseFloat(dif.toFixed(2)),
+            variacion_pct:     parseFloat(pct.toFixed(1)),
+            favorable:         dif < 0,   // pagamos menos = favorable
+            proveedor:         compra.proveedor || '',
+            periodo:           compra.periodo   || '',
+          });
+          vistos.add(cod);
+        }
+      }
+    }
+
+    // Desfavorables primero (precio compra > costo base)
+    return variaciones.sort((a, b) => b.diferencia_usd - a.diferencia_usd);
+  }
+
+  /**
    * Resetea el flag stock_sincronizado en TODAS las compras.
    * Usar solo para re-sincronización forzada completa.
    */
