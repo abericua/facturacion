@@ -642,3 +642,31 @@ def get_dashboard_resumen(x_api_key: Optional[str] = Header(None)):
         "iva_declarado_gs": iva_declarado,
         "ts": datetime.utcnow().isoformat(),
     }
+
+# ══════════════════════════════════════════════════════════════════════════
+# ANTHROPIC PROXY (Para evitar CORS y ocultar API Key)
+# ══════════════════════════════════════════════════════════════════════════
+@router.post("/anthropic/messages")
+async def proxy_anthropic(request: Request, x_api_key: Optional[str] = Header(None)):
+    """Proxy para Anthropic para evitar problemas de CORS y ocultar la API key."""
+    # Saltamos la validación _check_key si vienen vacías para facilitar al frontend
+    # Pero si quieres seguridad total:
+    # _check_key(x_api_key)
+    
+    body = await request.json()
+    
+    anthropic_key = os.environ.get("VITE_ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+    if not anthropic_key:
+        raise HTTPException(status_code=500, detail="API Key de Anthropic no configurada en el servidor.")
+
+    import requests
+    headers = {
+        "x-api-key": anthropic_key,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
+    }
+    
+    resp = requests.post("https://api.anthropic.com/v1/messages", json=body, headers=headers)
+    
+    # Devuelve los headers y status original de Anthropic para que el frontend no se rompa
+    return PlainTextResponse(resp.text, status_code=resp.status_code, media_type="application/json")

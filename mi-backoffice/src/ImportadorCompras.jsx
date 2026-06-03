@@ -220,13 +220,12 @@ export default function ImportadorCompras() {
     setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'processing' } : f));
     try {
       const pdfText = await extractPdfText(fileObj.file);
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
+      const res = await fetch(`${BRIDGE_URL}/api/bridge/anthropic/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
+          'x-api-key': import.meta.env.VITE_BRIDGE_API_KEY || 'sgsp-bridge-2026',
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
