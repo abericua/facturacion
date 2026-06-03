@@ -727,7 +727,7 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
         if not gemini_key:
             raise HTTPException(status_code=500, detail="GEMINI_API_KEY no configurada en el servidor.")
 
-        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-2.0-flash").strip()
+        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-3.5-flash").strip()
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{modelo}:generateContent?key={gemini_key}"
