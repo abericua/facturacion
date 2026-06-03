@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.worker.mjs`;
 import DB from './db.js';
 import {
   Upload, FileText, CheckCircle, XCircle, RefreshCw,
@@ -72,7 +72,7 @@ async function extractPdfText(file) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+        // workerSrc ya configurado globalmente al importar
         const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
         let text = '';
         for (let i = 1; i <= pdf.numPages; i++) {
