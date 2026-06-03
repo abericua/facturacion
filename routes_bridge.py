@@ -644,29 +644,124 @@ def get_dashboard_resumen(x_api_key: Optional[str] = Header(None)):
     }
 
 # ══════════════════════════════════════════════════════════════════════════
-# ANTHROPIC PROXY (Para evitar CORS y ocultar API Key)
+# LLM PROXY (Anthropic / Gemini) — evita CORS y oculta la API Key
 # ══════════════════════════════════════════════════════════════════════════
+# Proveedor activo: "gemini" o "anthropic".
+#   - Si LLM_PROVIDER está seteado, manda eso.
+#   - Si no, usa Gemini cuando hay GEMINI_API_KEY; si no, Anthropic.
+def _resolver_proveedor() -> str:
+    forzado = (os.environ.get("LLM_PROVIDER") or "").strip().lower()
+    if forzado in ("gemini", "anthropic"):
+        return forzado
+    if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+        return "gemini"
+    return "anthropic"
+
+
+def _anthropic_a_gemini(body: dict) -> dict:
+    """Traduce un payload estilo Anthropic Messages a un request de Gemini."""
+    gemini_req: dict = {"contents": []}
+
+    # system → system_instruction
+    system = body.get("system")
+    if system:
+        gemini_req["system_instruction"] = {"parts": [{"text": str(system)}]}
+
+    # messages → contents (assistant → model)
+    for msg in body.get("messages", []):
+        role = "model" if msg.get("role") == "assistant" else "user"
+        content = msg.get("content", "")
+        if isinstance(content, list):  # bloques estilo Anthropic
+            text = "".join(b.get("text", "") for b in content if isinstance(b, dict))
+        else:
+            text = str(content)
+        gemini_req["contents"].append({"role": role, "parts": [{"text": text}]})
+
+    # max_tokens → generationConfig.maxOutputTokens
+    gen_cfg = {}
+    if body.get("max_tokens"):
+        gen_cfg["maxOutputTokens"] = int(body["max_tokens"])
+    if body.get("temperature") is not None:
+        gen_cfg["temperature"] = float(body["temperature"])
+    if gen_cfg:
+        gemini_req["generationConfig"] = gen_cfg
+
+    return gemini_req
+
+
+def _gemini_a_anthropic(gemini_json: dict, modelo: str) -> dict:
+    """Reformatea la respuesta de Gemini al shape Anthropic que espera el frontend."""
+    texto = ""
+    try:
+        partes = gemini_json["candidates"][0]["content"]["parts"]
+        texto = "".join(p.get("text", "") for p in partes)
+    except (KeyError, IndexError, TypeError):
+        texto = ""
+    return {
+        "id": "gemini-proxy",
+        "type": "message",
+        "role": "assistant",
+        "model": modelo,
+        "content": [{"type": "text", "text": texto}],
+        "stop_reason": "end_turn",
+    }
+
+
 @router.post("/anthropic/messages")
-async def proxy_anthropic(request: Request, x_api_key: Optional[str] = Header(None)):
-    """Proxy para Anthropic para evitar problemas de CORS y ocultar la API key."""
-    # Saltamos la validación _check_key si vienen vacías para facilitar al frontend
-    # Pero si quieres seguridad total:
-    # _check_key(x_api_key)
-    
+async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
+    """
+    Proxy de LLM para el Backoffice. Mantiene la ruta /anthropic/messages por
+    compatibilidad con el frontend ya compilado, pero puede enrutar a Gemini.
+    El frontend envía/recibe siempre formato Anthropic; la traducción es interna.
+    """
     body = await request.json()
-    
+    proveedor = _resolver_proveedor()
+    import requests
+
+    # ── GEMINI ────────────────────────────────────────────────────────────
+    if proveedor == "gemini":
+        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not gemini_key:
+            raise HTTPException(status_code=500, detail="GEMINI_API_KEY no configurada en el servidor.")
+
+        modelo = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{modelo}:generateContent?key={gemini_key}"
+        )
+        gemini_req = _anthropic_a_gemini(body)
+
+        try:
+            resp = requests.post(url, json=gemini_req,
+                                 headers={"content-type": "application/json"}, timeout=120)
+        except requests.RequestException as e:
+            return PlainTextResponse(
+                json.dumps({"error": {"message": f"Error de red hacia Gemini: {e}"}}),
+                status_code=502, media_type="application/json")
+
+        if resp.status_code != 200:
+            # Reenvía el error en shape que el frontend entiende (json.error.message)
+            try:
+                err = resp.json().get("error", {})
+                msg = err.get("message", resp.text)
+            except Exception:
+                msg = resp.text
+            return PlainTextResponse(
+                json.dumps({"error": {"message": f"Gemini: {msg}"}}),
+                status_code=resp.status_code, media_type="application/json")
+
+        anthropic_shape = _gemini_a_anthropic(resp.json(), modelo)
+        return PlainTextResponse(json.dumps(anthropic_shape), media_type="application/json")
+
+    # ── ANTHROPIC (fallback) ────────────────────────────────────────────────
     anthropic_key = os.environ.get("VITE_ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
     if not anthropic_key:
         raise HTTPException(status_code=500, detail="API Key de Anthropic no configurada en el servidor.")
 
-    import requests
     headers = {
         "x-api-key": anthropic_key,
         "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
-    
-    resp = requests.post("https://api.anthropic.com/v1/messages", json=body, headers=headers)
-    
-    # Devuelve los headers y status original de Anthropic para que el frontend no se rompa
+    resp = requests.post("https://api.anthropic.com/v1/messages", json=body, headers=headers, timeout=120)
     return PlainTextResponse(resp.text, status_code=resp.status_code, media_type="application/json")
