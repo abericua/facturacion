@@ -347,3 +347,31 @@ El archivo `pagos.json` lo genera el **facturador Streamlit** (`app.py`) cada ve
 - Commits en rama `main` — Railway deployado.
 - Fecha: 2026-06-02
 - Ejecutado por: Claude + Antigravity
+
+---
+
+## 2026-06-03 — Resolución de CORS de Anthropic (Proxy Arquitectónico)
+
+### Problema
+Las peticiones a la API de Anthropic (`claude-haiku-4-5-20251001`) fallaban sistemáticamente en producción con errores **CORS (405 Method Not Allowed / 400 Bad Request)**. La causa raíz es que Anthropic bloquea intencionalmente las peticiones directas desde navegadores para evitar la exposición de la API Key en el frontend, incluso cuando se usa la cabecera `anthropic-dangerous-direct-browser-access`.
+
+### Solución aplicada (Proxy Backend)
+Se reestructuró la arquitectura para que las peticiones de IA pasen a través del backend de Python (`bridge-api`), el cual tiene permisos nativos (Server-to-Server) para invocar a Anthropic sin restricciones CORS.
+
+1. **Backend (`routes_bridge.py`)**:
+   - Se creó el endpoint `POST /api/bridge/anthropic/messages`.
+   - Recibe la petición del frontend, firma la solicitud usando `VITE_ANTHROPIC_API_KEY` (protegida en Railway) y la envía a `api.anthropic.com`.
+
+2. **Frontend (`mi-backoffice`)**:
+   - Se actualizaron `CargadorDocumentos.jsx`, `ImportadorCompras.jsx` y `ConciliacionBancaria.jsx`.
+   - El `fetch` ahora apunta a `${BRIDGE_URL}/api/bridge/anthropic/messages`.
+   - Se añadió la autenticación interna del bridge: `x-api-key: import.meta.env.VITE_BRIDGE_API_KEY || 'sgsp-bridge-2026'`.
+
+### ⚠️ Regla Importante para Futuros Agentes
+**NUNCA** intentar hacer fetch a `api.anthropic.com` directamente desde los archivos `.jsx` o React. Siempre enrutar la petición a través del bridge.
+
+### Deploy
+- Commits en rama `main` — Railway deployado (`fix: proxy de Anthropic via backend para evitar errores de CORS`).
+- Push forzado de Antigravity debido a la ausencia de git en el PATH del sistema usando `C:\Program Files\Git\cmd\git.exe`.
+- Fecha: 2026-06-03
+- Ejecutado por: Antigravity

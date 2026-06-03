@@ -57,7 +57,7 @@ El sistema ha evolucionado significativamente con un enfoque en **Seguridad (Pro
 | POST | `/api/bridge/iva/sync` | JS | Push IVA |
 | POST | `/api/bridge/productos/sync` | JS + PY | Push productos CSV |
 | POST | `/api/bridge/ventas/upload` | JS | Upload ventas |
-
+| POST | `/api/bridge/anthropic/messages` | JS | Proxy seguro a Anthropic (CORS Fix) |
 ### Constantes de URL por archivo
 | Archivo | Variable | Valor correcto |
 |---------|----------|----------------|
