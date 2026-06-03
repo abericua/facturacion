@@ -316,3 +316,34 @@ routes_bridge.py
 - Múltiples commits en rama `main` — todos deployados en Railway.
 - Fecha: 2026-06-02
 - Ejecutado por: Claude (backoffice) + Antigravity (git/Railway)
+
+---
+
+## 2026-06-02 — Sesión Extendida 2: Conciliación, Análisis, Dashboard y Persistencia
+
+### Fixes Críticos
+- **Gradiente `gG` faltante** en gráfico mensual Dashboard — área Compras se veía sin fill. Fix: agregar `<linearGradient id="gG">` en defs.
+- **TabConciliacion URL incorrecta** — apuntaba a `facturacion.solpropy.com` (Streamlit, sin API REST). Corregido a bridge FastAPI `facturacion-production-3916.up.railway.app`.
+- **TabConciliacion sin autenticación** — headers `x-api-key` no se enviaban. Corregido.
+
+### Nuevos Endpoints — `routes_bridge.py`
+- `GET /api/bridge/conciliacion/resumen` — lee `pagos.json` del volumen, retorna pagos con totales pendiente/conciliado
+- `PATCH /api/bridge/pagos/{id_pago}/conciliar` — marca pago como conciliado con fecha
+- `PATCH /api/bridge/pagos/{id_pago}/desconciliar` — revierte conciliación
+
+### Persistencia entre sesiones
+- `DashboardReal2026.jsx`: ventas y precios CSV cacheados en IndexedDB (`_cache_ventas_csv`, `_cache_precios_csv`)
+- `VentasAnalytics.jsx`: ventas CSV cacheado en IndexedDB
+- Patrón: carga caché local primero → Railway actualiza en background → si Railway falla, usa caché sin error
+
+### Estado tabs FinanzasPro
+- **📈 Análisis Financiero** — ✅ Funcional. Requiere datos IRE cargados manualmente en tab IRE Anual
+- **🏦 Conciliación** — ✅ Funcional tras fix. Lee `pagos.json` vía bridge con auth
+
+### ⚠️ Nota importante `pagos.json`
+El archivo `pagos.json` lo genera el **facturador Streamlit** (`app.py`) cada vez que se emite una factura. Se guarda en el volumen Railway en `/app/data/pagos.json`. El bridge lo lee/modifica. Si el path `DATA_DIR` no coincide con donde `app.py` escribe, los datos no aparecerán. Verificar que ambos usen la misma ruta de volumen.
+
+### Deploy
+- Commits en rama `main` — Railway deployado.
+- Fecha: 2026-06-02
+- Ejecutado por: Claude + Antigravity
