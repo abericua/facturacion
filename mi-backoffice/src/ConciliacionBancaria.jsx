@@ -513,7 +513,7 @@ export default function ConciliacionBancaria() {
                         <button onClick={e => { e.stopPropagation(); toggleConciliar(m.id); }}
                           title={m.conciliado ? 'Marcar como pendiente' : 'Marcar como conciliado'}
                           style={{
-                            width: 22, height: 22, borderRadius: 4, border: 'none',
+                            width: 22, height: 22, borderRadius: 4,
                             background: m.conciliado ? T.greenBg : T.surface,
                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             border: `1px solid ${m.conciliado ? 'rgba(52,211,153,0.4)' : T.border}`,

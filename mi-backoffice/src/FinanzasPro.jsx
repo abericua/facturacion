@@ -2150,7 +2150,7 @@ const SBtnLocal = ({id, label, color, seccion, setSeccion}) => (
                         fontFamily:"'DM Sans',sans-serif"}}>Cerrar</button>
                   </div>
                 )}
-              </div>
+              
 
               {/* Nota sobre la lógica de Base Imponible */}
               {ireAnio.formulario === 'Formulario 501 — IRE SIMPLE' && (
