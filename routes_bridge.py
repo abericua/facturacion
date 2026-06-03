@@ -720,11 +720,14 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
 
     # ── GEMINI ────────────────────────────────────────────────────────────
     if proveedor == "gemini":
-        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        # .strip() defensivo: Railway suele pegar un \n o espacios invisibles
+        # al final del valor, lo que corrompe el ?key= y Google responde
+        # "Expected OAuth 2 access token".
+        gemini_key = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
         if not gemini_key:
             raise HTTPException(status_code=500, detail="GEMINI_API_KEY no configurada en el servidor.")
 
-        modelo = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-2.0-flash").strip()
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{modelo}:generateContent?key={gemini_key}"
