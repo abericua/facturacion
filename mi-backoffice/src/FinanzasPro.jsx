@@ -219,7 +219,7 @@ function KPICard({label, value, sub, color, trend, icon:Icon}) {
   );
 }
 
-function TabConciliacion({ apiUrl }) {
+function TabConciliacion({ apiUrl, apiKey }) {
   const [pagos, setPagos] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
@@ -227,21 +227,25 @@ function TabConciliacion({ apiUrl }) {
   const [desde, setDesde] = React.useState('');
   const [hasta, setHasta] = React.useState('');
 
+  const headers = React.useMemo(() => ({
+    'x-api-key': apiKey || 'sgsp-bridge-2026',
+  }), [apiKey]);
+
   const cargarPagos = React.useCallback(async () => {
     try {
       setLoading(true);
-      const url = `${apiUrl}api/conciliacion/resumen`;
-      const r = await fetch(url);
-      if (!r.ok) throw new Error('Error al cargar');
+      const url = `${apiUrl}api/bridge/conciliacion/resumen`;
+      const r = await fetch(url, { headers });
+      if (!r.ok) throw new Error(`Error ${r.status}`);
       const data = await r.json();
       setPagos(data.pagos || []);
       setError(null);
     } catch (e) {
-      setError('No se pudo conectar con el Facturador.');
+      setError('No se pudo conectar con el Bridge API.');
     } finally {
       setLoading(false);
     }
-  }, [apiUrl]);
+  }, [apiUrl, headers]);
 
   React.useEffect(() => {
     cargarPagos();
@@ -250,8 +254,8 @@ function TabConciliacion({ apiUrl }) {
   const conciliar = async (id_pago) => {
     try {
       await fetch(
-        `${apiUrl}api/pagos/${id_pago}/conciliar`,
-        { method: 'PATCH' });
+        `${apiUrl}api/bridge/pagos/${id_pago}/conciliar`,
+        { method: 'PATCH', headers });
       cargarPagos();
     } catch(e) {}
   };
@@ -259,8 +263,8 @@ function TabConciliacion({ apiUrl }) {
   const desconciliar = async (id_pago) => {
     try {
       await fetch(
-        `${apiUrl}api/pagos/${id_pago}/desconciliar`,
-        { method: 'PATCH' });
+        `${apiUrl}api/bridge/pagos/${id_pago}/desconciliar`,
+        { method: 'PATCH', headers });
       cargarPagos();
     } catch(e) {}
   };
@@ -2816,7 +2820,10 @@ export default function FinanzasPro() {
           {tab==='iva'      && <TabIVA     data={data} onSave={handleSave}/>}
           {tab==='cxc'      && <TabCxC     data={data} onSave={handleSave}/>}
           {tab==='analisis' && <TabAnalisis data={data}/>}
-          {tab==='conciliacion' && <TabConciliacion apiUrl={import.meta.env.VITE_API_URL || 'https://facturacion.solpropy.com/'}/>}
+          {tab==='conciliacion' && <TabConciliacion
+            apiUrl={(import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app') + '/'}
+            apiKey={import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026'}
+          />}
         </div>
       </div>
     </div>

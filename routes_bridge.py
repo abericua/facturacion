@@ -491,6 +491,90 @@ def sync_stock(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# CONCILIACIÓN DE PAGOS (TabConciliacion en FinanzasPro)
+# ══════════════════════════════════════════════════════════════════════════
+PAGOS_FILE = os.path.join(DATA_DIR, "pagos.json")
+
+@router.get("/conciliacion/resumen")
+def get_conciliacion_resumen(x_api_key: Optional[str] = Header(None)):
+    """
+    Lee pagos.json del volumen Railway y retorna el listado para la
+    vista de conciliación en FinanzasPro.
+    """
+    _check_key(x_api_key)
+    if not os.path.exists(PAGOS_FILE):
+        return {"pagos": [], "total_pendiente": 0, "total_conciliado": 0}
+
+    with open(PAGOS_FILE, 'r', encoding='utf-8') as f:
+        pagos = json.load(f)
+
+    total_pendiente  = sum(p.get('monto_gs', 0) for p in pagos if not p.get('conciliado'))
+    total_conciliado = sum(p.get('monto_gs', 0) for p in pagos if p.get('conciliado'))
+
+    return {
+        "pagos":             pagos,
+        "total":             len(pagos),
+        "total_pendiente":   total_pendiente,
+        "total_conciliado":  total_conciliado,
+        "ts":                datetime.utcnow().isoformat(),
+    }
+
+
+@router.patch("/pagos/{id_pago}/conciliar")
+def conciliar_pago(id_pago: str, x_api_key: Optional[str] = Header(None)):
+    """Marca un pago como conciliado."""
+    _check_key(x_api_key)
+    if not os.path.exists(PAGOS_FILE):
+        raise HTTPException(status_code=404, detail="Sin pagos registrados.")
+
+    with open(PAGOS_FILE, 'r', encoding='utf-8') as f:
+        pagos = json.load(f)
+
+    encontrado = False
+    for p in pagos:
+        if p.get('id_pago') == id_pago:
+            p['conciliado']        = True
+            p['fecha_conciliacion'] = datetime.utcnow().strftime('%Y-%m-%d')
+            encontrado = True
+            break
+
+    if not encontrado:
+        raise HTTPException(status_code=404, detail=f"Pago {id_pago} no encontrado.")
+
+    with open(PAGOS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(pagos, f, ensure_ascii=False, indent=2)
+
+    return {"status": "conciliado", "id_pago": id_pago}
+
+
+@router.patch("/pagos/{id_pago}/desconciliar")
+def desconciliar_pago(id_pago: str, x_api_key: Optional[str] = Header(None)):
+    """Revierte la conciliación de un pago."""
+    _check_key(x_api_key)
+    if not os.path.exists(PAGOS_FILE):
+        raise HTTPException(status_code=404, detail="Sin pagos registrados.")
+
+    with open(PAGOS_FILE, 'r', encoding='utf-8') as f:
+        pagos = json.load(f)
+
+    encontrado = False
+    for p in pagos:
+        if p.get('id_pago') == id_pago:
+            p['conciliado']        = False
+            p['fecha_conciliacion'] = ''
+            encontrado = True
+            break
+
+    if not encontrado:
+        raise HTTPException(status_code=404, detail=f"Pago {id_pago} no encontrado.")
+
+    with open(PAGOS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(pagos, f, ensure_ascii=False, indent=2)
+
+    return {"status": "desconciliado", "id_pago": id_pago}
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # RESUMEN FINANCIERO (para Dashboard)
 # ══════════════════════════════════════════════════════════════════════════
 @router.get("/dashboard/resumen")
