@@ -191,3 +191,128 @@ El servicio `solpro-facturacion` (Streamlit) y la API FastAPI convivían en un m
 - Commits: `e3d7ab2` (Dockerfile), `79bd25c` (sync_service), `b987305` (mi-backoffice/.env) en rama `main`
 - Fecha: 2026-06-01
 - Ejecutado por: Antigravity + Usuario
+
+---
+
+## 2026-06-02 — Pipeline de Stock, FinanzasPro y Fixes Críticos (mi-backoffice)
+
+### Problemas Resueltos
+- **PDF Worker (pdfjs-dist):** Roturas críticas en el worker del lector de PDFs solucionadas actualizando a v5 con rutas correctas (`?url` y MIME type `.mjs` en Nginx) en `ImportadorCompras.jsx` y `CargadorDocumentos.jsx`.
+- **SyncBridge & DB:** Reparado error bloqueante en `pullAll()` / `autoSync()` causado por una llamada a un método inexistente (`DB.guardarVentas()`).
+
+### Nuevas Implementaciones (Features)
+- **Pipeline de Stock (Compras -> Inventario -> Facturación):**
+  - Botón "Sincronizar Stock" en `ImportadorCompras.jsx` que extrae items procesados desde IndexedDB.
+  - Endpoint nuevo `/api/bridge/stock/sync` en `routes_bridge.py` para aplicar suma/resta de stock en `productos_maestros.csv`.
+  - Idempotencia integrada: flag `stock_sincronizado` para evitar duplicación de actualizaciones de inventario.
+- **FinanzasPro Auto-Update:** 
+  - Cálculo automático de IVA crédito neto y proyección a declarar con vencimiento RUC -7.
+  - Alertas de diferencia vs F120 y análisis de variación de costos post-proceso de compras locales.
+- **Dashboards Reales:** `DashboardReal2026.jsx`, `VentasAnalytics.jsx` y `CalculadoraPrecios.jsx` ahora consumen y cruzan datos reales mediante el bridge API hacia los CSVs en Railway.
+
+### Deploy
+- Múltiples commits en rama `main` (Despliegue automático en Railway `solpro-facturacion` y `facturacion`).
+- Fecha: 2026-06-02
+- Ejecutado por: Antigravity + Usuario
+
+---
+
+## 2026-06-02 — Sesión Extendida: Backoffice Completo (Claude)
+
+### ⚠️ REGLAS CRÍTICAS PARA FUTUROS AGENTES — LEER ANTES DE TOCAR CUALQUIER COSA
+
+1. **NUNCA eliminar las bandas de precio (`BANDA_PISO_PTS = 150`, `BANDA_TECHO_PTS = 350`)** — Son la Regla de Oro SOLPRO, herramienta de negocio auditada, NO estimaciones. Están en `DashboardReal2026.jsx` y `CalculadoraPrecios.jsx`.
+2. **NUNCA eliminar `getPrice()`, `parsePricesCSV()`, `parseSalesCSV()`** — Son el motor de cálculo de revenue del Dashboard. Cruzan el historial de ventas con el catálogo de productos.
+3. **NUNCA reemplazar el `DashboardReal2026.jsx` completo** — Hacer cambios mínimos y quirúrgicos. Si hay duda, preguntar antes de escribir.
+4. **CMV 81.9% / Gastos 8.1% / Utilidad 10.0%** — Constantes financieras auditadas. No cambiar sin orden explícita del usuario.
+5. **Antes de modificar cualquier módulo crítico, leer:** `SOLPRO_MEMORIA.md`, `BITACORA_MANTENIMIENTO_2026.md`, `GEMINI.md`.
+
+---
+
+### Bugs Corregidos
+
+| Archivo | Bug | Fix |
+|---|---|---|
+| `ImportadorCompras.jsx` | Worker pdfjs v3 path + `<script>` suelto en JSX | Path → `pdf.worker.mjs?url`, script eliminado |
+| `CargadorDocumentos.jsx` | `window.pdfjsLib` undefined + path v3 | Import correcto pdfjs-dist + path `.mjs` |
+| `SyncBridge.js` | `DB.guardarVentas()` no existe en db.js | Cambiado a `DB.guardarCatalogo('ventas', records)` |
+| `vite.config.js` | Faltaba `optimizeDeps.exclude: ['pdfjs-dist']` | Agregado + `worker.format: 'es'` |
+| `nginx.conf` | `.mjs` sin MIME type → browser rechaza módulo ES | Agregado `application/javascript mjs;` |
+| `DashboardReal2026.jsx` | TC USD no persistía entre sesiones | Load/save desde IndexedDB al iniciar/guardar |
+| `CalculadoraPrecios.jsx` | TC USD no persistía entre sesiones | Ídem |
+
+### Features Implementadas
+
+**Pipeline Compras → Stock → Facturación:**
+- `db.js`: `agregarStockDesdeCompras()`, `marcarComprasSincronizadas()`, `resetearFlagsStock()`
+- `SyncBridge.js`: `pushStock(stockItems)`
+- `routes_bridge.py`: `POST /api/bridge/stock/sync` → actualiza `productos_maestros.csv`
+- `ImportadorCompras.jsx`: botón "Sync Stock" (idempotente con flag `stock_sincronizado`)
+
+**Auto-update FinanzasPro desde ImportadorCompras:**
+- `db.js`: `actualizarEgresosDesdeCompras(tcUSD)` → actualiza `compras_local` en FinanzasPro por período
+- `db.js`: `analizarVariacionCostos()` → compara precios de compra vs catálogo
+- `ImportadorCompras.jsx`: se ejecuta automáticamente después de "Procesar con IA"
+- Tabla colapsable de variación de costos post-proceso
+
+**Proyección IVA a declarar:**
+- `FinanzasPro.jsx` → Tab IVA → sección nueva sobre el F120
+- RUC termina en -7 → vence día 13 del mes siguiente
+- Muestra débito estimado (ventas × 10/110), crédito de compras (importadas), saldo proyectado
+- Si F120 ya cargado → muestra datos reales + alerta si hay diferencia con crédito de compras
+
+**Módulo Bancos / Conciliación Bancaria (nuevo — `ConciliacionBancaria.jsx`):**
+- 4 cuentas preconfiguradas: Ueno GS, Ueno USD, Atlas GS, Atlas USD
+- Upload de extracto PDF por cuenta → extracción IA (claude-haiku) → movimientos en IndexedDB
+- Checkbox de conciliación por movimiento, balance neto por cuenta
+- Sidebar con resumen consolidado GS y USD por banco
+
+**CSVs via Bridge Railway:**
+- `routes_bridge.py`: `GET /api/bridge/ventas/csv` y `GET /api/bridge/productos/csv`
+- `DashboardReal2026.jsx`, `VentasAnalytics.jsx`, `CalculadoraPrecios.jsx`: fetch al bridge en vez de `/public`
+
+**Persistencia de datos entre sesiones:**
+- `DashboardReal2026.jsx`: caché de ventas/precios CSV en IndexedDB (`_cache_ventas_csv`, `_cache_precios_csv`)
+- `VentasAnalytics.jsx`: ídem para ventas CSV
+- Patrón: carga caché local primero → actualiza desde Railway en paralelo → si Railway falla, usa caché
+
+**Inventario con datos reales:**
+- `backoffice.jsx` → función `Inventario()` reescrita con `useEffect` que lee `DB.obtenerCatalogo('productos')`
+- Tab Proveedores: calculado desde `DB.obtenerTodasCompras()` (FACs, NCs, total USD, IVA)
+
+**Pedidos con datos reales:**
+- `backoffice.jsx` → función `Pedidos()` reescrita con fetch a `GET /api/bridge/ventas`
+- Filtro por año, clasificación automática (entregado/anulado), gráfico mensual real
+
+**Limpieza de uploads duplicados:**
+- `FinanzasPro.jsx` → eliminados botones de upload F120 e IRE (duplicados de CargadorDocumentos)
+- Reemplazados por mensaje redirect a "Cargar Documentos"
+
+### ⚠️ ERROR GRAVE COMETIDO — NO REPETIR
+
+**Claude eliminó por error todo el motor de pricing del Dashboard** (`getPrice`, `parsePricesCSV`, bandas) creyendo que eran "estimaciones". Son herramientas de negocio auditadas. Se restauró desde commit `7bebac5` con `git show 7bebac5:mi-backoffice/src/DashboardReal2026.jsx`.
+
+**Lección:** Cuando el usuario dice "que los cálculos se basen en datos reales", significa que la FUENTE DE DATOS debe ser fidedigna (Railway Excel, IndexedDB), NO que hay que eliminar la lógica de cálculo.
+
+### Archivos Modificados en Esta Sesión
+
+```
+mi-backoffice/src/ImportadorCompras.jsx
+mi-backoffice/src/CargadorDocumentos.jsx
+mi-backoffice/src/SyncBridge.js
+mi-backoffice/src/db.js
+mi-backoffice/src/DashboardReal2026.jsx
+mi-backoffice/src/VentasAnalytics.jsx
+mi-backoffice/src/CalculadoraPrecios.jsx
+mi-backoffice/src/FinanzasPro.jsx
+mi-backoffice/src/backoffice.jsx
+mi-backoffice/src/ConciliacionBancaria.jsx  ← NUEVO
+mi-backoffice/vite.config.js
+mi-backoffice/nginx.conf
+routes_bridge.py
+```
+
+### Deploy
+- Múltiples commits en rama `main` — todos deployados en Railway.
+- Fecha: 2026-06-02
+- Ejecutado por: Claude (backoffice) + Antigravity (git/Railway)
