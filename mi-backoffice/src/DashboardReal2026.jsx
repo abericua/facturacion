@@ -521,6 +521,10 @@ export default function DashboardReal() {
                   <stop offset="5%" stopColor={T.accent} stopOpacity={0.25}/>
                   <stop offset="95%" stopColor={T.accent} stopOpacity={0}/>
                 </linearGradient>
+                <linearGradient id="gG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={T.red} stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor={T.red} stopOpacity={0}/>
+                </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
               <XAxis dataKey="label" tick={{fill:T.textMuted,fontSize:9,fontFamily:"'DM Sans',sans-serif"}} axisLine={false} tickLine={false} interval={2}/>
