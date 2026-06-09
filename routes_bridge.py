@@ -678,13 +678,12 @@ def _anthropic_a_gemini(body: dict) -> dict:
         gemini_req["contents"].append({"role": role, "parts": [{"text": text}]})
 
     # max_tokens → generationConfig.maxOutputTokens
-    gen_cfg = {}
+    gen_cfg = {"responseMimeType": "application/json"}
     if body.get("max_tokens"):
         gen_cfg["maxOutputTokens"] = int(body["max_tokens"])
     if body.get("temperature") is not None:
         gen_cfg["temperature"] = float(body["temperature"])
-    if gen_cfg:
-        gemini_req["generationConfig"] = gen_cfg
+    gemini_req["generationConfig"] = gen_cfg
 
     return gemini_req
 
