@@ -368,6 +368,200 @@ Se reestructuró la arquitectura para que las peticiones de IA pasen a través d
    - Se añadió la autenticación interna del bridge: `x-api-key: import.meta.env.VITE_BRIDGE_API_KEY || 'sgsp-bridge-2026'`.
 
 ### ⚠️ Regla Importante para Futuros Agentes
+## 2026-06-01 — Desacoplamiento de API (Nuevo Servicio bridge-api)
+
+### Problema
+El servicio `solpro-facturacion` (Streamlit) y la API FastAPI convivían en un mismo despliegue con lógica de arranque condicional en el `Dockerfile`. Esto podía generar complicaciones en escalabilidad y en el ciclo de vida de los contenedores en Railway.
+
+### Solución aplicada
+- Se creó un `Dockerfile.api` independiente y exclusivo para la API FastAPI del bridge.
+- Se levantó un nuevo servicio en Railway llamado `bridge-api` conectado al mismo repositorio.
+- Se configuró el servicio con un volumen persistente en `/app/data` y la variable `DATA_DIR=/app/data`.
+- Se actualizaron las referencias de red para apuntar al nuevo endpoint (`https://facturacion-production-3916.up.railway.app`):
+  - `sync_service.py` (`API_BASE_URL`)
+  - `mi-backoffice/.env` (`VITE_BRIDGE_URL`)
+
+### Deploy
+- Commits: `e3d7ab2` (Dockerfile), `79bd25c` (sync_service), `b987305` (mi-backoffice/.env) en rama `main`
+- Fecha: 2026-06-01
+- Ejecutado por: Antigravity + Usuario
+
+---
+
+## 2026-06-02 — Pipeline de Stock, FinanzasPro y Fixes Críticos (mi-backoffice)
+
+### Problemas Resueltos
+- **PDF Worker (pdfjs-dist):** Roturas críticas en el worker del lector de PDFs solucionadas actualizando a v5 con rutas correctas (`?url` y MIME type `.mjs` en Nginx) en `ImportadorCompras.jsx` y `CargadorDocumentos.jsx`.
+- **SyncBridge & DB:** Reparado error bloqueante en `pullAll()` / `autoSync()` causado por una llamada a un método inexistente (`DB.guardarVentas()`).
+
+### Nuevas Implementaciones (Features)
+- **Pipeline de Stock (Compras -> Inventario -> Facturación):**
+  - Botón "Sincronizar Stock" en `ImportadorCompras.jsx` que extrae items procesados desde IndexedDB.
+  - Endpoint nuevo `/api/bridge/stock/sync` en `routes_bridge.py` para aplicar suma/resta de stock en `productos_maestros.csv`.
+  - Idempotencia integrada: flag `stock_sincronizado` para evitar duplicación de actualizaciones de inventario.
+- **FinanzasPro Auto-Update:** 
+  - Cálculo automático de IVA crédito neto y proyección a declarar con vencimiento RUC -7.
+  - Alertas de diferencia vs F120 y análisis de variación de costos post-proceso de compras locales.
+- **Dashboards Reales:** `DashboardReal2026.jsx`, `VentasAnalytics.jsx` y `CalculadoraPrecios.jsx` ahora consumen y cruzan datos reales mediante el bridge API hacia los CSVs en Railway.
+
+### Deploy
+- Múltiples commits en rama `main` (Despliegue automático en Railway `solpro-facturacion` y `facturacion`).
+- Fecha: 2026-06-02
+- Ejecutado por: Antigravity + Usuario
+
+---
+
+## 2026-06-02 — Sesión Extendida: Backoffice Completo (Claude)
+
+### ⚠️ REGLAS CRÍTICAS PARA FUTUROS AGENTES — LEER ANTES DE TOCAR CUALQUIER COSA
+
+1. **NUNCA eliminar las bandas de precio (`BANDA_PISO_PTS = 150`, `BANDA_TECHO_PTS = 350`)** — Son la Regla de Oro SOLPRO, herramienta de negocio auditada, NO estimaciones. Están en `DashboardReal2026.jsx` y `CalculadoraPrecios.jsx`.
+2. **NUNCA eliminar `getPrice()`, `parsePricesCSV()`, `parseSalesCSV()`** — Son el motor de cálculo de revenue del Dashboard. Cruzan el historial de ventas con el catálogo de productos.
+3. **NUNCA reemplazar el `DashboardReal2026.jsx` completo** — Hacer cambios mínimos y quirúrgicos. Si hay duda, preguntar antes de escribir.
+4. **CMV 81.9% / Gastos 8.1% / Utilidad 10.0%** — Constantes financieras auditadas. No cambiar sin orden explícita del usuario.
+5. **Antes de modificar cualquier módulo crítico, leer:** `SOLPRO_MEMORIA.md`, `BITACORA_MANTENIMIENTO_2026.md`, `GEMINI.md`.
+
+---
+
+### Bugs Corregidos
+
+| Archivo | Bug | Fix |
+|---|---|---|
+| `ImportadorCompras.jsx` | Worker pdfjs v3 path + `<script>` suelto en JSX | Path → `pdf.worker.mjs?url`, script eliminado |
+| `CargadorDocumentos.jsx` | `window.pdfjsLib` undefined + path v3 | Import correcto pdfjs-dist + path `.mjs` |
+| `SyncBridge.js` | `DB.guardarVentas()` no existe en db.js | Cambiado a `DB.guardarCatalogo('ventas', records)` |
+| `vite.config.js` | Faltaba `optimizeDeps.exclude: ['pdfjs-dist']` | Agregado + `worker.format: 'es'` |
+| `nginx.conf` | `.mjs` sin MIME type → browser rechaza módulo ES | Agregado `application/javascript mjs;` |
+| `DashboardReal2026.jsx` | TC USD no persistía entre sesiones | Load/save desde IndexedDB al iniciar/guardar |
+| `CalculadoraPrecios.jsx` | TC USD no persistía entre sesiones | Ídem |
+
+### Features Implementadas
+
+**Pipeline Compras → Stock → Facturación:**
+- `db.js`: `agregarStockDesdeCompras()`, `marcarComprasSincronizadas()`, `resetearFlagsStock()`
+- `SyncBridge.js`: `pushStock(stockItems)`
+- `routes_bridge.py`: `POST /api/bridge/stock/sync` → actualiza `productos_maestros.csv`
+- `ImportadorCompras.jsx`: botón "Sync Stock" (idempotente con flag `stock_sincronizado`)
+
+**Auto-update FinanzasPro desde ImportadorCompras:**
+- `db.js`: `actualizarEgresosDesdeCompras(tcUSD)` → actualiza `compras_local` en FinanzasPro por período
+- `db.js`: `analizarVariacionCostos()` → compara precios de compra vs catálogo
+- `ImportadorCompras.jsx`: se ejecuta automáticamente después de "Procesar con IA"
+- Tabla colapsable de variación de costos post-proceso
+
+**Proyección IVA a declarar:**
+- `FinanzasPro.jsx` → Tab IVA → sección nueva sobre el F120
+- RUC termina en -7 → vence día 13 del mes siguiente
+- Muestra débito estimado (ventas × 10/110), crédito de compras (importadas), saldo proyectado
+- Si F120 ya cargado → muestra datos reales + alerta si hay diferencia con crédito de compras
+
+**Módulo Bancos / Conciliación Bancaria (nuevo — `ConciliacionBancaria.jsx`):**
+- 4 cuentas preconfiguradas: Ueno GS, Ueno USD, Atlas GS, Atlas USD
+- Upload de extracto PDF por cuenta → extracción IA (claude-haiku) → movimientos en IndexedDB
+- Checkbox de conciliación por movimiento, balance neto por cuenta
+- Sidebar con resumen consolidado GS y USD por banco
+
+**CSVs via Bridge Railway:**
+- `routes_bridge.py`: `GET /api/bridge/ventas/csv` y `GET /api/bridge/productos/csv`
+- `DashboardReal2026.jsx`, `VentasAnalytics.jsx`, `CalculadoraPrecios.jsx`: fetch al bridge en vez de `/public`
+
+**Persistencia de datos entre sesiones:**
+- `DashboardReal2026.jsx`: caché de ventas/precios CSV en IndexedDB (`_cache_ventas_csv`, `_cache_precios_csv`)
+- `VentasAnalytics.jsx`: ídem para ventas CSV
+- Patrón: carga caché local primero → actualiza desde Railway en paralelo → si Railway falla, usa caché
+
+**Inventario con datos reales:**
+- `backoffice.jsx` → función `Inventario()` reescrita con `useEffect` que lee `DB.obtenerCatalogo('productos')`
+- Tab Proveedores: calculado desde `DB.obtenerTodasCompras()` (FACs, NCs, total USD, IVA)
+
+**Pedidos con datos reales:**
+- `backoffice.jsx` → función `Pedidos()` reescrita con fetch a `GET /api/bridge/ventas`
+- Filtro por año, clasificación automática (entregado/anulado), gráfico mensual real
+
+**Limpieza de uploads duplicados:**
+- `FinanzasPro.jsx` → eliminados botones de upload F120 e IRE (duplicados de CargadorDocumentos)
+- Reemplazados por mensaje redirect a "Cargar Documentos"
+
+### ⚠️ ERROR GRAVE COMETIDO — NO REPETIR
+
+**Claude eliminó por error todo el motor de pricing del Dashboard** (`getPrice`, `parsePricesCSV`, bandas) creyendo que eran "estimaciones". Son herramientas de negocio auditadas. Se restauró desde commit `7bebac5` con `git show 7bebac5:mi-backoffice/src/DashboardReal2026.jsx`.
+
+**Lección:** Cuando el usuario dice "que los cálculos se basen en datos reales", significa que la FUENTE DE DATOS debe ser fidedigna (Railway Excel, IndexedDB), NO que hay que eliminar la lógica de cálculo.
+
+### Archivos Modificados en Esta Sesión
+
+```
+mi-backoffice/src/ImportadorCompras.jsx
+mi-backoffice/src/CargadorDocumentos.jsx
+mi-backoffice/src/SyncBridge.js
+mi-backoffice/src/db.js
+mi-backoffice/src/DashboardReal2026.jsx
+mi-backoffice/src/VentasAnalytics.jsx
+mi-backoffice/src/CalculadoraPrecios.jsx
+mi-backoffice/src/FinanzasPro.jsx
+mi-backoffice/src/backoffice.jsx
+mi-backoffice/src/ConciliacionBancaria.jsx  ← NUEVO
+mi-backoffice/vite.config.js
+mi-backoffice/nginx.conf
+routes_bridge.py
+```
+
+### Deploy
+- Múltiples commits en rama `main` — todos deployados en Railway.
+- Fecha: 2026-06-02
+- Ejecutado por: Claude (backoffice) + Antigravity (git/Railway)
+
+---
+
+## 2026-06-02 — Sesión Extendida 2: Conciliación, Análisis, Dashboard y Persistencia
+
+### Fixes Críticos
+- **Gradiente `gG` faltante** en gráfico mensual Dashboard — área Compras se veía sin fill. Fix: agregar `<linearGradient id="gG">` en defs.
+- **TabConciliacion URL incorrecta** — apuntaba a `facturacion.solpropy.com` (Streamlit, sin API REST). Corregido a bridge FastAPI `facturacion-production-3916.up.railway.app`.
+- **TabConciliacion sin autenticación** — headers `x-api-key` no se enviaban. Corregido.
+
+### Nuevos Endpoints — `routes_bridge.py`
+- `GET /api/bridge/conciliacion/resumen` — lee `pagos.json` del volumen, retorna pagos con totales pendiente/conciliado
+- `PATCH /api/bridge/pagos/{id_pago}/conciliar` — marca pago como conciliado con fecha
+- `PATCH /api/bridge/pagos/{id_pago}/desconciliar` — revierte conciliación
+
+### Persistencia entre sesiones
+- `DashboardReal2026.jsx`: ventas y precios CSV cacheados en IndexedDB (`_cache_ventas_csv`, `_cache_precios_csv`)
+- `VentasAnalytics.jsx`: ventas CSV cacheado en IndexedDB
+- Patrón: carga caché local primero → Railway actualiza en background → si Railway falla, usa caché sin error
+
+### Estado tabs FinanzasPro
+- **📈 Análisis Financiero** — ✅ Funcional. Requiere datos IRE cargados manualmente en tab IRE Anual
+- **🏦 Conciliación** — ✅ Funcional tras fix. Lee `pagos.json` vía bridge con auth
+
+### ⚠️ Nota importante `pagos.json`
+El archivo `pagos.json` lo genera el **facturador Streamlit** (`app.py`) cada vez que se emite una factura. Se guarda en el volumen Railway en `/app/data/pagos.json`. El bridge lo lee/modifica. Si el path `DATA_DIR` no coincide con donde `app.py` escribe, los datos no aparecerán. Verificar que ambos usen la misma ruta de volumen.
+
+### Deploy
+- Commits en rama `main` — Railway deployado.
+- Fecha: 2026-06-02
+- Ejecutado por: Claude + Antigravity
+
+---
+
+## 2026-06-03 — Resolución de CORS de Anthropic (Proxy Arquitectónico)
+
+### Problema
+Las peticiones a la API de Anthropic (`claude-haiku-4-5-20251001`) fallaban sistemáticamente en producción con errores **CORS (405 Method Not Allowed / 400 Bad Request)**. La causa raíz es que Anthropic bloquea intencionalmente las peticiones directas desde navegadores para evitar la exposición de la API Key en el frontend, incluso cuando se usa la cabecera `anthropic-dangerous-direct-browser-access`.
+
+### Solución aplicada (Proxy Backend)
+Se reestructuró la arquitectura para que las peticiones de IA pasen a través del backend de Python (`bridge-api`), el cual tiene permisos nativos (Server-to-Server) para invocar a Anthropic sin restricciones CORS.
+
+1. **Backend (`routes_bridge.py`)**:
+   - Se creó el endpoint `POST /api/bridge/anthropic/messages`.
+   - Recibe la petición del frontend, firma la solicitud usando `VITE_ANTHROPIC_API_KEY` (protegida en Railway) y la envía a `api.anthropic.com`.
+
+2. **Frontend (`mi-backoffice`)**:
+   - Se actualizaron `CargadorDocumentos.jsx`, `ImportadorCompras.jsx` y `ConciliacionBancaria.jsx`.
+   - El `fetch` ahora apunta a `${BRIDGE_URL}/api/bridge/anthropic/messages`.
+   - Se añadió la autenticación interna del bridge: `x-api-key: import.meta.env.VITE_BRIDGE_API_KEY || 'sgsp-bridge-2026'`.
+
+### ⚠️ Regla Importante para Futuros Agentes
 **NUNCA** intentar hacer fetch a `api.anthropic.com` directamente desde los archivos `.jsx` o React. Siempre enrutar la petición a través del bridge.
 
 ### Deploy
@@ -375,3 +569,35 @@ Se reestructuró la arquitectura para que las peticiones de IA pasen a través d
 - Push forzado de Antigravity debido a la ausencia de git en el PATH del sistema usando `C:\Program Files\Git\cmd\git.exe`.
 - Fecha: 2026-06-03
 - Ejecutado por: Antigravity
+
+---
+
+## 2026-06-09 — Migración a Gemini AI y Fixes de Estabilidad de Extracción
+
+### Problema: Roturas Críticas en Importación de Compras
+La extracción con IA de las facturas de compras fallaba frecuentemente devolviendo errores de sintaxis JSON (`Unexpected token`, `Expected double-quoted property name`, `Unterminated string`). Esto ocurría porque Gemini devolvía respuestas truncadas, con caracteres basura al final, o con comillas internas no escapadas. Además, la persistencia de las compras procesadas no se sincronizaba correctamente entre diferentes dispositivos.
+
+### Soluciones Aplicadas (JSON Parser & API)
+1. **Force JSON Nativo (Backend):**
+   - Se modificó `routes_bridge.py` (`_anthropic_a_gemini`) inyectando `{"responseMimeType": "application/json"}` en el `generationConfig` de Gemini. Esto fuerza al motor de la IA a retornar siempre un JSON estructuralmente válido y escapado, eliminando de raíz los errores por comillas no escapadas en cadenas de texto.
+2. **Parser JSON Robusto de 4 Intentos (Frontend):**
+   - En `mi-backoffice/src/ImportadorCompras.jsx` se aplicó una lógica agresiva de recuperación:
+     - Reemplazo del regex greedy por `extractFirstJSON()` para extraer sólo el bloque inicial ignorando texto extra inyectado por Gemini (como RUCs o notas al final).
+     - Función `closeJSON()` para completar automáticamente llaves `}` y corchetes `]` de respuestas que llegan truncadas por límite de tokens.
+     - Quoteo forzado de claves *bare* (ej. `{clave: valor}` a `{"clave": valor}`).
+     - Eliminación de literales *ellipsis* (`...`) y sanitización de saltos de línea mal formateados dentro del string.
+3. **Optimización del Contexto de IA:**
+   - Se amplió el `max_tokens` de 4000 a 8000 para soportar facturas largas con múltiples ítems.
+   - Implementación de prompts dinámicos por proveedor (`getSystemPrompt(proveedorId)`) y validación financiera post-extracción.
+
+### Sincronización Cross-Device y Fixes Adicionales
+1. **Sync Cross-Device:**
+   - En `backoffice.jsx` se agregó el chequeo `pullAll()` en el montaje inicial para que todos los dispositivos descarguen el catálogo actualizado apenas acceden al backoffice.
+   - En `ImportadorCompras.jsx` se implementó `pushCompras()` inmediatamente después de procesar las facturas con éxito, garantizando persistencia en nube inmediata.
+2. **Fix Stock Sync API:**
+   - Se diagnosticó y corrigió un Error 500 (`KeyError: 'Nombre'`) en el endpoint `/api/bridge/stock/sync` provocado por una búsqueda con un nombre de columna incorrecto en el CSV.
+
+### Deploy
+- Múltiples commits en la rama `main` deployados exitosamente en Railway (Backend y Frontend).
+- Fecha: 2026-06-09
+- Ejecutado por: Claude (Desarrollo Frontend) + Antigravity (Ejecución y Despliegue)
