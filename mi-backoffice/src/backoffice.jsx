@@ -1,6 +1,7 @@
 import FinanzasPro from './FinanzasPro.jsx';
 import ConciliacionBancaria from './ConciliacionBancaria.jsx';
 import { useState, useEffect, useMemo } from "react";
+import { SyncBridge } from './SyncBridge.js';
 
 import VentasAnalytics from './VentasAnalytics.jsx';
 // import DashboardReal from './DashboardReal.jsx';
@@ -937,6 +938,13 @@ DB.obtenerConfig('migracion_completada').then(async (migrado) => {
 export default function BackOffice() {
   const [active, setActive] = useState('dashboard');
   const [time]  = useState(new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
+
+  // ── Hydrate IndexedDB desde Railway al abrir (sync cross-device) ─────────
+  useEffect(() => {
+    SyncBridge.pullAll().catch(e =>
+      console.warn('[SyncBridge] pullAll al iniciar falló (sin conexión?):', e.message)
+    );
+  }, []);
 
   const current = NAV.find(n=>n.id===active);
 

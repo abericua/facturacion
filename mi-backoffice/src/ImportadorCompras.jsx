@@ -503,6 +503,13 @@ export default function ImportadorCompras() {
     await DB.limpiarCompras();
     await DB.guardarCompras(allRecords).catch(console.error);
 
+    // ── Push compras a Railway para sincronización cross-device ──────────────
+    try {
+      await SyncBridge.pushCompras();
+    } catch (e) {
+      console.warn('[SyncBridge] pushCompras falló (no crítico):', e.message);
+    }
+
     // ── Auto-actualizar FinanzasPro (egresos compras_local + IVA crédito) ──
     try {
       const periodos = await DB.actualizarEgresosDesdeCompras();
