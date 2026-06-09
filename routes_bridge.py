@@ -417,13 +417,19 @@ def sync_stock(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
     os.makedirs(DATA_DIR, exist_ok=True)
 
     # Leer CSV actual (o crear vacío con columnas base)
+    BASE_COLS = ["Nombre","ID_Ref","Proveedor","Linea","Costo_Compra","Moneda_Costo","Margen_Pct"]
     if os.path.exists(PRODUCTOS_CSV):
-        df = pd.read_csv(PRODUCTOS_CSV)
+        try:
+            df = pd.read_csv(PRODUCTOS_CSV)
+        except Exception:
+            df = pd.DataFrame(columns=BASE_COLS)
     else:
-        df = pd.DataFrame(columns=["Nombre","ID_Ref","Proveedor","Linea",
-                                    "Costo_Compra","Moneda_Costo","Margen_Pct"])
+        df = pd.DataFrame(columns=BASE_COLS)
 
-    # Asegurar columnas de stock y costo actualizado
+    # Asegurar que TODAS las columnas requeridas existen (CSV parcial o corrupto)
+    for col in BASE_COLS:
+        if col not in df.columns:
+            df[col] = ""
     if "Stock" not in df.columns:
         df["Stock"] = 0
     if "Costo_USD" not in df.columns:
@@ -765,5 +771,4 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
     }
-    resp = requests.post("https://api.anthropic.com/v1/messages", json=body, headers=headers, timeout=120)
-    return PlainTextResponse(resp.text, status_code=resp.status_code, media_type="application/json")
+    resp 
