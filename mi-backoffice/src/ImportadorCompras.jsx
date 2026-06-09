@@ -315,6 +315,30 @@ export default function ImportadorCompras() {
 
       // ── Extracción robusta del JSON ───────────────────────────────────────
 
+      // Extrae el PRIMER bloque {...} balanceado (ignora texto extra antes/después)
+      // Evita el bug del regex greedy que captura hasta el último } del string completo
+      const extractFirstJSON = (str) => {
+        let depth = 0;
+        let inString = false;
+        let escape = false;
+        const start = str.indexOf('{');
+        if (start === -1) return null;
+        for (let i = start; i < str.length; i++) {
+          const ch = str[i];
+          if (escape) { escape = false; continue; }
+          if (ch === '\\' && inString) { escape = true; continue; }
+          if (ch === '"') { inString = !inString; continue; }
+          if (inString) continue;
+          if (ch === '{') depth++;
+          else if (ch === '}') {
+            depth--;
+            if (depth === 0) return str.slice(start, i + 1);
+          }
+        }
+        // JSON truncado: devuelve desde start hasta el final (closeJSON lo cerrará)
+        return start > 0 ? str.slice(start) : str;
+      };
+
       // Cierra un JSON truncado contando llaves/corchetes abiertos
       const closeJSON = (str) => {
         const stack = [];
@@ -374,10 +398,11 @@ export default function ImportadorCompras() {
       try {
         data = JSON.parse(clean);
       } catch (parseErr1) {
-        // Intento 2: extraer el bloque {} más externo (ignora texto antes/después)
-        const jsonMatch = clean.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error(`JSON inválido: ${parseErr1.message}`);
-        let jsonStr = jsonMatch[0];
+        // Intento 2: extraer el primer bloque {} balanceado (ignora texto antes/después)
+        // Usamos extractFirstJSON en vez de regex greedy para no capturar texto posterior al JSON
+        const jsonStr0 = extractFirstJSON(clean);
+        if (!jsonStr0) throw new Error(`JSON inválido: ${parseErr1.message}`);
+        let jsonStr = jsonStr0;
         try {
           data = JSON.parse(jsonStr);
         } catch (parseErr2) {
