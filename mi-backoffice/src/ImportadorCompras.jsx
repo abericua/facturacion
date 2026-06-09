@@ -246,11 +246,36 @@ export default function ImportadorCompras() {
 
       const raw = json.content?.map(b => b.text || '').join('') || '';
       if (!raw) throw new Error('Respuesta vacía de la API');
-      
+
       const clean = raw.replace(/```json|```/g, '').trim();
       if (!clean) throw new Error('Sin contenido extraíble');
-      
-      const data = JSON.parse(clean);
+
+      // ── Extracción robusta del JSON ───────────────────────────────────────
+      let data;
+      try {
+        data = JSON.parse(clean);
+      } catch (parseErr1) {
+        // Intento 2: extraer el bloque {} más externo (ignora texto antes/después)
+        const jsonMatch = clean.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error(`JSON inválido: ${parseErr1.message}`);
+        let jsonStr = jsonMatch[0];
+        try {
+          data = JSON.parse(jsonStr);
+        } catch (parseErr2) {
+          // Intento 3: sanitizar problemas comunes del LLM
+          jsonStr = jsonStr
+            // Trailing commas antes de } o ]
+            .replace(/,\s*([}\]])/g, '$1')
+            // Python booleans / null
+            .replace(/:\s*True\b/g, ': true')
+            .replace(/:\s*False\b/g, ': false')
+            .replace(/:\s*None\b/g, ': null')
+            // Números con separador de miles paraguayo 7.650.000 → solo si tiene 2+ puntos
+            .replace(/"(\w+)":\s*(\d{1,3})\.(\d{3})\.(\d{3})/g, '"$1": $2$3$4')
+            .replace(/"(\w+)":\s*(\d{1,3})\.(\d{3})\b(?![\d,])/g, '"$1": $2$3');
+          data = JSON.parse(jsonStr);
+        }
+      }
       const RUC_MAP = {
         '80014018-4': 'Sol Control S.R.L.',
         '800140184':  'Sol Control S.R.L.',
