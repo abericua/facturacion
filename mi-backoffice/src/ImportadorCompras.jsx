@@ -40,25 +40,54 @@ const PROVEEDORES = [
   { id: 'todo_costura', label: 'Todo Costura S.A.',     ruc: '80054996-1' },
 ];
 
-const SYSTEM_PROMPT = `Eres un extractor de datos de comprobantes fiscales electrónicos paraguayos (kuDE - SIFEN).
-Analiza el documento PDF y devuelve ÚNICAMENTE un objeto JSON válido, sin texto adicional, sin backticks, sin markdown.
+// ── Parámetros financieros conocidos por proveedor (extraídos del catálogo productos_maestros.csv)
+const PROVEEDOR_PARAMS = {
+  sol_control: {
+    nombre:      'Sol Control S.R.L.',
+    ruc:         '80014018-4',
+    moneda:      'USD',
+    prefijo_cod: 'SC-',
+    iva_tipico:  10,
+    productos:   'impresoras Epson, plotters, equipos de impresión digital, consumibles',
+    reglas_moneda: `IMPORTANTE: Sol Control S.R.L. factura en DÓLARES AMERICANOS (USD).
+- "moneda" SIEMPRE es "USD"
+- "precio_unit_usd" es el precio en dólares (ej: 300.00, NO 2.340.000)
+- "subtotal_usd" es el monto en dólares
+- "subtotal_pyg" puede ser 0 o el equivalente en guaraníes
+- Los códigos de artículo empiezan con "SC-" (ej: SC-001, SC-023)`,
+  },
+  todo_costura: {
+    nombre:      'Todo Costura S.A.',
+    ruc:         '80054996-1',
+    moneda:      'PYG',
+    prefijo_cod: 'TC-',
+    iva_tipico:  10,
+    productos:   'prensas térmicas, grabadoras láser, equipos de sublimación, accesorios de costura',
+    reglas_moneda: `IMPORTANTE: Todo Costura S.A. factura en GUARANÍES PARAGUAYOS (PYG).
+- "moneda" SIEMPRE es "PYG"
+- "precio_unit_usd" debe ser null (no hay precio en dólares)
+- "subtotal_usd" debe ser null
+- "subtotal_pyg" es el monto real en guaraníes (ej: 1.300.000 → 1300000)
+- Los códigos de artículo empiezan con "TC-" (ej: TC-001, TC-023)`,
+  },
+};
 
-Estructura exacta requerida:
-{
+// Estructura base del JSON requerido (compartida entre todos los prompts)
+const JSON_ESTRUCTURA = `{
   "tipo": "FAC" o "NC",
   "numero": "001-001-XXXXXXX",
   "fecha": "DD/MM/YY",
   "hora": "HH:MM:SS",
-  "proveedor": "Nombre de la empresa emisora. ¡ATENCION! NUNCA puede ser 'SOLPRO SRL' ni 'SOL CONTROL S.R.L.' ya que ellos son los COMPRADORES.",
-  "ruc_proveedor": "RUC de la empresa emisora (arriba de todo). NUNCA puede ser el RUC de Solpro o Sol Control.",
+  "proveedor": "Nombre exacto de la empresa emisora",
+  "ruc_proveedor": "RUC de la empresa emisora",
   "cliente": "Nombre del receptor",
   "ruc_cliente": "RUC del receptor",
   "condicion": "Contado" o "Credito",
   "moneda": "USD" o "PYG",
   "tipo_cambio": numero_o_null,
   "concepto": "descripción breve de los ítems principales",
-  "subtotal_usd": numero o null si la factura es en guaranies,
-  "subtotal_pyg": numero (monto total en guaranies, 0 si la factura es en USD),
+  "subtotal_usd": numero_o_null,
+  "subtotal_pyg": numero,
   "iva_5": numero,
   "iva_10": numero,
   "iva_total": numero,
@@ -71,18 +100,52 @@ Estructura exacta requerida:
       "ncm": "código NCM si existe",
       "cantidad": numero,
       "descuento_pct": numero_o_0,
-      "precio_unit_usd": numero,
+      "precio_unit_usd": numero_o_null,
       "iva_pct": 5 o 10 o 0,
-      "subtotal_usd": numero
+      "subtotal_usd": numero_o_null
     }
   ]
-}
+}`;
+
+function getSystemPrompt(proveedorId) {
+  const params = PROVEEDOR_PARAMS[proveedorId];
+
+  if (params) {
+    return `Eres un extractor de datos de comprobantes fiscales electrónicos paraguayos (kuDE - SIFEN).
+Analiza el documento PDF y devuelve ÚNICAMENTE un objeto JSON válido, sin texto adicional, sin backticks, sin markdown.
+
+PROVEEDOR IDENTIFICADO: ${params.nombre} (RUC: ${params.ruc})
+Productos típicos: ${params.productos}
+
+${params.reglas_moneda}
+
+Estructura exacta requerida:
+${JSON_ESTRUCTURA}
+
+Reglas generales:
+- tipo "FAC" para Facturas Electrónicas, "NC" para Notas de Crédito
+- iva_total = iva_5 + iva_10
+- NUNCA uses puntos como separador de miles en los números JSON (7.650.000 → 7650000)
+- Responde SOLO el JSON, nada más`;
+  }
+
+  // Prompt genérico cuando no se conoce el proveedor de antemano
+  return `Eres un extractor de datos de comprobantes fiscales electrónicos paraguayos (kuDE - SIFEN).
+Analiza el documento PDF y devuelve ÚNICAMENTE un objeto JSON válido, sin texto adicional, sin backticks, sin markdown.
+
+ATENCIÓN: El COMPRADOR (cliente) es SOLPRO SRL o SOL CONTROL S.R.L. — el PROVEEDOR (emisor) es la otra empresa.
+- Si la factura es en USD: moneda="USD", precio_unit_usd=precio en dólares, subtotal_usd=monto en USD
+- Si la factura es en guaraníes: moneda="PYG", precio_unit_usd=null, subtotal_usd=null, subtotal_pyg=monto en PYG
+
+Estructura exacta requerida:
+${JSON_ESTRUCTURA}
 
 Reglas:
 - tipo "FAC" para Facturas Electrónicas, "NC" para Notas de Crédito
-- Si el documento está en USD, subtotal_usd es el monto directo
 - iva_total = iva_5 + iva_10
+- NUNCA uses puntos como separador de miles en los números JSON (7.650.000 → 7650000)
 - Responde SOLO el JSON, nada más`;
+}
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 const fmtUSD = (n) =>
@@ -216,7 +279,7 @@ export default function ImportadorCompras() {
   const clearAll   = () => { setFiles([]); setRecords([]); DB.limpiarCompras().catch(console.error); };
 
   // ── Procesar un PDF ───────────────────────────────────────────────────────
-  const processOne = async (fileObj) => {
+  const processOne = async (fileObj, proveedorHint = 'todos') => {
     setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'processing' } : f));
     try {
       const pdfText = await extractPdfText(fileObj.file);
@@ -230,7 +293,7 @@ export default function ImportadorCompras() {
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 4000,
-          system: SYSTEM_PROMPT,
+          system: getSystemPrompt(proveedorHint),
           messages: [{
             role: 'user',
             content: `Extraé los datos de este comprobante fiscal paraguayo (kuDE):\n\n${pdfText}`,
@@ -270,24 +333,63 @@ export default function ImportadorCompras() {
             .replace(/:\s*True\b/g, ': true')
             .replace(/:\s*False\b/g, ': false')
             .replace(/:\s*None\b/g, ': null')
-            // Números con separador de miles paraguayo 7.650.000 → solo si tiene 2+ puntos
-            .replace(/"(\w+)":\s*(\d{1,3})\.(\d{3})\.(\d{3})/g, '"$1": $2$3$4')
-            .replace(/"(\w+)":\s*(\d{1,3})\.(\d{3})\b(?![\d,])/g, '"$1": $2$3');
+            // Número con punto final sin decimales: 25. → 25  (causa "Unterminated fractional number")
+            .replace(/(\d+)\.\s*([,}\]\s\n\r])/g, '$1$2')
+            // Números con separador de miles paraguayo (4 grupos): 1.234.567.890 → 1234567890
+            .replace(/\b(\d+)\.(\d{3})\.(\d{3})\.(\d{3})\b/g, '$1$2$3$4')
+            // Números con separador de miles paraguayo (3 grupos): 7.650.000 → 7650000
+            .replace(/\b(\d+)\.(\d{3})\.(\d{3})\b/g, '$1$2$3');
           data = JSON.parse(jsonStr);
         }
       }
+      // ── Normalizar proveedor por RUC ──────────────────────────────────────
       const RUC_MAP = {
-        '80014018-4': 'Sol Control S.R.L.',
-        '800140184':  'Sol Control S.R.L.',
-        '80054996-1': 'Todo Costura S.A.',
-        '800549961':  'Todo Costura S.A.',
+        '80014018-4': { nombre: 'Sol Control S.R.L.',  id: 'sol_control'  },
+        '800140184':  { nombre: 'Sol Control S.R.L.',  id: 'sol_control'  },
+        '80054996-1': { nombre: 'Todo Costura S.A.',   id: 'todo_costura' },
+        '800549961':  { nombre: 'Todo Costura S.A.',   id: 'todo_costura' },
       };
+      let provIdDetectado = proveedorHint;
       if (data.ruc_proveedor) {
-        const match = Object.keys(RUC_MAP).find(r => 
+        const match = Object.keys(RUC_MAP).find(r =>
           data.ruc_proveedor.replace(/[^0-9]/g,'').includes(r.replace(/[^0-9]/g,''))
         );
-        if (match) data.proveedor = RUC_MAP[match];
+        if (match) {
+          data.proveedor  = RUC_MAP[match].nombre;
+          provIdDetectado = RUC_MAP[match].id;
+        }
       }
+
+      // ── Corrección de parámetros financieros con datos conocidos del catálogo ──
+      // Si identificamos el proveedor (por RUC o por filtro), corregimos campos
+      // que el LLM suele equivocar basándonos en parámetros ya determinados.
+      const params = PROVEEDOR_PARAMS[provIdDetectado];
+      if (params) {
+        // Corregir moneda si el LLM la confundió
+        if (data.moneda !== params.moneda) {
+          console.warn(`[SGSP] Corrección moneda: LLM dijo "${data.moneda}", se esperaba "${params.moneda}" para ${params.nombre}`);
+          data.moneda = params.moneda;
+        }
+        // Para facturas en PYG: precio_unit_usd y subtotal_usd de items deben ser null
+        if (params.moneda === 'PYG') {
+          data.subtotal_usd = null;
+          if (Array.isArray(data.items)) {
+            data.items = data.items.map(it => ({
+              ...it,
+              precio_unit_usd: null,
+              subtotal_usd:    null,
+            }));
+          }
+        }
+        // Para facturas en USD: subtotal_pyg puede ser 0 (se convertirá con TC al guardar)
+        if (params.moneda === 'USD' && !data.subtotal_usd && data.subtotal_pyg > 0) {
+          // El LLM puso el monto en subtotal_pyg cuando debería estar en subtotal_usd
+          // Esto ocurre si la factura muestra el equivalente en guaraníes
+          // No autocorregimos el monto (no sabemos el TC exacto), solo lo logueamos
+          console.warn(`[SGSP] Posible confusión USD/PYG: subtotal_usd=${data.subtotal_usd}, subtotal_pyg=${data.subtotal_pyg}`);
+        }
+      }
+
       setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'done', data } : f));
       return { ...data, _fileId: fileObj.id, _fileName: fileObj.file.name };
     } catch (e) {
@@ -308,7 +410,7 @@ export default function ImportadorCompras() {
     const newResults = [];
     for (let i = 0; i < pending.length; i += BATCH) {
       const batch = pending.slice(i, i + BATCH);
-      const results = await Promise.allSettled(batch.map(f => processOne(f)));
+      const results = await Promise.allSettled(batch.map(f => processOne(f, provFilter)));
       results.forEach(r => {
         if (r.status === 'fulfilled' && r.value) newResults.push(r.value);
       });
