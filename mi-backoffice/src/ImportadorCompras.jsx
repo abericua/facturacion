@@ -292,7 +292,7 @@ export default function ImportadorCompras() {
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 4000,
+          max_tokens: 8000,
           system: getSystemPrompt(proveedorHint),
           messages: [{
             role: 'user',
@@ -314,6 +314,62 @@ export default function ImportadorCompras() {
       if (!clean) throw new Error('Sin contenido extraíble');
 
       // ── Extracción robusta del JSON ───────────────────────────────────────
+
+      // Cierra un JSON truncado contando llaves/corchetes abiertos
+      const closeJSON = (str) => {
+        const stack = [];
+        let inString = false;
+        let escape = false;
+        for (const ch of str) {
+          if (escape) { escape = false; continue; }
+          if (ch === '\\' && inString) { escape = true; continue; }
+          if (ch === '"') { inString = !inString; continue; }
+          if (inString) continue;
+          if (ch === '{' || ch === '[') stack.push(ch === '{' ? '}' : ']');
+          else if ((ch === '}' || ch === ']') && stack.length) stack.pop();
+        }
+        return str + stack.reverse().join('');
+      };
+
+      // Sanitizaciones estándar del LLM (reutilizable en intentos 3 y 4)
+      const sanitizeLLMJson = (str) => str
+        // Trailing commas antes de } o ]
+        .replace(/,\s*([}\]])/g, '$1')
+        // Python booleans / null
+        .replace(/:\s*True\b/g, ': true')
+        .replace(/:\s*False\b/g, ': false')
+        .replace(/:\s*None\b/g, ': null')
+        // Número con punto final sin decimales: 25. → 25
+        .replace(/(\d+)\.\s*([,}\]\s\n\r])/g, '$1$2')
+        // Números con separador de miles paraguayo (4 grupos): 1.234.567.890
+        .replace(/\b(\d+)\.(\d{3})\.(\d{3})\.(\d{3})\b/g, '$1$2$3$4')
+        // Números con separador de miles paraguayo (3 grupos): 7.650.000
+        .replace(/\b(\d+)\.(\d{3})\.(\d{3})\b/g, '$1$2$3');
+
+      // Sanitizaciones agresivas para el intento 4
+      const sanitizeAgressive = (str) => {
+        let s = str;
+        // 1. Ellipsis fuera de strings como abreviación del LLM: {..., ...} o [..., ...]
+        s = s.replace(/,?\s*\.\.\.\s*([,}\]])/g, '$1');
+        // 2. Ellipsis al inicio de array/objeto como primer elemento
+        s = s.replace(/([{\[]\s*)\.\.\.\s*,/g, '$1');
+        // 3. Ellipsis como valor de propiedad: "key": ...  → "key": null
+        s = s.replace(/:\s*\.\.\./g, ': null');
+        // 4. Ellipsis dentro de strings: "texto..." es válido, no lo tocamos
+        // 5. Claves sin comillas: {key: "val"} o {key: 123}  → {"key": "val"}
+        //    Solo aplica fuera de strings (aproximación segura para objetos JSON)
+        s = s.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+        // 6. Limpiar comillas duplicadas generadas por paso anterior: {""key"":
+        s = s.replace(/""+([^"]+)""+\s*:/g, '"$1":');
+        // 7. Newlines/tabs literales DENTRO de valores string → espacio
+        s = s.replace(/"((?:[^"\\]|\\.)*)"/g, (m) => m.replace(/[\r\n\t]+/g, ' '));
+        // 8. String sin cerrar al final del JSON → agregar comilla de cierre
+        if ((s.match(/"/g) || []).length % 2 !== 0) {
+          s = s + '"';
+        }
+        return sanitizeLLMJson(s);
+      };
+
       let data;
       try {
         data = JSON.parse(clean);
@@ -325,21 +381,20 @@ export default function ImportadorCompras() {
         try {
           data = JSON.parse(jsonStr);
         } catch (parseErr2) {
-          // Intento 3: sanitizar problemas comunes del LLM
-          jsonStr = jsonStr
-            // Trailing commas antes de } o ]
-            .replace(/,\s*([}\]])/g, '$1')
-            // Python booleans / null
-            .replace(/:\s*True\b/g, ': true')
-            .replace(/:\s*False\b/g, ': false')
-            .replace(/:\s*None\b/g, ': null')
-            // Número con punto final sin decimales: 25. → 25  (causa "Unterminated fractional number")
-            .replace(/(\d+)\.\s*([,}\]\s\n\r])/g, '$1$2')
-            // Números con separador de miles paraguayo (4 grupos): 1.234.567.890 → 1234567890
-            .replace(/\b(\d+)\.(\d{3})\.(\d{3})\.(\d{3})\b/g, '$1$2$3$4')
-            // Números con separador de miles paraguayo (3 grupos): 7.650.000 → 7650000
-            .replace(/\b(\d+)\.(\d{3})\.(\d{3})\b/g, '$1$2$3');
-          data = JSON.parse(jsonStr);
+          // Intento 3: sanitizaciones estándar del LLM
+          const sanitized3 = sanitizeLLMJson(jsonStr);
+          try {
+            data = JSON.parse(sanitized3);
+          } catch (parseErr3) {
+            // Intento 4: sanitizaciones agresivas + cierre de JSON truncado
+            try {
+              const sanitized4 = sanitizeAgressive(jsonStr);
+              const closed4 = closeJSON(sanitized4);
+              data = JSON.parse(closed4);
+            } catch (parseErr4) {
+              throw new Error(`JSON no recuperable: ${parseErr4.message}`);
+            }
+          }
         }
       }
       // ── Normalizar proveedor por RUC ──────────────────────────────────────
