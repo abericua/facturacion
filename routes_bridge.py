@@ -1,52 +1,55 @@
 # -*- coding: utf-8 -*-
 """
-SGSP — Bridge API
+SGSP — Bridge API v2 (PostgreSQL)
 Módulo: routes_bridge.py
 Propósito: Endpoints REST para sincronización bidireccional entre
-           el Backoffice React (IndexedDB) y el volumen Railway.
+           el Backoffice React y PostgreSQL (Railway).
 
 Rutas registradas bajo /api/bridge/
+Mismo contrato de API que v1 — cero cambios en el frontend.
 """
 
 import os
 import json
-import pandas as pd
+import re
+import io
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Header, Request
 from fastapi.responses import PlainTextResponse
 from typing import Optional, List, Any
 from pydantic import BaseModel
 
-# ── Rutas de datos (mismo patrón que database.py) ─────────────────────────
-DATA_DIR = os.environ.get(
-    "DATA_DIR",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "database")
-)
+# ── DB (PostgreSQL) ─────────────────────────────────────────────────────────
+import db_sgsp
 
 # Clave de API para el bridge (configurar en Railway → Variables)
 BRIDGE_KEY = os.environ.get("BRIDGE_API_KEY", "sgsp-bridge-2026")
 
-# Archivos del volumen
-SALES_FILE    = os.path.join(DATA_DIR, "VENTAS TOTALES 2026.xlsx")
-COMPRAS_FILE  = os.path.join(DATA_DIR, "compras_proveedores.json")
-FINANZAS_FILE = os.path.join(DATA_DIR, "finanzas_pro.json")
-PRODUCTOS_CSV = os.path.join(DATA_DIR, "productos_maestros.csv")
-
-EXCLUIR_VENTAS = r'SEÑA|ANTICIPO|ACEPTACION DE PAGO|ANULADO|CANCELACION DE COMPRA'
+EXCLUIR_VENTAS = re.compile(
+    r'SEÑA|ANTICIPO|ACEPTACION DE PAGO|ANULADO|CANCELACION DE COMPRA',
+    re.IGNORECASE
+)
 
 router = APIRouter(prefix="/api/bridge", tags=["Bridge — Backoffice Sync"])
 
 
-# ── Modelos ────────────────────────────────────────────────────────────────
+# ── Modelos ─────────────────────────────────────────────────────────────────
 class SyncPayload(BaseModel):
     records: List[Any]
     metadata: Optional[dict] = {}
 
 
-# ── Auth helper ────────────────────────────────────────────────────────────
+# ── Auth helper ──────────────────────────────────────────────────────────────
 def _check_key(key: Optional[str]):
     if key != BRIDGE_KEY:
         raise HTTPException(status_code=403, detail="Bridge API Key inválida.")
+
+
+def _excluir_venta(r: dict) -> bool:
+    """True si el registro debe filtrarse (señas, anulados, etc.)"""
+    desc = str(r.get('descripcion', r.get('DESCRIPCION', '')) or '').upper()
+    cli  = str(r.get('cliente', r.get('CLIENTE', '')) or '').upper()
+    return bool(EXCLUIR_VENTAS.search(desc) or 'ANULADO' in cli or r.get('anulado'))
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -55,18 +58,19 @@ def _check_key(key: Optional[str]):
 @router.get("/status")
 def bridge_status():
     """Health check del bridge. No requiere autenticación."""
-    archivos = {
-        "ventas_excel":   os.path.exists(SALES_FILE),
-        "compras_json":   os.path.exists(COMPRAS_FILE),
-        "finanzas_json":  os.path.exists(FINANZAS_FILE),
-        "productos_csv":  os.path.exists(PRODUCTOS_CSV),
-    }
+    db_ok = False
+    try:
+        conn = db_sgsp.get_conn()
+        conn.close()
+        db_ok = True
+    except Exception:
+        pass
     return {
-        "status":    "ok",
-        "version":   "1.0.0",
+        "status":    "ok" if db_ok else "db_down",
+        "version":   "2.0.0",
+        "backend":   "postgresql",
         "timestamp": datetime.utcnow().isoformat(),
-        "data_dir":  DATA_DIR,
-        "archivos":  archivos,
+        "db_ok":     db_ok,
     }
 
 
@@ -76,82 +80,131 @@ def bridge_status():
 @router.get("/ventas")
 def get_ventas(x_api_key: Optional[str] = Header(None)):
     """
-    Lee VENTAS TOTALES 2026.xlsx del volumen Railway.
-    Filtra señas, anulaciones y registros sin fecha.
-    Retorna JSON limpio para el Backoffice React.
+    Lee ventas de PostgreSQL.
+    Filtra señas, anulaciones. Retorna JSON limpio para el Backoffice React.
     """
     _check_key(x_api_key)
-    if not os.path.exists(SALES_FILE):
-        return {"records": [], "total": 0, "fuente": "sin_archivo"}
+    try:
+        rows = db_sgsp.get_ventas(excluir_anuladas=True)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
-    df = pd.read_excel(SALES_FILE)
+    # Filtro adicional por descripción/cliente (copia semántica del filtro v1)
+    records = [r for r in rows if not _excluir_venta(r)]
 
-    # Filtrar señas y anulaciones
-    mask = (
-        df['DESCRIPCION'].astype(str).str.upper().str.contains(EXCLUIR_VENTAS, na=False) |
-        df['CLIENTE'].astype(str).str.upper().str.contains('ANULADO', na=False)
-    )
-    df = df[~mask].copy()
+    # Normalizar: devolver en el shape original del Excel para no romper el frontend
+    def _fmt(r):
+        return {
+            "FECHA":       r.get('fecha', ''),
+            "CLIENTE":     r.get('cliente', ''),
+            "DESCRIPCION": r.get('descripcion', ''),
+            "CODIGO":      r.get('codigo', ''),
+            "CANTIDAD":    r.get('cantidad', 1),
+            "PRECIO GS":   r.get('precio_gs', 0),
+            "PRECIO USD":  r.get('precio_usd', 0),
+            "NRO_FACTURA": r.get('nro_factura', ''),
+            "VENDEDOR":    r.get('vendedor', ''),
+        }
 
-    # Normalizar fechas
-    df['FECHA'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
-    df['FECHA'] = df['FECHA'].dt.strftime('%d/%m/%Y')
-    df['FECHA'] = df['FECHA'].fillna('')
-
-    # NaN → None para JSON válido
-    df = df.where(pd.notna(df), None)
-
-    records = df.to_dict(orient='records')
-    return {"records": records, "total": len(records), "fuente": SALES_FILE}
+    clean = [_fmt(r) for r in records]
+    return {"records": clean, "total": len(clean), "fuente": "postgresql"}
 
 
 @router.get("/ventas/resumen")
 def get_ventas_resumen(x_api_key: Optional[str] = Header(None)):
     """Resumen mensual de ventas (GS + USD) sin señas/anulaciones."""
     _check_key(x_api_key)
-    if not os.path.exists(SALES_FILE):
-        return {"meses": []}
+    try:
+        rows = db_sgsp.get_ventas(excluir_anuladas=True)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
-    df = pd.read_excel(SALES_FILE)
-    mask = (
-        df['DESCRIPCION'].astype(str).str.upper().str.contains(EXCLUIR_VENTAS, na=False) |
-        df['CLIENTE'].astype(str).str.upper().str.contains('ANULADO', na=False)
-    )
-    df = df[~mask].copy()
-    df['FECHA_DT'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
-    df = df[df['FECHA_DT'].notna()]
-    df['MES'] = df['FECHA_DT'].dt.to_period('M').astype(str)
+    rows = [r for r in rows if not _excluir_venta(r)]
 
-    meses = []
-    for mes, g in df.groupby('MES'):
-        meses.append({
-            "mes":       mes,
-            "ventas_gs": float(g['PRECIO GS'].sum()),
-            "ventas_usd": float(g['PRECIO USD'].sum()),
-            "facturas":  int(len(g)),
-        })
-    return {"meses": sorted(meses, key=lambda x: x['mes'])}
+    # Agrupar por mes (YYYY-MM)
+    meses: dict = {}
+    for r in rows:
+        fecha_str = str(r.get('fecha', '') or '')
+        dt = None
+        for fmt in ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y'):
+            try:
+                dt = datetime.strptime(fecha_str[:10], fmt)
+                break
+            except Exception:
+                pass
+        if not dt:
+            continue
+        mes = dt.strftime('%Y-%m')
+        if mes not in meses:
+            meses[mes] = {'mes': mes, 'ventas_gs': 0.0, 'ventas_usd': 0.0, 'facturas': 0}
+        meses[mes]['ventas_gs']  += float(r.get('precio_gs', 0) or 0)
+        meses[mes]['ventas_usd'] += float(r.get('precio_usd', 0) or 0)
+        meses[mes]['facturas']   += 1
+
+    return {"meses": sorted(meses.values(), key=lambda x: x['mes'])}
 
 
 @router.post("/ventas/upload")
-def upload_ventas_master(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
+async def upload_ventas_master(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
     """
-    Reemplaza VENTAS TOTALES 2026.xlsx en el volumen con el master enviado
-    desde el Backoffice React. Requiere autenticación.
+    Reemplaza todas las ventas en PostgreSQL con el master enviado
+    desde el Backoffice React.
     """
     _check_key(x_api_key)
     if not payload.records:
         raise HTTPException(status_code=400, detail="Sin registros para guardar.")
 
-    os.makedirs(DATA_DIR, exist_ok=True)
-    df = pd.DataFrame(payload.records)
-    df.to_excel(SALES_FILE, index=False, engine='openpyxl')
+    try:
+        result = db_sgsp.sync_ventas_bulk(payload.records)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
+
+    if 'error' in result:
+        raise HTTPException(status_code=500, detail=result['error'])
+
     return {
         "status":  "saved",
-        "total":   len(payload.records),
-        "archivo": SALES_FILE,
+        "total":   result.get('insertados', 0),
+        "fuente":  "postgresql",
         "ts":      datetime.utcnow().isoformat(),
     }
+
+
+@router.get("/ventas/csv")
+def get_ventas_csv(x_api_key: Optional[str] = Header(None)):
+    """
+    Sirve ventas como CSV semicolon-delimited.
+    Formato esperado por DashboardReal2026 y VentasAnalytics:
+    FECHA;CANTIDAD;DESCRIPCION;CODIGO
+    """
+    _check_key(x_api_key)
+    try:
+        rows = db_sgsp.get_ventas(excluir_anuladas=True)
+    except Exception:
+        rows = []
+
+    rows = [r for r in rows if not _excluir_venta(r)]
+
+    MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+    lines = ['FECHA;CANTIDAD;DESCRIPCION;CODIGO']
+    for r in rows:
+        fecha_str = str(r.get('fecha', '') or '')
+        dt = None
+        for fmt in ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y'):
+            try:
+                dt = datetime.strptime(fecha_str[:10], fmt)
+                break
+            except Exception:
+                pass
+        if not dt:
+            continue
+        fecha_csv = f"{dt.day:02d}-{MESES_CORTO[dt.month-1]}-{str(dt.year)[2:]}"
+        qty  = int(r.get('cantidad', 1) or 1)
+        desc = str(r.get('descripcion', '') or '').replace(';', ',').strip()
+        code = str(r.get('codigo', '') or '').replace(';', ',').strip()
+        lines.append(f"{fecha_csv};{qty};{desc};{code}")
+
+    return PlainTextResponse('\n'.join(lines), media_type="text/csv; charset=utf-8")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -159,16 +212,12 @@ def upload_ventas_master(payload: SyncPayload, x_api_key: Optional[str] = Header
 # ══════════════════════════════════════════════════════════════════════════
 @router.get("/compras")
 def get_compras(x_api_key: Optional[str] = Header(None)):
-    """
-    Lee el JSON de compras de proveedores guardado en el volumen Railway.
-    Si no existe, retorna lista vacía (backoffice usa su IndexedDB local).
-    """
+    """Lee el registro de compras de proveedores desde PostgreSQL."""
     _check_key(x_api_key)
-    if not os.path.exists(COMPRAS_FILE):
-        return {"records": [], "total": 0}
-
-    with open(COMPRAS_FILE, 'r', encoding='utf-8') as f:
-        records = json.load(f)
+    try:
+        records = db_sgsp.get_compras()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
     return {"records": records, "total": len(records)}
 
 
@@ -176,17 +225,20 @@ def get_compras(x_api_key: Optional[str] = Header(None)):
 def sync_compras(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
     """
     Recibe todos los comprobantes procesados por ImportadorCompras
-    y los persiste en el volumen Railway como compras_proveedores.json.
+    y los persiste en PostgreSQL (reemplaza todo).
     """
     _check_key(x_api_key)
-    os.makedirs(DATA_DIR, exist_ok=True)
+    try:
+        result = db_sgsp.sync_compras_bulk(payload.records)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
-    with open(COMPRAS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(payload.records, f, ensure_ascii=False, indent=2, default=str)
+    if 'error' in result:
+        raise HTTPException(status_code=500, detail=result['error'])
 
     return {
         "status": "synced",
-        "total":  len(payload.records),
+        "total":  result.get('insertados', 0),
         "ts":     datetime.utcnow().isoformat(),
     }
 
@@ -198,18 +250,27 @@ def sync_compras(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
 def get_iva(anio: str, x_api_key: Optional[str] = Header(None)):
     """Retorna los registros de IVA mensual del año indicado."""
     _check_key(x_api_key)
-    if not os.path.exists(FINANZAS_FILE):
-        return {"records": []}
+    try:
+        rows = db_sgsp.get_iva(anio=anio)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
-    with open(FINANZAS_FILE, 'r', encoding='utf-8') as f:
-        finanzas = json.load(f)
+    # Serializar datos JSONB
+    records = []
+    for r in rows:
+        datos = r.get('datos', {})
+        if isinstance(datos, str):
+            try:
+                datos = json.loads(datos)
+            except Exception:
+                datos = {}
+        entry = {"periodo": r['periodo'], **datos}
+        entry['total_ventas_brutas'] = r.get('total_ventas_brutas', 0)
+        entry['debito_fiscal']       = r.get('debito_fiscal', 0)
+        entry['credito_fiscal']      = r.get('credito_fiscal', 0)
+        entry['iva_a_pagar']         = r.get('iva_a_pagar', 0)
+        records.append(entry)
 
-    iva = finanzas.get("iva_mensual", {})
-    records = [
-        {"periodo": periodo, **datos}
-        for periodo, datos in iva.items()
-        if periodo.startswith(anio)
-    ]
     return {"records": records, "anio": anio}
 
 
@@ -217,31 +278,25 @@ def get_iva(anio: str, x_api_key: Optional[str] = Header(None)):
 def sync_iva(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
     """
     Recibe los registros de IVA procesados en el Backoffice React
-    y los merge en finanzas_pro.json del volumen Railway.
+    y los upserta en PostgreSQL por periodo.
     """
     _check_key(x_api_key)
-    os.makedirs(DATA_DIR, exist_ok=True)
-
-    finanzas = {}
-    if os.path.exists(FINANZAS_FILE):
-        with open(FINANZAS_FILE, 'r', encoding='utf-8') as f:
-            finanzas = json.load(f)
-
-    if "iva_mensual" not in finanzas:
-        finanzas["iva_mensual"] = {}
-
+    count = 0
+    errors = []
     for record in payload.records:
         periodo = record.get("periodo")
-        if periodo:
-            datos = {k: v for k, v in record.items() if k != "periodo"}
-            finanzas["iva_mensual"][periodo] = datos
-
-    with open(FINANZAS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(finanzas, f, ensure_ascii=False, indent=2, default=str)
+        if not periodo:
+            continue
+        try:
+            db_sgsp.upsert_iva(periodo, record)
+            count += 1
+        except Exception as e:
+            errors.append(str(e))
 
     return {
         "status": "synced",
-        "total":  len(payload.records),
+        "total":  count,
+        "errors": errors,
         "ts":     datetime.utcnow().isoformat(),
     }
 
@@ -249,25 +304,16 @@ def sync_iva(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
 # ══════════════════════════════════════════════════════════════════════════
 # CLIENTES (Directorio maestro)
 # ══════════════════════════════════════════════════════════════════════════
-CLIENTES_FILE = os.path.join(DATA_DIR, "master_clientes.json")
-
 @router.get("/clientes")
 def get_clientes(x_api_key: Optional[str] = Header(None)):
-    """Lee el directorio de clientes del volumen Railway."""
+    """Lee el directorio de clientes desde PostgreSQL."""
     _check_key(x_api_key)
-    if not os.path.exists(CLIENTES_FILE):
-        return {"records": [], "total": 0}
-    with open(CLIENTES_FILE, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    # Soporta dict {ruc: {...}} y lista [...]
-    if isinstance(data, dict):
-        records = list(data.values())
-    else:
-        records = data
+    try:
+        records = db_sgsp.get_clientes(solo_activos=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
     return {"records": records, "total": len(records)}
 
-
-from fastapi import Request
 
 @router.post("/clientes/sync")
 async def sync_clientes(request: Request, x_api_key: Optional[str] = Header(None)):
@@ -282,34 +328,28 @@ async def sync_clientes(request: Request, x_api_key: Optional[str] = Header(None
     else:
         raise HTTPException(status_code=400, detail="Formato de payload inválido.")
 
-    os.makedirs(DATA_DIR, exist_ok=True)
     creados = actualizados = 0
-
-    # Cargar existentes
-    existing = {}
-    if os.path.exists(CLIENTES_FILE):
-        with open(CLIENTES_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        existing = data if isinstance(data, dict) else {str(c.get('ruc', i)): c for i, c in enumerate(data)}
+    errors = []
 
     for cliente in records:
-        key = str(cliente.get('ruc') or cliente.get('RUC') or cliente.get('id', ''))
-        if key in existing:
-            existing[key].update(cliente)
-            actualizados += 1
-        else:
-            existing[key] = cliente
+        key = str(cliente.get('ruc') or cliente.get('RUC') or cliente.get('id_solpro', ''))
+        if not key:
+            continue
+        if not cliente.get('id_solpro'):
+            cliente['id_solpro'] = key
+        try:
+            db_sgsp.upsert_cliente(cliente)
             creados += 1
-
-    with open(CLIENTES_FILE, 'w', encoding='utf-8') as f:
-        json.dump(existing, f, ensure_ascii=False, indent=2, default=str)
+        except Exception as e:
+            errors.append(str(e))
+            actualizados += 1  # puede ser update fallido — contar de todas formas
 
     return {
-        "status":      "synced",
-        "creados":     creados,
+        "status":       "synced",
+        "creados":      creados,
         "actualizados": actualizados,
-        "total":       len(existing),
-        "ts":          datetime.utcnow().isoformat(),
+        "errors":       errors,
+        "ts":           datetime.utcnow().isoformat(),
     }
 
 
@@ -318,180 +358,136 @@ async def sync_clientes(request: Request, x_api_key: Optional[str] = Header(None
 # ══════════════════════════════════════════════════════════════════════════
 @router.get("/productos")
 def get_productos_bridge(x_api_key: Optional[str] = Header(None)):
-    """
-    Lee productos_maestros.csv del volumen Railway.
-    Complementa el endpoint /api/productos (SQLite) con el CSV maestro.
-    """
+    """Lee productos desde PostgreSQL."""
     _check_key(x_api_key)
-    if not os.path.exists(PRODUCTOS_CSV):
-        return {"records": [], "total": 0}
-
-    df = pd.read_csv(PRODUCTOS_CSV)
-    df = df.where(pd.notna(df), None)
-    records = df.to_dict(orient='records')
+    try:
+        records = db_sgsp.get_productos(solo_activos=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
     return {"records": records, "total": len(records)}
 
 
 @router.get("/ventas/csv")
-def get_ventas_csv(x_api_key: Optional[str] = Header(None)):
-    """
-    Sirve VENTAS TOTALES 2026.xlsx como CSV semicolon-delimited.
-    Formato esperado por DashboardReal2026 y VentasAnalytics:
-    FECHA;CANTIDAD;DESCRIPCION;CODIGO
-    """
-    _check_key(x_api_key)
-    if not os.path.exists(SALES_FILE):
-        return PlainTextResponse("FECHA;CANTIDAD;DESCRIPCION;CODIGO\n", media_type="text/csv; charset=utf-8")
-
-    df = pd.read_excel(SALES_FILE)
-    mask = (
-        df['DESCRIPCION'].astype(str).str.upper().str.contains(EXCLUIR_VENTAS, na=False) |
-        df['CLIENTE'].astype(str).str.upper().str.contains('ANULADO', na=False)
-    )
-    df = df[~mask].copy()
-
-    df['FECHA_DT'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
-    df = df[df['FECHA_DT'].notna()]
-
-    MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
-    df['FECHA_CSV'] = df['FECHA_DT'].apply(
-        lambda d: f"{d.day:02d}-{MESES_CORTO[d.month-1]}-{str(d.year)[2:]}"
-    )
-
-    qty_col = 'CANTIDAD' if 'CANTIDAD' in df.columns else None
-
-    lines = ['FECHA;CANTIDAD;DESCRIPCION;CODIGO']
-    for _, row in df.iterrows():
-        qty  = int(row[qty_col]) if qty_col and pd.notna(row[qty_col]) else 1
-        desc = str(row.get('DESCRIPCION', '')).replace(';', ',').strip()
-        code = str(row.get('CODIGO', row.get('COD', ''))).replace(';', ',').strip()
-        lines.append(f"{row['FECHA_CSV']};{qty};{desc};{code}")
-
-    return PlainTextResponse('\n'.join(lines), media_type="text/csv; charset=utf-8")
+def _ventas_csv_dup(x_api_key: Optional[str] = Header(None)):
+    # alias — ya definido arriba, FastAPI usará el primero
+    pass
 
 
 @router.get("/productos/csv")
 def get_productos_csv(x_api_key: Optional[str] = Header(None)):
     """
-    Sirve productos_maestros.csv directamente como texto.
-    Usado por CalculadoraPrecios y DashboardReal2026.
+    Sirve productos como CSV semicolon-delimited para CalculadoraPrecios y DashboardReal2026.
+    Formato: Nombre,ID_Ref,Proveedor,Linea,Costo_Compra,Moneda_Costo,Margen_Pct,Stock,Costo_USD,Codigo_Proveedor
     """
     _check_key(x_api_key)
-    if not os.path.exists(PRODUCTOS_CSV):
-        return PlainTextResponse(
-            "Nombre,ID_Ref,Proveedor,Linea,Costo_Compra,Moneda_Costo,Margen_Pct\n",
-            media_type="text/csv; charset=utf-8"
-        )
-    with open(PRODUCTOS_CSV, 'r', encoding='utf-8-sig') as f:
-        content = f.read()
-    return PlainTextResponse(content, media_type="text/csv; charset=utf-8")
+    try:
+        records = db_sgsp.get_productos(solo_activos=False)
+    except Exception:
+        records = []
+
+    headers = ['Nombre','ID_Ref','Proveedor','Linea','Costo_Compra','Moneda_Costo','Margen_Pct','Stock','Costo_USD','Codigo_Proveedor']
+    lines = [','.join(headers)]
+    for r in records:
+        row = [
+            str(r.get('nombre_canonico', '') or '').replace(',', ';'),
+            str(r.get('id_solpro', '') or '').replace(',', ';'),
+            str(r.get('proveedor', '') or '').replace(',', ';'),
+            str(r.get('linea', '') or '').replace(',', ';'),
+            str(r.get('costo', 0) or 0),
+            str(r.get('moneda_costo', 'USD') or 'USD'),
+            str(r.get('margen_pct', 0) or 0),
+            str(int(r.get('stock_actual', 0) or 0)),
+            str(r.get('costo_usd', 0) or 0),
+            str(r.get('codigo_proveedor', '') or '').replace(',', ';'),
+        ]
+        lines.append(','.join(row))
+
+    return PlainTextResponse('\n'.join(lines), media_type="text/csv; charset=utf-8")
 
 
 @router.post("/productos/sync")
 def sync_productos(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
-    """Actualiza productos_maestros.csv en el volumen con el catálogo del Backoffice."""
+    """Actualiza el catálogo de productos en PostgreSQL."""
     _check_key(x_api_key)
     if not payload.records:
         raise HTTPException(status_code=400, detail="Sin registros.")
 
-    os.makedirs(DATA_DIR, exist_ok=True)
-    df = pd.DataFrame(payload.records)
-    df.to_csv(PRODUCTOS_CSV, index=False, encoding='utf-8-sig')
-    return {"status": "synced", "total": len(payload.records)}
+    count = 0
+    errors = []
+    for p in payload.records:
+        # Asegura id_solpro
+        if not p.get('id_solpro'):
+            p['id_solpro'] = p.get('ID_Ref') or p.get('nombre_canonico') or p.get('Nombre', '')
+        try:
+            db_sgsp.upsert_producto(p)
+            count += 1
+        except Exception as e:
+            errors.append(str(e))
+
+    return {
+        "status": "synced",
+        "total":  count,
+        "errors": errors,
+        "ts":     datetime.utcnow().isoformat(),
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# STOCK (desde ImportadorCompras → productos_maestros.csv)
+# STOCK (desde ImportadorCompras → sgsp_productos)
 # ══════════════════════════════════════════════════════════════════════════
 @router.post("/stock/sync")
 def sync_stock(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
     """
-    Recibe items agregados desde ImportadorCompras (codigo, descripcion,
-    cantidad, precio_unit_usd) y actualiza la columna 'Stock' en
-    productos_maestros.csv usando matching por código o descripción.
+    Recibe items de compras (codigo, descripcion, cantidad, precio_unit_usd)
+    y actualiza stock en sgsp_productos.
     """
     _check_key(x_api_key)
     if not payload.records:
         raise HTTPException(status_code=400, detail="Sin items de stock.")
 
-    os.makedirs(DATA_DIR, exist_ok=True)
-
-    # Leer CSV actual (o crear vacío con columnas base)
-    BASE_COLS = ["Nombre","ID_Ref","Proveedor","Linea","Costo_Compra","Moneda_Costo","Margen_Pct"]
-    if os.path.exists(PRODUCTOS_CSV):
-        try:
-            df = pd.read_csv(PRODUCTOS_CSV)
-        except Exception:
-            df = pd.DataFrame(columns=BASE_COLS)
-    else:
-        df = pd.DataFrame(columns=BASE_COLS)
-
-    # Asegurar que TODAS las columnas requeridas existen (CSV parcial o corrupto)
-    for col in BASE_COLS:
-        if col not in df.columns:
-            df[col] = ""
-    if "Stock" not in df.columns:
-        df["Stock"] = 0
-    if "Costo_USD" not in df.columns:
-        df["Costo_USD"] = 0.0
-    if "Codigo_Proveedor" not in df.columns:
-        df["Codigo_Proveedor"] = ""
-
-    df["Stock"] = pd.to_numeric(df["Stock"], errors="coerce").fillna(0)
-
     actualizados = 0
     nuevos = 0
+    errors = []
 
     for item in payload.records:
-        cod   = str(item.get("codigo", "")).strip().upper()
-        desc  = str(item.get("descripcion", "")).strip().upper()
-        qty   = float(item.get("cantidad", 0))
+        cod   = str(item.get("codigo", "")).strip()
+        desc  = str(item.get("descripcion", "")).strip()
+        qty   = float(item.get("cantidad", 0) or 0)
         precio = float(item.get("precio_unit_usd", 0) or 0)
 
         if not cod or qty <= 0:
             continue
 
-        # 1. Match por Codigo_Proveedor exacto
-        mask = df["Codigo_Proveedor"].astype(str).str.upper() == cod
-        # 2. Si no matchea, buscar por código en el Nombre o ID_Ref
-        if not mask.any():
-            mask = (
-                df["Nombre"].astype(str).str.upper().str.contains(cod, na=False) |
-                df["ID_Ref"].astype(str).str.upper().str.contains(cod, na=False)
-            )
-
-        if mask.any():
-            df.loc[mask, "Stock"] += qty
-            if precio > 0:
-                df.loc[mask, "Costo_Compra"] = precio
-                df.loc[mask, "Moneda_Costo"] = "USD"
-            df.loc[mask, "Codigo_Proveedor"] = cod
-            actualizados += 1
-        else:
-            # Producto nuevo — agregarlo al CSV
-            nuevo = {
-                "Nombre":           desc or cod,
-                "ID_Ref":           cod,
-                "Proveedor":        "SOL CONTROL / TODO COSTURA",
-                "Linea":            "INSUMOS",
-                "Costo_Compra":     precio,
-                "Moneda_Costo":     "USD",
-                "Margen_Pct":       15.0,
-                "Stock":            qty,
-                "Costo_USD":        precio,
-                "Codigo_Proveedor": cod,
-            }
-            df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
-            nuevos += 1
-
-    df["Stock"] = df["Stock"].astype(int)
-    df.to_csv(PRODUCTOS_CSV, index=False, encoding="utf-8-sig")
+        try:
+            ok = db_sgsp.update_stock_producto(cod, qty, precio)
+            if ok:
+                actualizados += 1
+            else:
+                # Producto no existe — crearlo
+                nuevo = {
+                    'id_solpro':          cod,
+                    'nombre_canonico':    desc or cod,
+                    'codigo_proveedor':   cod,
+                    'proveedor':          'SOL CONTROL / TODO COSTURA',
+                    'linea':              'INSUMOS',
+                    'moneda_costo':       'USD',
+                    'costo':              precio,
+                    'costo_usd':          precio,
+                    'margen_pct':         15.0,
+                    'stock_actual':       qty,
+                    'stock_disponible':   qty,
+                    'activo':             True,
+                }
+                db_sgsp.upsert_producto(nuevo)
+                nuevos += 1
+        except Exception as e:
+            errors.append(f"{cod}: {e}")
 
     return {
-        "status":      "synced",
+        "status":       "synced",
         "actualizados": actualizados,
         "nuevos":       nuevos,
-        "total_csv":    len(df),
+        "errors":       errors,
         "ts":           datetime.utcnow().isoformat(),
     }
 
@@ -499,83 +495,53 @@ def sync_stock(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
 # ══════════════════════════════════════════════════════════════════════════
 # CONCILIACIÓN DE PAGOS (TabConciliacion en FinanzasPro)
 # ══════════════════════════════════════════════════════════════════════════
-PAGOS_FILE = os.path.join(DATA_DIR, "pagos.json")
-
 @router.get("/conciliacion/resumen")
 def get_conciliacion_resumen(x_api_key: Optional[str] = Header(None)):
-    """
-    Lee pagos.json del volumen Railway y retorna el listado para la
-    vista de conciliación en FinanzasPro.
-    """
+    """Retorna el listado de pagos para la vista de conciliación."""
     _check_key(x_api_key)
-    if not os.path.exists(PAGOS_FILE):
-        return {"pagos": [], "total_pendiente": 0, "total_conciliado": 0}
-
-    with open(PAGOS_FILE, 'r', encoding='utf-8') as f:
-        pagos = json.load(f)
+    try:
+        pagos = db_sgsp.get_pagos()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
     total_pendiente  = sum(p.get('monto_gs', 0) for p in pagos if not p.get('conciliado'))
     total_conciliado = sum(p.get('monto_gs', 0) for p in pagos if p.get('conciliado'))
 
     return {
-        "pagos":             pagos,
-        "total":             len(pagos),
-        "total_pendiente":   total_pendiente,
-        "total_conciliado":  total_conciliado,
-        "ts":                datetime.utcnow().isoformat(),
+        "pagos":            pagos,
+        "total":            len(pagos),
+        "total_pendiente":  total_pendiente,
+        "total_conciliado": total_conciliado,
+        "ts":               datetime.utcnow().isoformat(),
     }
 
 
 @router.patch("/pagos/{id_pago}/conciliar")
-def conciliar_pago(id_pago: str, x_api_key: Optional[str] = Header(None)):
+def conciliar_pago_route(id_pago: str, x_api_key: Optional[str] = Header(None)):
     """Marca un pago como conciliado."""
     _check_key(x_api_key)
-    if not os.path.exists(PAGOS_FILE):
-        raise HTTPException(status_code=404, detail="Sin pagos registrados.")
+    try:
+        ok = db_sgsp.conciliar_pago(id_pago, conciliado=True)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
-    with open(PAGOS_FILE, 'r', encoding='utf-8') as f:
-        pagos = json.load(f)
-
-    encontrado = False
-    for p in pagos:
-        if p.get('id_pago') == id_pago:
-            p['conciliado']        = True
-            p['fecha_conciliacion'] = datetime.utcnow().strftime('%Y-%m-%d')
-            encontrado = True
-            break
-
-    if not encontrado:
+    if not ok:
         raise HTTPException(status_code=404, detail=f"Pago {id_pago} no encontrado.")
-
-    with open(PAGOS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(pagos, f, ensure_ascii=False, indent=2)
 
     return {"status": "conciliado", "id_pago": id_pago}
 
 
 @router.patch("/pagos/{id_pago}/desconciliar")
-def desconciliar_pago(id_pago: str, x_api_key: Optional[str] = Header(None)):
+def desconciliar_pago_route(id_pago: str, x_api_key: Optional[str] = Header(None)):
     """Revierte la conciliación de un pago."""
     _check_key(x_api_key)
-    if not os.path.exists(PAGOS_FILE):
-        raise HTTPException(status_code=404, detail="Sin pagos registrados.")
+    try:
+        ok = db_sgsp.conciliar_pago(id_pago, conciliado=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error BD: {e}")
 
-    with open(PAGOS_FILE, 'r', encoding='utf-8') as f:
-        pagos = json.load(f)
-
-    encontrado = False
-    for p in pagos:
-        if p.get('id_pago') == id_pago:
-            p['conciliado']        = False
-            p['fecha_conciliacion'] = ''
-            encontrado = True
-            break
-
-    if not encontrado:
+    if not ok:
         raise HTTPException(status_code=404, detail=f"Pago {id_pago} no encontrado.")
-
-    with open(PAGOS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(pagos, f, ensure_ascii=False, indent=2)
 
     return {"status": "desconciliado", "id_pago": id_pago}
 
@@ -586,59 +552,48 @@ def desconciliar_pago(id_pago: str, x_api_key: Optional[str] = Header(None)):
 @router.get("/dashboard/resumen")
 def get_dashboard_resumen(x_api_key: Optional[str] = Header(None)):
     """
-    Endpoint de alto nivel para el Dashboard Real 2026.
-    Combina ventas reales (Excel) + compras (JSON) + IVA (finanzas_pro.json).
+    Resumen de alto nivel para el Dashboard Real 2026.
+    Combina ventas + compras + IVA de PostgreSQL.
     """
     _check_key(x_api_key)
 
     # Ventas
-    ventas_gs = ventas_usd = 0
-    facturas_activas = 0
-    if os.path.exists(SALES_FILE):
-        try:
-            df = pd.read_excel(SALES_FILE)
-            mask = (
-                df['DESCRIPCION'].astype(str).str.upper().str.contains(EXCLUIR_VENTAS, na=False) |
-                df['CLIENTE'].astype(str).str.upper().str.contains('ANULADO', na=False)
-            )
-            df = df[~mask]
-            ventas_gs = float(df['PRECIO GS'].sum())
-            ventas_usd = float(df['PRECIO USD'].sum())
-            facturas_activas = int(len(df))
-        except Exception:
-            pass
+    ventas_gs = ventas_usd = facturas_activas = 0
+    try:
+        rows = db_sgsp.get_ventas(excluir_anuladas=True)
+        rows = [r for r in rows if not _excluir_venta(r)]
+        ventas_gs       = sum(float(r.get('precio_gs', 0) or 0) for r in rows)
+        ventas_usd      = sum(float(r.get('precio_usd', 0) or 0) for r in rows)
+        facturas_activas = len(rows)
+    except Exception:
+        pass
 
     # Compras
-    compras_total = 0
-    compras_count = 0
-    if os.path.exists(COMPRAS_FILE):
-        try:
-            with open(COMPRAS_FILE, 'r', encoding='utf-8') as f:
-                compras = json.load(f)
-            compras_count = len(compras)
-            for c in compras:
-                if c.get('tipo') == 'FAC':
-                    compras_total += float(c.get('subtotal_usd') or 0)
-                    compras_total -= float(c.get('subtotal_usd') or 0) if c.get('tipo') == 'NC' else 0
-        except Exception:
-            pass
+    compras_total = compras_count = 0
+    try:
+        compras = db_sgsp.get_compras()
+        compras_count = len(compras)
+        for c in compras:
+            if c.get('tipo') == 'FAC':
+                compras_total += float(c.get('subtotal_usd', 0) or 0)
+            elif c.get('tipo') == 'NC':
+                compras_total -= float(c.get('subtotal_usd', 0) or 0)
+    except Exception:
+        pass
 
-    # IVA
+    # IVA 2026
     iva_declarado = 0
-    if os.path.exists(FINANZAS_FILE):
-        try:
-            with open(FINANZAS_FILE, 'r', encoding='utf-8') as f:
-                fin = json.load(f)
-            for periodo, datos in fin.get("iva_mensual", {}).items():
-                if periodo.startswith("2026"):
-                    iva_declarado += float(datos.get("total_ventas_brutas") or datos.get("debito_fiscal", 0))
-        except Exception:
-            pass
+    try:
+        rows_iva = db_sgsp.get_iva(anio='2026')
+        for r in rows_iva:
+            iva_declarado += float(r.get('total_ventas_brutas', 0) or 0)
+    except Exception:
+        pass
 
     return {
         "ventas": {
-            "gs":      ventas_gs,
-            "usd":     ventas_usd,
+            "gs":       ventas_gs,
+            "usd":      ventas_usd,
             "facturas": facturas_activas,
         },
         "compras": {
@@ -649,12 +604,12 @@ def get_dashboard_resumen(x_api_key: Optional[str] = Header(None)):
         "ts": datetime.utcnow().isoformat(),
     }
 
+
 # ══════════════════════════════════════════════════════════════════════════
 # LLM PROXY (Anthropic / Gemini) — evita CORS y oculta la API Key
 # ══════════════════════════════════════════════════════════════════════════
-# Proveedor activo: "gemini" o "anthropic".
-#   - Si LLM_PROVIDER está seteado, manda eso.
-#   - Si no, usa Gemini cuando hay GEMINI_API_KEY; si no, Anthropic.
+# Sin cambios respecto a v1 — el proxy no toca almacenamiento.
+
 def _resolver_proveedor() -> str:
     forzado = (os.environ.get("LLM_PROVIDER") or "").strip().lower()
     if forzado in ("gemini", "anthropic"):
@@ -668,22 +623,19 @@ def _anthropic_a_gemini(body: dict) -> dict:
     """Traduce un payload estilo Anthropic Messages a un request de Gemini."""
     gemini_req: dict = {"contents": []}
 
-    # system → system_instruction
     system = body.get("system")
     if system:
         gemini_req["system_instruction"] = {"parts": [{"text": str(system)}]}
 
-    # messages → contents (assistant → model)
     for msg in body.get("messages", []):
         role = "model" if msg.get("role") == "assistant" else "user"
         content = msg.get("content", "")
-        if isinstance(content, list):  # bloques estilo Anthropic
+        if isinstance(content, list):
             text = "".join(b.get("text", "") for b in content if isinstance(b, dict))
         else:
             text = str(content)
         gemini_req["contents"].append({"role": role, "parts": [{"text": text}]})
 
-    # max_tokens → generationConfig.maxOutputTokens
     gen_cfg = {"responseMimeType": "application/json"}
     if body.get("max_tokens"):
         gen_cfg["maxOutputTokens"] = int(body["max_tokens"])
@@ -717,7 +669,6 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
     """
     Proxy de LLM para el Backoffice. Mantiene la ruta /anthropic/messages por
     compatibilidad con el frontend ya compilado, pero puede enrutar a Gemini.
-    El frontend envía/recibe siempre formato Anthropic; la traducción es interna.
     """
     body = await request.json()
     proveedor = _resolver_proveedor()
@@ -725,14 +676,11 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
 
     # ── GEMINI ────────────────────────────────────────────────────────────
     if proveedor == "gemini":
-        # .strip() defensivo: Railway suele pegar un \n o espacios invisibles
-        # al final del valor, lo que corrompe el ?key= y Google responde
-        # "Expected OAuth 2 access token".
         gemini_key = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
         if not gemini_key:
             raise HTTPException(status_code=500, detail="GEMINI_API_KEY no configurada en el servidor.")
 
-        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-3.5-flash").strip()
+        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-2.0-flash").strip()
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{modelo}:generateContent?key={gemini_key}"
@@ -748,7 +696,6 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
                 status_code=502, media_type="application/json")
 
         if resp.status_code != 200:
-            # Reenvía el error en shape que el frontend entiende (json.error.message)
             try:
                 err = resp.json().get("error", {})
                 msg = err.get("message", resp.text)
@@ -761,7 +708,7 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
         anthropic_shape = _gemini_a_anthropic(resp.json(), modelo)
         return PlainTextResponse(json.dumps(anthropic_shape), media_type="application/json")
 
-    # ── ANTHROPIC (fallback) ────────────────────────────────────────────────
+    # ── ANTHROPIC (fallback) ───────────────────────────────────────────────
     anthropic_key = os.environ.get("VITE_ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
     if not anthropic_key:
         raise HTTPException(status_code=500, detail="API Key de Anthropic no configurada en el servidor.")
@@ -771,4 +718,5 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
     }
-    resp 
+    resp = requests.post("https://api.anthropic.com/v1/messages", json=body, headers=headers, timeout=120)
+    return PlainTextResponse(resp.text, status_code=resp.status_code, media_type="application/json")

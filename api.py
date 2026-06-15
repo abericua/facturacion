@@ -24,6 +24,7 @@ from pydantic import BaseModel
 
 from database import get_db_connection, inicializar_base_datos
 from routes_bridge import router as bridge_router
+import db_sgsp
 
 # ── Configuración ──────────────────────────────────────────────────────────
 JWT_SECRET    = os.environ.get("JWT_SECRET", "sgsp-dev-secret-cambiar-en-produccion")
@@ -113,7 +114,8 @@ def hash_password(password: str) -> str:
 def startup():
     """Inicializa las tablas al arrancar (idempotente)."""
     inicializar_base_datos()
-    print("[api.py] API iniciada. DB lista.")
+    db_sgsp.init_db()   # Crea todas las tablas Postgres si no existen
+    print("[api.py] API iniciada. SQLite + PostgreSQL listos.")
 
 
 # ── AUTENTICACIÓN ──────────────────────────────────────────────────────────
