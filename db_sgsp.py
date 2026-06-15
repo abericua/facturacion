@@ -636,15 +636,26 @@ def get_productos(solo_activos=True) -> list:
     return rows
 
 
+def _to_str(v, default='') -> str:
+    """Convierte cualquier valor a str seguro para columnas TEXT."""
+    if v is None:
+        return default
+    if isinstance(v, dict):
+        return json.dumps(v, ensure_ascii=False)
+    if isinstance(v, list):
+        return json.dumps(v, ensure_ascii=False)
+    return str(v)
+
+
 def upsert_producto(p: dict) -> bool:
     conn = get_conn()
     cur = conn.cursor()
     try:
         ids_ext = p.get('ids_externos', [])
         aliases = p.get('aliases', [])
-        if isinstance(ids_ext, list):
+        if isinstance(ids_ext, (list, dict)):
             ids_ext = json.dumps(ids_ext, ensure_ascii=False)
-        if isinstance(aliases, list):
+        if isinstance(aliases, (list, dict)):
             aliases = json.dumps(aliases, ensure_ascii=False)
         cur.execute("""
             INSERT INTO sgsp_productos (
@@ -674,12 +685,12 @@ def upsert_producto(p: dict) -> bool:
         """, {
             'id_solpro':           p.get('id_solpro', ''),
             'ids_externos':        ids_ext,
-            'nombre_canonico':     p.get('nombre_canonico', p.get('Nombre', '')),
+            'nombre_canonico':     _to_str(p.get('nombre_canonico', p.get('Nombre', ''))),
             'aliases':             aliases,
-            'proveedor':           p.get('proveedor', p.get('Proveedor', '')),
-            'linea':               p.get('linea', p.get('Linea', '')),
-            'tipo':                p.get('tipo', ''),
-            'moneda_costo':        p.get('moneda_costo', p.get('Moneda_Costo', 'USD')),
+            'proveedor':           _to_str(p.get('proveedor', p.get('Proveedor', ''))),
+            'linea':               _to_str(p.get('linea', p.get('Linea', ''))),
+            'tipo':                _to_str(p.get('tipo', '')),
+            'moneda_costo':        _to_str(p.get('moneda_costo', p.get('Moneda_Costo', 'USD'))),
             'costo':               float(p.get('costo', p.get('Costo_Compra', 0)) or 0),
             'margen_pct':          float(p.get('margen_pct', p.get('Margen_Pct', 0)) or 0),
             'stock_actual':        float(p.get('stock_actual', p.get('Stock', 0)) or 0),
@@ -687,7 +698,7 @@ def upsert_producto(p: dict) -> bool:
             'stock_disponible':    float(p.get('stock_disponible', 0) or 0),
             'credito_habilitado':  bool(p.get('credito_habilitado', False)),
             'activo':              bool(p.get('activo', True)),
-            'codigo_proveedor':    p.get('codigo_proveedor', p.get('Codigo_Proveedor', p.get('ID_Ref', ''))),
+            'codigo_proveedor':    _to_str(p.get('codigo_proveedor', p.get('Codigo_Proveedor', p.get('ID_Ref', '')))),
             'costo_usd':           float(p.get('costo_usd', p.get('Costo_USD', 0)) or 0),
         })
         conn.commit()
