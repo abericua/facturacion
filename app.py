@@ -533,8 +533,7 @@ def run_facturador_app():
     def validate_stock(inventory_log):
         import json
         master_path = os.path.join(
-            SGSP_DATABASE,
-            'master_productos.json')
+            SGSP_DATABASE, 'master_productos.json')
         if not os.path.exists(master_path):
             return True, ""
         with open(master_path, 'r',
@@ -1805,4 +1804,3 @@ if __name__ == "__main__":
 
 
 
-                          
