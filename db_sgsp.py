@@ -6,6 +6,7 @@ Todas las entidades del sistema en una sola fuente de verdad.
 
 import os
 import json
+import math
 import psycopg2
 import psycopg2.extras
 from datetime import datetime
@@ -930,7 +931,18 @@ def get_ventas(excluir_anuladas=True) -> list:
         for k, v in r.items():
             if hasattr(v, 'isoformat'):
                 r[k] = v.isoformat()
+            elif isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+                r[k] = None  # NaN/Inf no son JSON-serializable
     return rows
+
+
+def _safe_float(val, default=0.0) -> float:
+    """Convierte val a float; devuelve default si es None, NaN o Inf."""
+    try:
+        f = float(val) if val is not None else default
+        return default if math.isnan(f) or math.isinf(f) else f
+    except (TypeError, ValueError):
+        return default
 
 
 def sync_ventas_bulk(records: list) -> dict:
@@ -960,8 +972,8 @@ def sync_ventas_bulk(records: list) -> dict:
                 str(v.get('DESCRIPCION', v.get('descripcion', '')) or ''),
                 str(v.get('CODIGO', v.get('codigo', '')) or ''),
                 int(v.get('CANTIDAD', v.get('cantidad', 1)) or 1),
-                float(v.get('PRECIO GS', v.get('precio_gs', 0)) or 0),
-                float(v.get('PRECIO USD', v.get('precio_usd', 0)) or 0),
+                _safe_float(v.get('PRECIO GS', v.get('precio_gs', 0))),
+                _safe_float(v.get('PRECIO USD', v.get('precio_usd', 0))),
                 str(v.get('NRO_FACTURA', v.get('nro_factura', '')) or ''),
                 str(v.get('VENDEDOR', v.get('vendedor', '')) or ''),
                 bool(v.get('anulado', False)),
