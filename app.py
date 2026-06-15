@@ -26,7 +26,7 @@ SYSTEM_PEPPER  = os.environ.get("SYSTEM_PEPPER", "SOLPRO_ULTRA_SECRET_2026_#!")
 def inicializar_tipo_cambio():
     import json
     from datetime import datetime
-    tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
+    tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
     if not os.path.exists(tc_path):
         return
     with open(tc_path, 'r', encoding='utf-8') as f:
@@ -533,7 +533,7 @@ def run_facturador_app():
     def validate_stock(inventory_log):
         import json
         master_path = os.path.join(
-            BASE_DIR, '..', 'database',
+            SGSP_DATABASE,
             'master_productos.json')
         if not os.path.exists(master_path):
             return True, ""
@@ -598,7 +598,7 @@ def run_facturador_app():
 
     def descontar_stock(items_entregados):
         import json
-        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_productos.json')
+        master_path = os.path.join(SGSP_DATABASE, 'master_productos.json')
         if not os.path.exists(master_path): return
         with open(master_path, 'r', encoding='utf-8') as f: productos = json.load(f)
         for item in items_entregados:
@@ -612,7 +612,7 @@ def run_facturador_app():
 
     def reservar_stock(items):
         import json
-        master_path = os.path.join(BASE_DIR, '..', 'database', 'master_productos.json')
+        master_path = os.path.join(SGSP_DATABASE, 'master_productos.json')
         if not os.path.exists(master_path): return
         with open(master_path, 'r', encoding='utf-8') as f: productos = json.load(f)
         for item in items:
@@ -626,9 +626,9 @@ def run_facturador_app():
     def registrar_pedido(venta_data):
         import json, uuid
         from datetime import datetime
-        pedidos_path = os.path.join(BASE_DIR, '..', 'database', 'pedidos.json')
-        items_path = os.path.join(BASE_DIR, '..', 'database', 'pedido_items.json')
-        pagos_path = os.path.join(BASE_DIR, '..', 'database', 'pagos.json')
+        pedidos_path = os.path.join(SGSP_DATABASE, 'pedidos.json')
+        items_path = os.path.join(SGSP_DATABASE, 'pedido_items.json')
+        pagos_path = os.path.join(SGSP_DATABASE, 'pagos.json')
 
         pedidos, items, pagos = [], [], []
         if os.path.exists(pedidos_path):
@@ -1061,7 +1061,7 @@ def run_facturador_app():
         else:
             ai_url = "http://localhost:1234/v1"
 
-        tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
+        tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
         banda_piso = 0
         banda_techo = 0
         ultima_actualizacion = 'N/A'
@@ -1607,7 +1607,7 @@ def run_facturador_app():
     if True:
         with tab6:
             st.header("📦 PEDIDOS PENDIENTES")
-            pedidos_path = os.path.join(BASE_DIR, '..', 'database', 'pedidos.json')
+            pedidos_path = os.path.join(SGSP_DATABASE, 'pedidos.json')
             if os.path.exists(pedidos_path):
                 import json
                 with open(pedidos_path, 'r', encoding='utf-8') as f:
@@ -1643,14 +1643,14 @@ def run_facturador_app():
                                 with open(pedidos_path, 'w', encoding='utf-8') as f:
                                     json.dump(pedidos_all, f, indent=2, ensure_ascii=False)
 
-                                items_path = os.path.join(BASE_DIR, '..', 'database', 'pedido_items.json')
+                                items_path = os.path.join(SGSP_DATABASE, 'pedido_items.json')
                                 items_all = []
                                 if os.path.exists(items_path):
                                     with open(items_path, 'r', encoding='utf-8') as f: items_all = json.load(f)
                                 items_del_pedido = [i for i in items_all if i['id_pedido'] == p_liq['id_pedido']]
                                 descontar_stock(items_del_pedido)
 
-                                pagos_path = os.path.join(BASE_DIR, '..', 'database', 'pagos.json')
+                                pagos_path = os.path.join(SGSP_DATABASE, 'pagos.json')
                                 pagos_all = []
                                 if os.path.exists(pagos_path):
                                     with open(pagos_path, 'r', encoding='utf-8') as f: pagos_all = json.load(f)
@@ -1682,7 +1682,7 @@ def run_facturador_app():
         if not is_admin:
             st.warning("⚠️ Acceso restringido. Solo Administración puede modificar el tipo de cambio.")
         else:
-            tc_path = os.path.join(BASE_DIR, '..', 'database', 'master_tipo_cambio.json')
+            tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
             tc = {}
             if os.path.exists(tc_path):
                 with open(tc_path, 'r', encoding='utf-8') as f:
@@ -1805,3 +1805,4 @@ if __name__ == "__main__":
 
 
 
+                          
