@@ -12,6 +12,7 @@ import {
   AlertTriangle, Edit3, CheckCircle, Shield, Package, Calendar
 } from "lucide-react";
 import DB from './db.js';
+import SyncBridge from './SyncBridge.js';
 
 // ── THEME ─────────────────────────────────────────────────────────────────────
 const T = {
@@ -213,11 +214,19 @@ export default function DashboardReal() {
   },[]);
 
   useEffect(() => {
-    DB.obtenerTodasCompras().then(data => { if (data?.length) setCompras(data); }).catch(()=>{});
-  }, []);
+    const recargarComprasIVA = () => {
+      DB.obtenerTodasCompras().then(data => { if (data?.length) setCompras(data); }).catch(()=>{});
+      DB.obtenerIVAPorAnio('2026').then(data => { if (data?.length) setIvaData(data); }).catch(()=>{});
+    };
 
-  useEffect(() => {
-    DB.obtenerIVAPorAnio('2026').then(data => { if (data?.length) setIvaData(data); }).catch(()=>{});
+    // Carga inmediata desde IndexedDB
+    recargarComprasIVA();
+
+    // Re-lee cuando SyncBridge termina pullAll (fix race condition cross-device)
+    const unsub = SyncBridge.subscribe(({ status }) => {
+      if (status === 'ok') recargarComprasIVA();
+    });
+    return unsub;
   }, []);
 
   const years = useMemo(()=>['Todos',...([...new Set(data.map(d=>d.fecha.year))].sort())],[data]);

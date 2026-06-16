@@ -761,6 +761,8 @@ def get_compras(proveedor_id=None) -> list:
         for k, v in r.items():
             if hasattr(v, 'isoformat'):
                 r[k] = v.isoformat()
+            elif isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+                r[k] = None
     return rows
 
 
