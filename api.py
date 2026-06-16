@@ -35,7 +35,14 @@ TOKEN_HORAS   = 12
 # CORS: lista de orígenes separados por coma en ALLOWED_ORIGINS
 # Ejemplo: https://dashboard.solpropy.com,https://otro.com
 _origins_env = os.environ.get("ALLOWED_ORIGINS", "")
-ALLOWED_ORIGINS = [o.strip() for o in _origins_env.split(",") if o.strip()] or ["*"]
+_lista = [o.strip() for o in _origins_env.split(",") if o.strip()]
+ALLOWED_ORIGINS = _lista if _lista else ["*"]
+
+# Forzar siempre los dominios de producción si no están
+for dominio in ["https://facturacion.solpropy.com", "https://dashboard.solpropy.com"]:
+    if dominio not in ALLOWED_ORIGINS and "*" not in ALLOWED_ORIGINS:
+        ALLOWED_ORIGINS.append(dominio)
+
 
 # ── App ────────────────────────────────────────────────────────────────────
 app = FastAPI(
