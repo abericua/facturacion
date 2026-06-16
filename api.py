@@ -32,8 +32,10 @@ SYSTEM_PEPPER = os.environ.get("SYSTEM_PEPPER", "")
 ALGORITMO     = "HS256"
 TOKEN_HORAS   = 12
 
-# CORS: en producción reemplazar "*" por la URL real del frontend Railway
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+# CORS: lista de orígenes separados por coma en ALLOWED_ORIGINS
+# Ejemplo: https://dashboard.solpropy.com,https://otro.com
+_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
+ALLOWED_ORIGINS = [o.strip() for o in _origins_env.split(",") if o.strip()] or ["*"]
 
 # ── App ────────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -42,10 +44,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# allow_credentials=True es incompatible con allow_origins=["*"]
+_use_credentials = "*" not in ALLOWED_ORIGINS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=_use_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
