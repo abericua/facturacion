@@ -216,7 +216,7 @@ export default function DashboardReal() {
     recargarComprasIVA();
 
     // Re-lee cuando SyncBridge termina pullAll (fix race condition cross-device)
-    const unsub = SyncBridge.subscribe(({ status }) => {
+    const unsub = SyncBridge.onStatusChange(({ status }) => {
       if (status === 'ok') recargarComprasIVA();
     });
     return unsub;
