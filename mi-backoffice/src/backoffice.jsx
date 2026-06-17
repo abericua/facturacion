@@ -1,7 +1,7 @@
 import FinanzasPro from './FinanzasPro.jsx';
 import ConciliacionBancaria from './ConciliacionBancaria.jsx';
 import { useState, useEffect, useMemo } from "react";
-import { SyncBridge } from './SyncBridge.js';
+import SyncBridge from './SyncBridge.js';
 
 import VentasAnalytics from './VentasAnalytics.jsx';
 // import DashboardReal from './DashboardReal.jsx';
@@ -23,29 +23,7 @@ import {
   ChevronRight, CheckCircle, Clock, XCircle, Plus, RefreshCw, FolderOpen, Calendar, Calculator
 } from "lucide-react";
 
-// ── THEME ────────────────────────────────────────────────────────────────────
-const T = {
-  bg:          '#07080f',
-  surface:     '#0d1117',
-  card:        '#111827',
-  cardB:       '#141d2e',
-  border:      '#1a2535',
-  borderL:     '#243045',
-  accent:      '#f59e0b',
-  accentBg:    'rgba(245,158,11,0.08)',
-  accentBorder:'rgba(245,158,11,0.25)',
-  cyan:        '#22d3ee',
-  cyanBg:      'rgba(34,211,238,0.08)',
-  green:       '#34d399',
-  greenBg:     'rgba(52,211,153,0.08)',
-  red:         '#f87171',
-  redBg:       'rgba(248,113,113,0.08)',
-  purple:      '#a78bfa',
-  purpleBg:    'rgba(167,139,250,0.08)',
-  textPrimary: '#e2e8f0',
-  textSecondary:'#7d9db5',
-  textMuted:   '#3d5470',
-};
+import T from './theme.js';
 
 // ── FORMATTERS ───────────────────────────────────────────────────────────────
 const fmt  = (n) => `₲ ${new Intl.NumberFormat('es-PY').format(Math.round(n||0))}`;
@@ -91,6 +69,42 @@ const categoryData = [
   {name:'Otros Insumos',     value:3, color:'#f87171'},  // Varios
 ];
 
+// ── Helpers para derivar categoryData de ventas CSV ──────────────────────
+const CAT_COLORS_DASH = {
+  'Tintas/Consumibles':'#22d3ee','Plotters':'#f59e0b','SureColor':'#a78bfa',
+  'Garantías':'#34d399','Cabezales':'#f87171','Papel/Rollos':'#60a5fa',
+  'Matriciales':'#f472b6','Impresoras Tank':'#fb923c','Otros':'#7d9db5',
+};
+function categorizarVenta(desc){
+  const d=(desc||'').toUpperCase();
+  if(d.includes('PLOTER')||d.includes('PLOTTER'))           return 'Plotters';
+  if(d.includes('SURECOLOR')||d.includes('T3170')||d.includes('SCF')) return 'SureColor';
+  if(d.includes('GARANTIA')||d.includes('GARANTÍA'))        return 'Garantías';
+  if(d.includes('TINTA')||d.includes('INK')||d.includes('CARTUCHO')) return 'Tintas/Consumibles';
+  if(d.includes('CABEZAL')||d.includes('HEAD'))             return 'Cabezales';
+  if(d.includes('PAPEL')||d.includes('ROLLO'))              return 'Papel/Rollos';
+  if(d.includes('LX-')||d.includes('MATRICIAL'))            return 'Matriciales';
+  if(d.includes('IMP EPSON')||d.includes('IMPRESORA'))      return 'Impresoras Tank';
+  return 'Otros';
+}
+function derivarCategorias(csvText){
+  if(!csvText||typeof csvText!=='string') return [];
+  const lines=csvText.split('\n').filter(l=>l.trim());
+  const counts={};
+  for(let i=1;i<lines.length;i++){
+    const cols=lines[i].split(';');
+    if(cols.length<3) continue;
+    const qty=parseInt(cols[1]?.trim())||0;
+    if(qty<=0) continue;
+    const cat=categorizarVenta(cols[2]?.trim()||'');
+    counts[cat]=(counts[cat]||0)+qty;
+  }
+  const total=Object.values(counts).reduce((a,b)=>a+b,0);
+  if(!total) return [];
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([name,qty])=>({name,value:Math.round(qty/total*100),color:CAT_COLORS_DASH[name]||'#7d9db5'}));
+}
+
 const orders = [
   {id:'SOL-0426',cliente:'ALBERT SPORT',          monto:2850000, fecha:'24 Abr 2026',estado:'entregado',   items:3, ciudad:'Ñemby'},
   {id:'SOL-0425',cliente:'ATLANTIS SPORT',        monto:4120000, fecha:'22 Abr 2026',estado:'en_tránsito', items:2, ciudad:'Minga Guazú'},
@@ -106,42 +120,7 @@ const orders = [
   {id:'SOL-0415',cliente:'ALTEX',                 monto:2940000, fecha:'02 Abr 2026',estado:'cancelado',   items:2, ciudad:'Yaguarón'},
 ];
 
-const inventory = [
-  {id:'PRD-001',nombre:'Laptop Empresarial ProX',       cat:'Electrónica', stock:23,min:10,precio:18500,proveedor:'TechSupply MX'},
-  {id:'PRD-002',nombre:'Monitor 4K UltraWide',          cat:'Electrónica', stock:7, min:15,precio:8900, proveedor:'TechSupply MX'},
-  {id:'PRD-003',nombre:'Silla Ergonómica Executive',    cat:'Hogar',       stock:45,min:20,precio:4200, proveedor:'Muebles Pro'},
-  {id:'PRD-004',nombre:'Escritorio Stand-Up',           cat:'Hogar',       stock:12,min:10,precio:6800, proveedor:'Muebles Pro'},
-  {id:'PRD-005',nombre:'Teclado Mecánico RGB',          cat:'Electrónica', stock:3, min:20,precio:1850, proveedor:'TechSupply MX'},
-  {id:'PRD-006',nombre:'Audífonos Noise Cancel',        cat:'Electrónica', stock:18,min:10,precio:3400, proveedor:'AudioWorld'},
-  {id:'PRD-007',nombre:'Impresora Láser Color',         cat:'Electrónica', stock:8, min:5, precio:12600,proveedor:'PrintMex'},
-  {id:'PRD-008',nombre:'Proyector 4K Inalámbrico',      cat:'Electrónica', stock:4, min:8, precio:22000,proveedor:'TechSupply MX'},
-  {id:'PRD-009',nombre:'Tablet Empresarial',            cat:'Electrónica', stock:31,min:15,precio:7200, proveedor:'TechSupply MX'},
-  {id:'PRD-010',nombre:'Teléfono IP Empresarial',       cat:'Comunicación',stock:2, min:10,precio:2800, proveedor:'TeleCom Pro'},
-  {id:'PRD-011',nombre:'Router Wi-Fi 6 Empresarial',    cat:'Redes',       stock:16,min:8, precio:4500, proveedor:'NetPro'},
-  {id:'PRD-012',nombre:'Switch 24 Puertos PoE',         cat:'Redes',       stock:9, min:5, precio:8200, proveedor:'NetPro'},
-];
-
-const suppliers = [
-  {id:'PROV-001',nombre:'TechSupply MX', contacto:'Carlos Mendoza', email:'cmendoza@techsupply.mx', cat:'Electrónica', estado:'activo',   rating:4.8,ordenes:3,monto:1240000},
-  {id:'PROV-002',nombre:'Muebles Pro',   contacto:'Ana García',     email:'agarcia@mueblepro.mx',  cat:'Mobiliario',  estado:'activo',   rating:4.5,ordenes:1,monto:380000},
-  {id:'PROV-003',nombre:'AudioWorld',    contacto:'Miguel Torres',  email:'mtorres@audioworld.com',cat:'Audio',       estado:'activo',   rating:4.2,ordenes:2,monto:215000},
-  {id:'PROV-004',nombre:'PrintMex',      contacto:'Laura Sánchez',  email:'lsanchez@printmex.mx',  cat:'Impresión',   estado:'inactivo', rating:3.8,ordenes:0,monto:95000},
-  {id:'PROV-005',nombre:'TeleCom Pro',   contacto:'Roberto Jiménez',email:'rjimenez@telecompro.mx',cat:'Comunicación',estado:'activo',   rating:4.6,ordenes:1,monto:178000},
-  {id:'PROV-006',nombre:'NetPro',        contacto:'Patricia Luna',  email:'pluna@netpro.com',       cat:'Redes',       estado:'activo',   rating:4.9,ordenes:2,monto:520000},
-];
-
-const invoices = [
-  {id:'FAC-2401',cliente:'Grupo Alfa S.A.',  monto:24580,fecha:'18 Dic',vence:'17 Ene',estado:'pagada',   tipo:'venta'},
-  {id:'FAC-2402',cliente:'Comercial Beta',   monto:8940, fecha:'18 Dic',vence:'17 Ene',estado:'pendiente',tipo:'venta'},
-  {id:'FAC-2403',cliente:'TechSupply MX',    monto:47200,fecha:'17 Dic',vence:'16 Ene',estado:'pendiente',tipo:'compra'},
-  {id:'FAC-2404',cliente:'Inversiones Delta',monto:15630,fecha:'17 Dic',vence:'16 Ene',estado:'pagada',   tipo:'venta'},
-  {id:'FAC-2405',cliente:'Muebles Pro',      monto:32800,fecha:'16 Dic',vence:'15 Ene',estado:'vencida',  tipo:'compra'},
-  {id:'FAC-2406',cliente:'TechMex Corp',     monto:92400,fecha:'16 Dic',vence:'15 Ene',estado:'pendiente',tipo:'venta'},
-  {id:'FAC-2407',cliente:'NetPro',           monto:18750,fecha:'15 Dic',vence:'14 Ene',estado:'pagada',   tipo:'compra'},
-  {id:'FAC-2408',cliente:'Nexus Industrial', monto:68900,fecha:'15 Dic',vence:'14 Ene',estado:'pagada',   tipo:'venta'},
-  {id:'FAC-2409',cliente:'AudioWorld',       monto:12400,fecha:'14 Dic',vence:'13 Ene',estado:'vencida',  tipo:'compra'},
-  {id:'FAC-2410',cliente:'Almacenes Sur',    monto:29870,fecha:'14 Dic',vence:'13 Ene',estado:'pendiente',tipo:'venta'},
-];
+// (inventory, suppliers e invoices eliminados — los componentes cargan datos reales desde IndexedDB)
 
 // ── SHARED COMPONENTS ────────────────────────────────────────────────────────
 const Badge = ({status}) => {
@@ -275,6 +254,18 @@ const SearchBar = ({value, onChange, placeholder, width=260}) => (
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
 function Dashboard({setActive}) {
+  // categoryData: empieza con datos estáticos 2025, se reemplaza si hay CSV en IndexedDB
+  const [catData, setCatData] = useState(categoryData);
+
+  useEffect(() => {
+    import('./db.js').then(({default: DB}) => {
+      DB.obtenerCatalogo('_cache_ventas_csv').then(cache => {
+        const derivado = derivarCategorias(cache?.productos);
+        if(derivado.length > 0) setCatData(derivado);
+      }).catch(() => {});
+    });
+  }, []);
+
   // DATOS REALES SOL PRO 2025
   const ingresos2025 = 3858537;      // ₲3.858.537 (datos F500)
   const rentalNeta2025 = 153157;     // ₲153.157 (3.97% margen)
@@ -341,14 +332,14 @@ function Dashboard({setActive}) {
           <SecHeader title="Ventas por Categoría"/>
           <ResponsiveContainer width="100%" height={170}>
             <PieChart>
-              <Pie data={categoryData} cx="50%" cy="50%" innerRadius={50} outerRadius={72} paddingAngle={3} dataKey="value">
-                {categoryData.map((e,i)=><Cell key={i} fill={e.color} opacity={0.85}/>)}
+              <Pie data={catData} cx="50%" cy="50%" innerRadius={50} outerRadius={72} paddingAngle={3} dataKey="value">
+                {catData.map((e,i)=><Cell key={i} fill={e.color} opacity={0.85}/>)}
               </Pie>
               <Tooltip formatter={v=>`${v}%`} contentStyle={{background:T.cardB,border:`1px solid ${T.border}`,borderRadius:8,fontFamily:"'DM Sans',sans-serif",fontSize:12}}/>
             </PieChart>
           </ResponsiveContainer>
           <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:2}}>
-            {categoryData.map(c=>(
+            {catData.map(c=>(
               <div key={c.name} style={{display:'flex',alignItems:'center',gap:8}}>
                 <div style={{width:7,height:7,borderRadius:'50%',background:c.color,flexShrink:0}}/>
                 <span style={{color:T.textSecondary,fontSize:12,flex:1,fontFamily:"'DM Sans',sans-serif"}}>{c.name}</span>
@@ -434,7 +425,37 @@ function Dashboard({setActive}) {
 
 // ── FINANZAS ─────────────────────────────────────────────────────────────────
 function Finanzas() {
-  const [filter, setFilter] = useState('todas');
+  const [filter,   setFilter]   = useState('todas');
+  const [invoices, setInvoices] = useState([]); // empieza vacío, se llena desde IndexedDB
+
+  useEffect(() => {
+    import('./db.js').then(({default: DB}) => {
+      DB.obtenerTodasCompras().then(compras => {
+        // Mapear compras reales → formato de factura
+        const comprasRows = (compras||[])
+          .filter(c => c.tipo === 'FAC')
+          .sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''))
+          .slice(0,30)
+          .map(c => {
+            const montoGs = Math.round((c.subtotal_usd||0)*7650 + (c.subtotal_pyg||0));
+            const partes  = (c.fecha||'').split('/');
+            const fechaFmt= partes.length===3 ? `${partes[0]} ${['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][parseInt(partes[1])]||partes[1]} ${partes[2]}` : (c.fecha||c.periodo||'—');
+            return {
+              id:     c.numero || `CP-${c.id}`,
+              cliente: c.proveedor || '—',
+              monto:  montoGs,
+              fecha:  fechaFmt,
+              vence:  '—',
+              estado: 'pendiente',
+              tipo:   'compra',
+            };
+          });
+        // Las ventas se conectarán cuando el endpoint ventas/records esté disponible
+        setInvoices(comprasRows);
+      }).catch(() => {});
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const ventas     = invoices.filter(i=>i.tipo==='venta');
   const facturado  = ventas.reduce((a,b)=>a+b.monto,0);
@@ -466,7 +487,7 @@ function Finanzas() {
 
       {/* P&L Chart */}
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'16px 18px'}}>
-        <SecHeader title="Estado de Resultados Mensual — P&L 2024"/>
+        <SecHeader title="Estado de Resultados Mensual — P&L 2025"/>
         <ResponsiveContainer width="100%" height={230}>
           <BarChart data={revenueData} margin={{top:5,right:5,bottom:0,left:0}} barGap={3}>
             <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
@@ -516,9 +537,9 @@ function Finanzas() {
       {/* Summary cards */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
         {[
-          {label:'Cuentas por Cobrar (30 días)', value:porCobrar, note:'3 facturas pendientes'},
-          {label:'Cuentas por Pagar', value:invoices.filter(i=>i.tipo==='compra'&&i.estado==='pendiente').reduce((a,b)=>a+b.monto,0), note:'2 facturas de proveedores'},
-          {label:'Cartera Vencida', value:vencido, note:'2 facturas con mora'},
+          {label:'Cuentas por Cobrar (30 días)', value:porCobrar, note:`${ventas.filter(i=>i.estado==='pendiente').length} facturas pendientes`},
+          {label:'Cuentas por Pagar', value:invoices.filter(i=>i.tipo==='compra'&&i.estado==='pendiente').reduce((a,b)=>a+b.monto,0), note:`${invoices.filter(i=>i.tipo==='compra').length} facturas de proveedores`},
+          {label:'Cartera Vencida', value:vencido, note:`${invoices.filter(i=>i.estado==='vencida').length} facturas con mora`},
         ].map(item=>(
           <div key={item.label} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'14px 16px'}}>
             <div style={{color:T.textMuted,fontSize:10,fontWeight:700,letterSpacing:'0.08em',marginBottom:6,fontFamily:"'DM Sans',sans-serif"}}>{item.label.toUpperCase()}</div>
@@ -877,17 +898,19 @@ function Pedidos() {
                 <TD><Badge status={v.estado}/></TD>
               </TRow>
             ))}
+            {filtered.length > 200 && (
+              <tr>
+                <td colSpan={7} style={{padding:'12px 16px',textAlign:'center',color:T.accent,fontSize:12,fontFamily:"'DM Sans',sans-serif",fontWeight:600,background:T.accentBg,borderTop:`1px solid ${T.accentBorder}`}}>
+                  ⚠ Mostrando 200 de {filtered.length.toLocaleString('es-PY')} registros. Usá el buscador para filtrar resultados.
+                </td>
+              </tr>
+            )}
           </tbody>
         </TableWrap>
 
         {filtered.length===0 && (
           <div style={{textAlign:'center',padding:'32px',color:T.textMuted,fontFamily:"'DM Sans',sans-serif",fontSize:13}}>
             No se encontraron ventas con ese criterio.
-          </div>
-        )}
-        {filtered.length>200 && (
-          <div style={{textAlign:'center',padding:'10px',color:T.textMuted,fontFamily:"'DM Sans',sans-serif",fontSize:11}}>
-            Mostrando 200 de {filtered.length} resultados. Usá el buscador para filtrar.
           </div>
         )}
       </div>
@@ -928,16 +951,26 @@ const NAV = [
 ];
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 import DB from './db.js';
-DB.obtenerConfig('migracion_completada').then(async (migrado) => {
-  if (!migrado?.valor) {
-    await DB.migrarDesdeLocalStorage();
-    await DB.guardarConfig('migracion_completada', true);
-  }
-}).catch(console.error);
 
 export default function BackOffice() {
   const [active, setActive] = useState('dashboard');
-  const [time]  = useState(new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
+  const [time, setTime] = useState(new Date().toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit'}));
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date().toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit'}));
+    }, 30000); // actualiza cada 30 segundos
+    return () => clearInterval(timer);
+  }, []);
+
+  // ── Migración desde localStorage (una sola vez) ───────────────────────────
+  useEffect(() => {
+    DB.obtenerConfig('migracion_completada').then(async (migrado) => {
+      if (!migrado?.valor) {
+        await DB.migrarDesdeLocalStorage();
+        await DB.guardarConfig('migracion_completada', true);
+      }
+    }).catch(err => console.error('Error en migración:', err));
+  }, []);
 
   // ── Hydrate IndexedDB desde Railway al abrir (sync cross-device) ─────────
   useEffect(() => {
@@ -965,7 +998,7 @@ export default function BackOffice() {
         {/* Logo */}
         <div style={{padding:'18px 14px 14px',borderBottom:`1px solid ${T.border}`}}>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <img src="/LOGO  SIN FONDO 2D REBRANDING REDONDO - copia.png"
+            <img src="/logo-solpro.png"
               style={{width:38,height:38,borderRadius:'50%',objectFit:'cover',flexShrink:0,
                 border:`1.5px solid ${T.accent}`,boxShadow:`0 0 14px ${T.accent}40`}}/>
             <div>
@@ -1045,7 +1078,7 @@ export default function BackOffice() {
 
             <div style={{padding:'5px 10px',background:T.card,border:`1px solid ${T.border}`,borderRadius:5,
               color:T.textMuted,fontSize:10,fontFamily:"'JetBrains Mono',monospace"}}>
-              Dic 2024 · {time}
+              {new Date().toLocaleDateString('es-PY',{month:'short',year:'numeric'})} · {time}
             </div>
             <button style={{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',background:T.card,
               border:`1px solid ${T.border}`,borderRadius:5,color:T.textSecondary,fontSize:10,fontWeight:700,

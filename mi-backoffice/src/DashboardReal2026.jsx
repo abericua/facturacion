@@ -14,21 +14,11 @@ import {
 import DB from './db.js';
 import SyncBridge from './SyncBridge.js';
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
-const T = {
-  bg:'#07080f', surface:'#0d1117', card:'#111827', cardB:'#141d2e',
-  border:'#1a2535', borderL:'#243045',
-  accent:'#f59e0b', accentBg:'rgba(245,158,11,0.08)', accentBorder:'rgba(245,158,11,0.25)',
-  cyan:'#22d3ee', green:'#34d399', red:'#f87171', purple:'#a78bfa',
-  orange:'#fb923c', blue:'#60a5fa',
-  textPrimary:'#e2e8f0', textSecondary:'#7d9db5', textMuted:'#3d5470',
-};
+import T from './theme.js';
+import { MARGENES_MULT as MARGEN_POR_LINEA, MARGEN_DEFAULT, BANDA_PISO_PTS, BANDA_TECHO_PTS, RECARGO_DIGITAL } from './constants.js';
 
 const MONTHS    = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MONTH_MAP = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sept:8,sep:8,oct:9,nov:10,dic:11};
-const BANDA_PISO_PTS  = 150;
-const BANDA_TECHO_PTS = 350;
-const RECARGO_DIGITAL = 0.04;
 
 // ── DYNAMIC CATALOG MATCHING ──────────────────────────────────────────────────
 function parsePricesCSV(text) {
@@ -58,13 +48,16 @@ function parsePricesCSV(text) {
   return map;
 }
 
+// MARGEN_POR_LINEA, MARGEN_DEFAULT → importados desde ./constants.js
+
 function getPrice(desc, priceMap) {
   const d = desc.toUpperCase();
   // 1. Try exact or keyword match against dynamic price map
   for (const p of priceMap) {
     if (p.kw.some(k => d.includes(k))) {
-      const gs = p.moneda === 'GS' ? p.costo * 1.3 : null; // Approximate default margin
-      const usd = p.moneda === 'USD' ? p.costo * 1.3 : null;
+      const factor = MARGEN_POR_LINEA[p.linea?.toUpperCase()] ?? MARGEN_DEFAULT;
+      const gs = p.moneda === 'GS' ? p.costo * factor : null;
+      const usd = p.moneda === 'USD' ? p.costo * factor : null;
       return { gs, usd, label: p.nombre, linea: p.linea, matched: true, costo: p.costo, moneda: p.moneda };
     }
   }

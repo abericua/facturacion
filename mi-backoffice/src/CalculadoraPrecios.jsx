@@ -6,40 +6,8 @@ import {
   Package, Copy, Eye, EyeOff, Settings, Lock
 } from "lucide-react";
 
-const T = {
-  bg:'#07080f', surface:'#0d1117', card:'#111827', cardB:'#141d2e',
-  border:'#1a2535', borderL:'#243045',
-  accent:'#f59e0b', accentBg:'rgba(245,158,11,0.08)', accentBorder:'rgba(245,158,11,0.25)',
-  cyan:'#22d3ee', cyanBg:'rgba(34,211,238,0.08)',
-  green:'#34d399', greenBg:'rgba(52,211,153,0.08)',
-  red:'#f87171', redBg:'rgba(248,113,113,0.08)',
-  purple:'#a78bfa', purpleBg:'rgba(167,139,250,0.08)', blue:'#60a5fa',
-  textPrimary:'#e2e8f0', textSecondary:'#7d9db5', textMuted:'#3d5470',
-};
-
-const CFG_DEFAULT = {
-  buffer_piso:  150,
-  buffer_techo: 350,
-  comision_qr:  4.0,
-  umbral_redondeo: 389000,
-  margenes_linea: {
-    'COMERCIAL':  30,
-    'INDUSTRIAL': 24,
-    'INSUMOS':    15,
-    'ACCESORIOS': 30,
-  },
-  ajustes_rango: [
-    { label:'Bajo (< $500)',         max:500,     ajuste:+5  },
-    { label:'Medio ($500-$5.000)',   max:5000,    ajuste:0   },
-    { label:'Alto (> $5.000)',       max:Infinity,ajuste:-4  },
-  ],
-  descuentos_volumen: [
-    { label:'1 unidad',    min:1,  max:1,        dto:0  },
-    { label:'2-4 unidades',min:2,  max:4,        dto:-2 },
-    { label:'5-9 unidades',min:5,  max:9,        dto:-3 },
-    { label:'10+ unidades',min:10, max:Infinity, dto:-5 },
-  ],
-};
+import T from './theme.js';
+import { CFG_DEFAULT } from './constants.js';
 
 function calcMargenFinal(costo, moneda, linea, unidades, cfg) {
   const base     = cfg.margenes_linea[linea?.toUpperCase()] ?? 30;

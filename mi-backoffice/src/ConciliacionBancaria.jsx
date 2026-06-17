@@ -8,19 +8,7 @@ import {
   ChevronDown, ChevronUp, Building2, AlertTriangle
 } from 'lucide-react';
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
-const T = {
-  bg:'#07080f', surface:'#0d1117', card:'#111827', cardB:'#141d2e',
-  border:'#1a2535', borderL:'#243045',
-  accent:'#f59e0b', accentBg:'rgba(245,158,11,0.08)', accentBorder:'rgba(245,158,11,0.25)',
-  cyan:'#22d3ee', cyanBg:'rgba(34,211,238,0.08)',
-  green:'#34d399', greenBg:'rgba(52,211,153,0.08)',
-  red:'#f87171', redBg:'rgba(248,113,113,0.08)',
-  purple:'#a78bfa', purpleBg:'rgba(167,139,250,0.08)',
-  blue:'#60a5fa', blueBg:'rgba(96,165,250,0.08)',
-  orange:'#fb923c',
-  textPrimary:'#e2e8f0', textSecondary:'#7d9db5', textMuted:'#3d5470',
-};
+import T from './theme.js';
 
 // ── CUENTAS PREDEFINIDAS ──────────────────────────────────────────────────────
 const CUENTAS_DEFAULT = [

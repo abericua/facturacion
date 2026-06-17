@@ -9,30 +9,8 @@ import * as pdfjsLib from 'pdfjs-dist';
 // Worker via CDN — evita problemas de bundling con Vite en producción
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.worker.mjs`;
 import DB from './db.js';
-import { SyncBridge } from './SyncBridge.js';
-// ── THEME (mismo T del backoffice) ────────────────────────────────────────────
-const T = {
-  bg:           '#07080f',
-  surface:      '#0d1117',
-  card:         '#111827',
-  cardB:        '#141d2e',
-  border:       '#1a2535',
-  borderL:      '#243045',
-  accent:       '#f59e0b',
-  accentBg:     'rgba(245,158,11,0.08)',
-  accentBorder: 'rgba(245,158,11,0.25)',
-  cyan:         '#22d3ee',
-  cyanBg:       'rgba(34,211,238,0.08)',
-  green:        '#34d399',
-  greenBg:      'rgba(52,211,153,0.08)',
-  red:          '#f87171',
-  redBg:        'rgba(248,113,113,0.08)',
-  purple:       '#a78bfa',
-  purpleBg:     'rgba(167,139,250,0.08)',
-  textPrimary:  '#e2e8f0',
-  textSecondary:'#7d9db5',
-  textMuted:    '#3d5470',
-};
+import SyncBridge from './SyncBridge.js';
+import T from './theme.js';
 
 const PROVEEDORES = [
   { id: 'todos',        label: 'Todos los proveedores', ruc: null },

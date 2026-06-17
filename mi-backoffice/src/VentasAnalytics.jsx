@@ -11,18 +11,7 @@ import {
   ShoppingCart, Star, AlertTriangle, ChevronUp, ChevronDown
 } from "lucide-react";
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
-const T = {
-  bg:'#07080f', surface:'#0d1117', card:'#111827', cardB:'#141d2e',
-  border:'#1a2535', borderL:'#243045',
-  accent:'#f59e0b', accentBg:'rgba(245,158,11,0.08)', accentBorder:'rgba(245,158,11,0.25)',
-  cyan:'#22d3ee', cyanBg:'rgba(34,211,238,0.08)',
-  green:'#34d399', greenBg:'rgba(52,211,153,0.08)',
-  red:'#f87171', redBg:'rgba(248,113,113,0.08)',
-  purple:'#a78bfa', purpleBg:'rgba(167,139,250,0.08)',
-  orange:'#fb923c',
-  textPrimary:'#e2e8f0', textSecondary:'#7d9db5', textMuted:'#3d5470',
-};
+import T from './theme.js';
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sept','Oct','Nov','Dic'];
 const MONTH_MAP = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sept:8,sep:8,oct:9,nov:10,dic:11};
@@ -242,6 +231,7 @@ export default function VentasAnalytics() {
   const [data,       setData]       = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
+  const [offline,    setOffline]    = useState(false); // true cuando Railway falla y se usan datos en caché
   const [yearFilter, setYearFilter] = useState('Todos');
   const [catFilter,  setCatFilter]  = useState('Todas');
   const [search,     setSearch]     = useState('');
@@ -267,9 +257,16 @@ export default function VentasAnalytics() {
         const txt = await fetch(`${BRIDGE_URL}/api/bridge/ventas/csv`, { headers: bh })
           .then(r => { if (!r.ok) throw new Error('Sin datos de ventas en Railway'); return r.text(); });
         import('./db.js').then(m => m.default.guardarCatalogo('_cache_ventas_csv', txt)).catch(()=>{});
-        setData(parseCSV(txt)); setLoading(false);
+        setData(parseCSV(txt)); setOffline(false); setLoading(false);
       } catch(e) {
-        if (!cache) { setError(e.message); setLoading(false); }
+        if (cache?.productos) {
+          // Railway caído pero hay caché → modo offline, ya se mostraron los datos
+          setOffline(true);
+        } else {
+          // Sin caché y sin Railway → error real
+          setError('No se pudo conectar con Railway y no hay datos en caché local. Verificá la conexión.');
+          setLoading(false);
+        }
       }
     };
     cargar();
@@ -373,11 +370,11 @@ export default function VentasAnalytics() {
   if (error) return (
     <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'60vh',flexDirection:'column',gap:12}}>
       <AlertTriangle size={32} color={T.red}/>
-      <p style={{color:T.red,fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:600}}>Error al cargar el CSV</p>
+      <p style={{color:T.red,fontFamily:"'DM Sans',sans-serif",fontSize:14,fontWeight:600}}>Sin datos de ventas disponibles</p>
       <p style={{color:T.textSecondary,fontFamily:"'DM Sans',sans-serif",fontSize:12}}>{error}</p>
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:'12px 18px',maxWidth:420}}>
         <p style={{color:T.textMuted,fontSize:11,fontFamily:"'DM Sans',sans-serif",lineHeight:1.6}}>
-          Asegúrate de copiar el archivo <span style={{color:T.accent,fontFamily:"'JetBrains Mono',monospace"}}>BBDD_VENTAS_24_AL_26.csv</span> dentro de la carpeta <span style={{color:T.cyan,fontFamily:"'JetBrains Mono',monospace"}}>public/</span> de tu proyecto.
+          Los datos de ventas se sincronizan desde Railway. Verificá que el servicio esté activo en <span style={{color:T.accent,fontFamily:"'JetBrains Mono',monospace"}}>railway.app</span> y que la variable <span style={{color:T.cyan,fontFamily:"'JetBrains Mono',monospace"}}>VITE_BRIDGE_URL</span> sea correcta.
         </p>
       </div>
     </div>
@@ -409,6 +406,16 @@ export default function VentasAnalytics() {
   return (
     <div style={{display:'flex',flexDirection:'column',gap:14}}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');`}</style>
+
+      {/* BANNER OFFLINE */}
+      {offline && (
+        <div style={{background:'rgba(234,179,8,0.1)',border:'1px solid rgba(234,179,8,0.35)',borderRadius:8,padding:'9px 14px',display:'flex',alignItems:'center',gap:9}}>
+          <AlertTriangle size={14} color="#eab308"/>
+          <span style={{color:'#eab308',fontFamily:"'DM Sans',sans-serif",fontSize:12,fontWeight:600}}>
+            Modo offline — mostrando datos en caché local. Railway no está disponible en este momento.
+          </span>
+        </div>
+      )}
 
       {/* FILTERS BAR */}
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:'12px 16px',display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}}>
