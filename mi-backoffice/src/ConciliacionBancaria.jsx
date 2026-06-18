@@ -54,22 +54,38 @@ Reglas importantes:
 - Si el extracto está en ${moneda === 'USD' ? 'dólares' : 'guaraníes'}, los montos deben ser en esa moneda
 - Responde SOLO el JSON, sin ningún texto adicional`;
 
-// ── EXTRAER TEXTO DEL PDF ─────────────────────────────────────────────────────
+// ── EXTRAER TEXTO DEL PDF (con reconstrucción espacial de layout) ─────────────
 async function extractPdfText(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        // workerSrc ya configurado globalmente al importar
         const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
-        let text = '';
+        let fullText = '';
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          text += content.items.map(item => item.str).join(' ') + '\n';
+          const content = await page.getTextContent({ normalizeWhitespace: false });
+          // Reordenar por coordenadas reales: Y desc (arriba primero), X asc
+          // Crítico para extractos bancarios que tienen columnas (fecha, descripción, débito, crédito)
+          const positioned = content.items
+            .filter(it => it.str && it.str.trim())
+            .map(it => ({ x: it.transform[4], y: it.transform[5], str: it.str }));
+          positioned.sort((a, b) =>
+            Math.abs(b.y - a.y) > 3 ? b.y - a.y : a.x - b.x
+          );
+          const rows = [];
+          let curRow = null;
+          for (const item of positioned) {
+            if (!curRow || Math.abs(item.y - curRow.y) > 3) {
+              curRow = { y: item.y, items: [] };
+              rows.push(curRow);
+            }
+            curRow.items.push(item);
+          }
+          fullText += rows.map(r => r.items.map(it => it.str).join('  ')).join('\n') + '\n\n';
         }
-        resolve(text);
-      } catch(err) { reject(err); }
+        resolve(fullText);
+      } catch (err) { reject(err); }
     };
     reader.onerror = reject;
     reader.readAsArrayBuffer(file);

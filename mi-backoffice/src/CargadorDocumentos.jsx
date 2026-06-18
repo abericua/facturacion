@@ -8,15 +8,31 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dis
 const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'https://facturacion-production-3916.up.railway.app';
 const BRIDGE_KEY = import.meta.env.VITE_BRIDGE_KEY || 'sgsp-bridge-2026';
 
-// ── Extrae texto de un PDF con pdfjs ──────────────────────────────────────────
+// ── Extrae texto de un PDF con pdfjs preservando layout espacial ──────────────
 async function extraerTextoPDF(archivo) {
   const arrayBuffer = await archivo.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   let texto = '';
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    texto += content.items.map(item => item.str).join(' ') + '\n';
+    const content = await page.getTextContent({ normalizeWhitespace: false });
+    // Reconstruir orden visual: Y desc (arriba primero), X asc (izq a der)
+    const positioned = content.items
+      .filter(it => it.str && it.str.trim())
+      .map(it => ({ x: it.transform[4], y: it.transform[5], str: it.str }));
+    positioned.sort((a, b) =>
+      Math.abs(b.y - a.y) > 3 ? b.y - a.y : a.x - b.x
+    );
+    const rows = [];
+    let curRow = null;
+    for (const item of positioned) {
+      if (!curRow || Math.abs(item.y - curRow.y) > 3) {
+        curRow = { y: item.y, items: [] };
+        rows.push(curRow);
+      }
+      curRow.items.push(item);
+    }
+    texto += rows.map(r => r.items.map(it => it.str).join('  ')).join('\n') + '\n\n';
   }
   return texto;
 }
