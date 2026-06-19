@@ -414,27 +414,40 @@ def run_facturador_app():
             except: dolar_mercado = 6250
 
         productos = []
-        if os.path.exists(master_path):
-            with open(master_path, 'r', encoding='utf-8') as f: prods = json.load(f)
+        try:
+            import db_sgsp
+            prods = db_sgsp.get_productos(solo_activos=True)
             for p in prods:
-                if not p.get('activo', True): continue
+                # db_sgsp ya filtra los inactivos si usamos solo_activos=True
                 precios = calcular(p['costo'], p['moneda_costo'], p['margen_pct'], p['linea'], dolar_mercado=dolar_mercado)
+                
+                # Extraer ids_externos (psycopg2 lo devuelve como dict, pero por seguridad)
+                ids_ext = p.get('ids_externos', {})
+                if isinstance(ids_ext, str):
+                    try:
+                        ids_ext = json.loads(ids_ext)
+                    except:
+                        ids_ext = {}
+                
                 productos.append({
                     'id_solpro': p.get('id_solpro',''),
-                    'CODIGO': p.get('ids_externos', {}).get('id_maestro', p.get('id_solpro','')),
-                    'DESCRIPCION': p['nombre_canonico'],
-                    'LINEA': p['linea'],
+                    'CODIGO': ids_ext.get('id_maestro', p.get('id_solpro','')),
+                    'DESCRIPCION': p.get('nombre_canonico', ''),
+                    'LINEA': p.get('linea', ''),
                     'PRECIO_CONTADO': precios['precio_contado'],
                     'PRECIO_QR': precios['precio_qr'],
                     'PRECIO_CREDITO': precios['precio_credito'],
                     'CREDITO_BLOQUEADO': precios['credito_bloqueado'],
                     'STOCK': p.get('stock_disponible',0),
-                    'MONEDA': p['moneda_costo'],
+                    'MONEDA': p.get('moneda_costo', ''),
                     'BANDA_PISO': precios['banda_piso'],
                     'BANDA_TECHO': precios['banda_techo'],
-                    'COSTO': p['costo'],
-                    'MARGEN_PCT': p['margen_pct']
+                    'COSTO': p.get('costo', 0),
+                    'MARGEN_PCT': p.get('margen_pct', 0)
                 })
+        except Exception as e:
+            pass
+            
         return pd.DataFrame(productos) if productos else pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])
 
     @st.cache_data(ttl=30)
@@ -573,27 +586,12 @@ def run_facturador_app():
         return True, ""
 
     def add_inventory(codigo, cantidad_a_sumar):
-        if os.path.exists(PRODUCTS_FILE):
-            df = pd.read_csv(PRODUCTS_FILE)
-            start_row = 0
-
-            full_mask = df['ID_Ref'].astype(str).str.strip() == str(codigo).strip()
-            if start_row > 0:
-                full_mask.iloc[0:start_row] = False
-
-            if full_mask.any():
-                idx = full_mask[full_mask].index[0]
-                if 'Stock' not in df.columns:
-                        df['Stock'] = 0
-                try:
-                    current_stock = pd.to_numeric(df.at[idx, 'Stock'], errors='coerce')
-                    if pd.isna(current_stock): current_stock = 0
-                    df.at[idx, 'Stock'] = current_stock + cantidad_a_sumar
-                except: pass
-                df.to_csv(PRODUCTS_FILE, index=False)
-                st.cache_data.clear()
-                return True
-        return False
+        import db_sgsp
+        codigo = str(codigo).strip()
+        success = db_sgsp.update_stock_producto(codigo, float(cantidad_a_sumar))
+        if success:
+            st.cache_data.clear()
+        return success
 
     def descontar_stock(items_entregados):
         import json
@@ -1376,7 +1374,10 @@ def run_facturador_app():
                 if st.button("💾 Actualizar Stock", key="btn_add_inv"):
                     if prod_to_load != "--- SELECCIONAR PRODUCTO ---":
                         cod_load = prod_to_load.split(" | ")[0]
-                        if add_inventory(cod_load, cant_to_load):
+                        # Usar id_solpro real, no el CODIGO del display
+                        mask = df_i['CODIGO'] == cod_load
+                        id_para_db = df_i.loc[mask, 'id_solpro'].values[0] if mask.any() else cod_load
+                        if add_inventory(id_para_db, cant_to_load):
                             accion = "sumaron" if cant_to_load > 0 else "restaron"
                             st.success(f"✅ Se {accion} {abs(cant_to_load)} unidades al producto {cod_load}.")
                             st.rerun()
