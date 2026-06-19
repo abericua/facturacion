@@ -438,7 +438,7 @@ def run_facturador_app():
                     'PRECIO_QR': precios['precio_qr'],
                     'PRECIO_CREDITO': precios['precio_credito'],
                     'CREDITO_BLOQUEADO': precios['credito_bloqueado'],
-                    'STOCK': p.get('stock_disponible',0),
+                    'STOCK': max(0, p.get('stock_actual', 0) - p.get('stock_reservado', 0)),
                     'MONEDA': p.get('moneda_costo', ''),
                     'BANDA_PISO': precios['banda_piso'],
                     'BANDA_TECHO': precios['banda_techo'],
