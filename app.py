@@ -843,6 +843,9 @@ def run_facturador_app():
             try:
                 df = pd.read_excel(SALES_FILE)
                 if not df.empty:
+                    # Normalizar NRO_FACTURA a str para evitar ArrowTypeError por tipos mixtos
+                    if 'NRO_FACTURA' in df.columns:
+                        df['NRO_FACTURA'] = df['NRO_FACTURA'].astype(str).str.strip()
                     # Asegurar que FECHA sea datetime (dayfirst=True para formato DD-MM-YYYY)
                     df['FECHA'] = pd.to_datetime(df['FECHA'], dayfirst=True, errors='coerce')
                     # Eliminar solo filas que realmente no tienen fecha (NaN en el Excel original)
