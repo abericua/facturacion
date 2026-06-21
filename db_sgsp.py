@@ -744,6 +744,33 @@ def update_stock_producto(id_solpro: str, delta: float, costo_usd: float = 0) ->
         conn.close()
 
 
+def descontar_stock_producto(id_solpro: str, cantidad: float) -> bool:
+    """Descuenta la cantidad del stock_actual y stock_disponible."""
+    return update_stock_producto(id_solpro, -float(cantidad))
+
+
+def reservar_stock_producto(id_solpro: str, cantidad: float) -> bool:
+    """Resta de stock_disponible y suma a stock_reservado sin afectar stock_actual."""
+    conn = get_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE sgsp_productos
+            SET stock_disponible = stock_disponible - %s,
+                stock_reservado = stock_reservado + %s
+            WHERE id_solpro = %s OR codigo_proveedor = %s
+        """, (float(cantidad), float(cantidad), id_solpro, id_solpro))
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        print(f"[DB] reservar_stock_producto error: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+
 # ══════════════════════════════════════════════════════════════════════════
 # COMPRAS
 # ══════════════════════════════════════════════════════════════════════════
@@ -1010,3 +1037,195 @@ def get_resumen() -> dict:
         'monto_pendiente_gs':   sum(p.get('monto_gs', 0) for p in pendientes),
         'pagos':                pagos,
     }
+
+
+def bulk_upsert_productos(records: list) -> dict:
+    """Inserta/actualiza todos los productos en UNA sola transacción."""
+    import json
+    if not records:
+        return {'insertados': 0, 'errors': []}
+    conn = get_conn()
+    cur = conn.cursor()
+    count = 0
+    errors = []
+    try:
+        for p in records:
+            ids_ext = p.get('ids_externos', [])
+            aliases = p.get('aliases', [])
+            if isinstance(ids_ext, (list, dict)):
+                ids_ext = json.dumps(ids_ext, ensure_ascii=False)
+            if isinstance(aliases, (list, dict)):
+                aliases = json.dumps(aliases, ensure_ascii=False)
+            id_solpro = p.get('id_solpro') or p.get('ID_Ref') or p.get('nombre_canonico') or p.get('Nombre', '')
+            if not id_solpro:
+                continue
+            try:
+                cur.execute("""
+                    INSERT INTO sgsp_productos (
+                        id_solpro, ids_externos, nombre_canonico, aliases,
+                        proveedor, linea, tipo, moneda_costo, costo, margen_pct,
+                        stock_actual, stock_reservado, stock_disponible,
+                        credito_habilitado, activo, codigo_proveedor, costo_usd
+                    ) VALUES (
+                        %(id_solpro)s, %(ids_externos)s::jsonb, %(nombre_canonico)s, %(aliases)s::jsonb,
+                        %(proveedor)s, %(linea)s, %(tipo)s, %(moneda_costo)s, %(costo)s, %(margen_pct)s,
+                        %(stock_actual)s, %(stock_reservado)s, %(stock_disponible)s,
+                        %(credito_habilitado)s, %(activo)s, %(codigo_proveedor)s, %(costo_usd)s
+                    )
+                    ON CONFLICT (id_solpro) DO UPDATE SET
+                        nombre_canonico   = EXCLUDED.nombre_canonico,
+                        aliases           = EXCLUDED.aliases,
+                        proveedor         = EXCLUDED.proveedor,
+                        costo             = EXCLUDED.costo,
+                        margen_pct        = EXCLUDED.margen_pct,
+                        stock_actual      = EXCLUDED.stock_actual,
+                        stock_reservado   = EXCLUDED.stock_reservado,
+                        stock_disponible  = EXCLUDED.stock_disponible,
+                        credito_habilitado= EXCLUDED.credito_habilitado,
+                        activo            = EXCLUDED.activo,
+                        codigo_proveedor  = EXCLUDED.codigo_proveedor,
+                        costo_usd         = EXCLUDED.costo_usd
+                """, {
+                    'id_solpro':           id_solpro,
+                    'ids_externos':        ids_ext,
+                    'nombre_canonico':     _to_str(p.get('nombre_canonico', p.get('Nombre', ''))),
+                    'aliases':             aliases,
+                    'proveedor':           _to_str(p.get('proveedor', p.get('Proveedor', ''))),
+                    'linea':               _to_str(p.get('linea', p.get('Linea', ''))),
+                    'tipo':                _to_str(p.get('tipo', '')),
+                    'moneda_costo':        _to_str(p.get('moneda_costo', p.get('Moneda_Costo', 'USD'))),
+                    'costo':               float(p.get('costo', p.get('Costo_Compra', 0)) or 0),
+                    'margen_pct':          float(p.get('margen_pct', p.get('Margen_Pct', 0)) or 0),
+                    'stock_actual':        float(p.get('stock_actual', p.get('Stock', 0)) or 0),
+                    'stock_reservado':     float(p.get('stock_reservado', 0) or 0),
+                    'stock_disponible':    float(p.get('stock_disponible', 0) or 0),
+                    'credito_habilitado':  bool(p.get('credito_habilitado', False)),
+                    'activo':              bool(p.get('activo', True)),
+                    'codigo_proveedor':    _to_str(p.get('codigo_proveedor', p.get('Codigo_Proveedor', p.get('ID_Ref', '')))),
+                    'costo_usd':           float(p.get('costo_usd', p.get('Costo_USD', 0)) or 0),
+                })
+                count += 1
+            except Exception as e:
+                errors.append(str(e))
+        conn.commit()
+        return {'insertados': count, 'errors': errors}
+    except Exception as e:
+        conn.rollback()
+        return {'insertados': count, 'errors': errors + [str(e)]}
+    finally:
+        cur.close()
+        conn.close()
+
+
+def bulk_upsert_clientes(records: list) -> dict:
+    """Inserta/actualiza todos los clientes en UNA sola transacción."""
+    if not records:
+        return {'insertados': 0, 'errors': []}
+    conn = get_conn()
+    cur = conn.cursor()
+    count = 0
+    errors = []
+    try:
+        for c in records:
+            id_solpro = str(c.get('id_solpro') or c.get('ruc') or '').strip()
+            if not id_solpro:
+                continue
+            aliases = c.get('aliases', [])
+            if isinstance(aliases, list):
+                aliases = json.dumps(aliases, ensure_ascii=False)
+            # fecha_alta: convertir '' a None para evitar error en columna DATE
+            fecha_alta = c.get('fecha_alta') or None
+            if fecha_alta == '':
+                fecha_alta = None
+            try:
+                cur.execute("""
+                    INSERT INTO sgsp_clientes (
+                        id_solpro, ruc, nombre_canonico, aliases, direccion,
+                        telefono, email, tipo, categoria,
+                        linea_credito_habilitada, notas, fecha_alta, activo
+                    ) VALUES (
+                        %(id_solpro)s, %(ruc)s, %(nombre_canonico)s, %(aliases)s::jsonb,
+                        %(direccion)s, %(telefono)s, %(email)s, %(tipo)s, %(categoria)s,
+                        %(linea_credito_habilitada)s, %(notas)s, %(fecha_alta)s, %(activo)s
+                    )
+                    ON CONFLICT (id_solpro) DO UPDATE SET
+                        ruc                      = EXCLUDED.ruc,
+                        nombre_canonico          = EXCLUDED.nombre_canonico,
+                        aliases                  = EXCLUDED.aliases,
+                        direccion                = EXCLUDED.direccion,
+                        telefono                 = EXCLUDED.telefono,
+                        email                    = EXCLUDED.email,
+                        categoria                = EXCLUDED.categoria,
+                        linea_credito_habilitada = EXCLUDED.linea_credito_habilitada,
+                        activo                   = EXCLUDED.activo
+                """, {
+                    'id_solpro':                id_solpro,
+                    'ruc':                      _to_str(c.get('ruc', '')),
+                    'nombre_canonico':          _to_str(c.get('nombre_canonico', c.get('nombre', ''))),
+                    'aliases':                  aliases,
+                    'direccion':                _to_str(c.get('direccion', '')),
+                    'telefono':                 _to_str(c.get('telefono', '')),
+                    'email':                    _to_str(c.get('email', '')),
+                    'tipo':                     _to_str(c.get('tipo', '')),
+                    'categoria':                _to_str(c.get('categoria', '')),
+                    'linea_credito_habilitada': bool(c.get('linea_credito_habilitada', False)),
+                    'notas':                    _to_str(c.get('notas', '')),
+                    'fecha_alta':               fecha_alta,
+                    'activo':                   bool(c.get('activo', True)),
+                })
+                count += 1
+            except Exception as e:
+                errors.append(f"{id_solpro}: {e}")
+        conn.commit()
+        return {'insertados': count, 'errors': errors}
+    except Exception as e:
+        conn.rollback()
+        return {'insertados': count, 'errors': errors + [str(e)]}
+    finally:
+        cur.close()
+        conn.close()
+
+
+def reservar_stock_producto(id_solpro: str, cantidad: float) -> bool:
+    """Suma cantidad a stock_reservado y resta de stock_disponible."""
+    conn = get_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE sgsp_productos
+            SET stock_reservado  = stock_reservado + %s,
+                stock_disponible = GREATEST(0, stock_disponible - %s)
+            WHERE id_solpro = %s OR codigo_proveedor = %s
+        """, (cantidad, cantidad, id_solpro, id_solpro))
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        print(f"[DB] reservar_stock_producto error: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+
+def descontar_stock_producto(id_solpro: str, cantidad: float) -> bool:
+    """Resta cantidad de stock_actual, stock_reservado y stock_disponible."""
+    conn = get_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE sgsp_productos
+            SET stock_actual     = GREATEST(0, stock_actual - %s),
+                stock_reservado  = GREATEST(0, stock_reservado - %s),
+                stock_disponible = GREATEST(0, stock_disponible - %s)
+            WHERE id_solpro = %s OR codigo_proveedor = %s
+        """, (cantidad, cantidad, cantidad, id_solpro, id_solpro))
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        print(f"[DB] descontar_stock_producto error: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
