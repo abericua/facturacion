@@ -51,14 +51,14 @@ def _dibujar_canvas(c, data, moneda):
     if os.path.exists(RUTA_PLANTILLA):
         c.drawImage(RUTA_PLANTILLA, 0, 0, width=PAGE_W, height=PAGE_H)
 
-    # CABECERA — coordenadas exactas de generador_facturas.py
+    # CABECERA
     c.setFont("Courier-Bold", 14)
-    c.drawString(450, 488, data['nro_factura'])
+    c.drawString(505, 505, data['nro_factura'])   # después del "002-001-" preimpreso
 
     c.setFont("Helvetica", 11)
     c.drawString(135, 444, data['fecha'])
     x_cond = 556 if data['condicion'] == "CONTADO" else 624
-    c.drawString(x_cond, 444, "X")
+    c.drawString(x_cond, 453, "X")               # subido para quedar dentro del checkbox
 
     c.drawString(145, 424, data['nombre'].upper())
     c.drawString(100, 404, data['ruc'])
@@ -74,16 +74,16 @@ def _dibujar_canvas(c, data, moneda):
         c.drawCentredString(55,  y, f"{float(p['c']):g}")
         c.drawString(105,        y, p['d'])
         c.drawRightString(415,   y, format_money(float(p['p']), moneda))
-        c.drawRightString(625,   y, format_money(float(p['t']), moneda))
+        c.drawRightString(621,   y, format_money(float(p['t']), moneda))
         total_suma += float(p['t'])
         y -= 18.5
 
     # TOTALES
     c.setFont("Helvetica", 10)
-    c.drawRightString(625, 102, format_money(total_suma, moneda))   # Sub-Totales
+    c.drawRightString(621, 102, format_money(total_suma, moneda))   # Sub-Totales
 
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(625, 80, format_money(total_suma, moneda))    # TOTAL A PAGAR
+    c.drawRightString(621, 80, format_money(total_suma, moneda))    # TOTAL A PAGAR
 
     c.setFont("Helvetica-Bold", 10)
     c.drawString(50, 60, numero_a_letras(total_suma, moneda))       # En letras
