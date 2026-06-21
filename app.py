@@ -303,7 +303,7 @@ def run_facturador_app():
         print(f"[{datetime.now()}] Inicialización de volumen completa.")
         
     # Sincronizacion desactivada para evitar pisar datos de la database maestra
-    LOGO_FILE = os.path.join(os.path.dirname(BASE_DIR), "LOGO  2D FONDO NEGRO 2026.png")
+    LOGO_FILE = os.path.join(BASE_DIR, "LOGO  2D FONDO NEGRO 2026.png")
 
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
@@ -422,7 +422,7 @@ def run_facturador_app():
                 precios = calcular(p['costo'], p['moneda_costo'], p['margen_pct'], p['linea'], dolar_mercado=dolar_mercado)
                 
                 # Extraer ids_externos (psycopg2 lo devuelve como dict, pero por seguridad)
-                ids_ext = p.get('ids_externos', {})
+                ids_ext = p.get('ids_externos') or {}
                 if isinstance(ids_ext, str):
                     try:
                         ids_ext = json.loads(ids_ext)
@@ -446,29 +446,43 @@ def run_facturador_app():
                     'MARGEN_PCT': p.get('margen_pct', 0)
                 })
         except Exception as e:
+            import traceback
+            print(f"[ERROR load_products] {e}", file=sys.stderr)
+            traceback.print_exc()
             pass
             
         return pd.DataFrame(productos) if productos else pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])
 
     @st.cache_data(ttl=30)
     def load_clients():
-        import json
-        master_path = os.path.join(SGSP_DATABASE, 'master_clientes.json')
         all_clients = {}
-        if os.path.exists(master_path):
-            with open(master_path, 'r', encoding='utf-8') as f:
-                clientes = json.load(f)
+        try:
+            import db_sgsp
+            clientes = db_sgsp.get_clientes(solo_activos=True)
             for c in clientes:
-                if not c.get('activo', True): continue
                 key = c['nombre_canonico'].upper()
+                
+                # Extraer aliases del JSONB
+                aliases = c.get('aliases', [])
+                if isinstance(aliases, str):
+                    try:
+                        import json
+                        aliases = json.loads(aliases)
+                    except:
+                        aliases = []
+                        
                 all_clients[key] = {
                     'id_solpro': c.get('id_solpro',''),
                     'nombre': c['nombre_canonico'],
                     'ruc': c.get('ruc', ''),
                     'direccion': c.get('direccion',''),
                     'telefono': c.get('telefono',''),
-                    'aliases': c.get('aliases', [])
+                    'aliases': aliases
                 }
+        except Exception as e:
+            import sys, traceback
+            print(f"[ERROR load_clients] {e}", file=sys.stderr)
+            traceback.print_exc()
         return all_clients
 
     def buscar_cliente(query, clientes):
@@ -544,81 +558,69 @@ def run_facturador_app():
             st.cache_data.clear()
 
     def validate_stock(inventory_log):
-        import json
-        master_path = os.path.join(
-            SGSP_DATABASE, 'master_productos.json')
-        if not os.path.exists(master_path):
+        """
+        Valida stock disponible para cada item del pedido consultando PostgreSQL.
+        Retorna (True, "") si hay stock suficiente, o (False, mensaje) si no.
+        """
+        if not inventory_log:
             return True, ""
-        with open(master_path, 'r',
-            encoding='utf-8') as f:
-            productos = json.load(f)
-        stock_map = {}
-        for p in productos:
-            stock_map[p['id_solpro']] = p.get(
-                'stock_disponible', 0)
-            for ext_id in p.get(
-                'ids_externos', {}).values():
-                if ext_id:
-                    stock_map[ext_id] = p.get(
-                        'stock_disponible', 0)
+        try:
+            import db_sgsp
+            productos = db_sgsp.get_productos(solo_activos=False)
+            stock_map = {}
+            for p in productos:
+                id_s = str(p.get('id_solpro', '') or '').strip()
+                stock_disp = float(p.get('stock_disponible', 0) or 0)
+                if id_s:
+                    stock_map[id_s] = stock_disp
+                cod_prov = str(p.get('codigo_proveedor', '') or '').strip()
+                if cod_prov:
+                    stock_map[cod_prov] = stock_disp
+        except Exception as e:
+            print(f"[validate_stock] Error al consultar DB: {e}", file=sys.stderr)
+            # No bloquear la venta por error de conectividad
+            return True, ""
+
         for item in inventory_log:
-            cod = str(item.get(
-                'COD_PRODUCTO', '')).strip()
-            stock = stock_map.get(cod, 0)
-            if stock < 0:
-                return False,                     f"{cod}: stock negativo"
-        return True, ""
-        df = pd.read_csv(PRODUCTS_FILE)
-        start_row = 0
-        for sale in sales_list:
-            codigo = sale['COD_PRODUCTO']
-            cant_solicitada = sale.get('_CANT_NUM', 0)
-            full_mask = df['ID_Ref'].astype(str).str.strip() == str(codigo).strip()
-            
-            if full_mask.any():
-                idx = full_mask[full_mask].index[0]
-                try:
-                    current_stock = pd.to_numeric(df.at[idx, 'Stock'], errors='coerce')
-                    if pd.isna(current_stock): current_stock = 0
-                    if cant_solicitada > current_stock:
-                        return False, f"⚠️ Stock insuficiente para {codigo}. Disponible: {current_stock}, Solicitado: {cant_solicitada}"
-                except: pass
+            cod = str(item.get('COD_PRODUCTO', '')).strip()
+            cant_solicitada = float(item.get('_CANT_NUM', 0) or 0)
+            if not cod or cant_solicitada <= 0:
+                continue
+            if cod not in stock_map:
+                continue  # Producto no registrado en DB, no bloquear
+            stock = stock_map[cod]
+            if cant_solicitada > stock:
+                return False, f"⚠️ Stock insuficiente para {cod}. Disponible: {stock:g}, Solicitado: {cant_solicitada:g}"
         return True, ""
 
     def add_inventory(codigo, cantidad_a_sumar):
         import db_sgsp
         codigo = str(codigo).strip()
-        success = db_sgsp.update_stock_producto(codigo, float(cantidad_a_sumar))
-        if success:
-            st.cache_data.clear()
-        return success
+        try:
+            success = db_sgsp.update_stock_producto(codigo, float(cantidad_a_sumar))
+            if success:
+                st.cache_data.clear()
+                return True, None
+            else:
+                return False, f"Producto '{codigo}' no encontrado en la base de datos."
+        except Exception as e:
+            return False, str(e)
 
     def descontar_stock(items_entregados):
-        import json
-        master_path = os.path.join(SGSP_DATABASE, 'master_productos.json')
-        if not os.path.exists(master_path): return
-        with open(master_path, 'r', encoding='utf-8') as f: productos = json.load(f)
+        import db_sgsp as _db
         for item in items_entregados:
-            for p in productos:
-                if p.get('id_solpro') == item.get('id_producto_solpro'):
-                    p['stock_actual'] = max(0, p.get('stock_actual',0) - item.get('cantidad',0))
-                    p['stock_reservado'] = max(0, p.get('stock_reservado',0) - item.get('cantidad',0))
-                    p['stock_disponible'] = max(0, p['stock_actual'] - p['stock_reservado'])
-                    break
-        with open(master_path, 'w', encoding='utf-8') as f: json.dump(productos, f, indent=2, ensure_ascii=False)
+            id_prod = item.get('id_producto_solpro', '')
+            cantidad = float(item.get('cantidad', 0))
+            if id_prod and cantidad > 0:
+                _db.descontar_stock_producto(id_prod, cantidad)
 
     def reservar_stock(items):
-        import json
-        master_path = os.path.join(SGSP_DATABASE, 'master_productos.json')
-        if not os.path.exists(master_path): return
-        with open(master_path, 'r', encoding='utf-8') as f: productos = json.load(f)
+        import db_sgsp as _db
         for item in items:
-            for p in productos:
-                if p.get('id_solpro') == item.get('id_producto_solpro'):
-                    p['stock_reservado'] = p.get('stock_reservado',0) + item.get('cantidad',0)
-                    p['stock_disponible'] = max(0, p.get('stock_actual',0) - p['stock_reservado'])
-                    break
-        with open(master_path, 'w', encoding='utf-8') as f: json.dump(productos, f, indent=2, ensure_ascii=False)
+            id_prod = item.get('id_producto_solpro', '')
+            cantidad = float(item.get('cantidad', 0))
+            if id_prod and cantidad > 0:
+                _db.reservar_stock_producto(id_prod, cantidad)
 
     def registrar_pedido(venta_data):
         import json, uuid
@@ -801,8 +803,18 @@ def run_facturador_app():
                         try:
                             import json
                             items_to_restore = json.loads(raw_items_str)
+                            df_inv = get_inventory_data()
                             for item in items_to_restore:
-                                add_inventory(item['COD_PRODUCTO'], item['_CANT_NUM'])
+                                cod = item.get('COD_PRODUCTO', '')
+                                id_para_db = cod
+                                if not df_inv.empty and 'CODIGO' in df_inv.columns and 'id_solpro' in df_inv.columns:
+                                    mask = df_inv['CODIGO'] == cod
+                                    if mask.any():
+                                        id_para_db = df_inv.loc[mask, 'id_solpro'].values[0]
+                                
+                                ok, msg = add_inventory(id_para_db, item.get('_CANT_NUM', 0))
+                                if not ok:
+                                    print(f"Error devolviendo stock para {cod}: {msg}")
                         except Exception as e:
                             print(f"Error restoring inventory: {e}")
 
@@ -1081,11 +1093,13 @@ def run_facturador_app():
         st.subheader("Sincronización Cloud (Railway)")
         c1, c2 = st.columns(2)
         if c1.button("Sincronizar Clientes"):
-            res = sync_clientes_bulk(list(clients_dict.values()))
+            import db_sgsp
+            clientes_db = db_sgsp.get_clientes(solo_activos=False)
+            res = sync_clientes_bulk(clientes_db)
             if "error" in res:
                 st.error(f"Error: {res['error']}")
             else:
-                st.success(f"Sync OK: {res.get('creados', 0)} creados, {res.get('actualizados', 0)} actualizados.")
+                st.success(f"Sync OK: {res.get('creados', 0)} procesados.")
         
         if c2.button("Sincronizar Productos"):
             import json as _json
@@ -1374,17 +1388,22 @@ def run_facturador_app():
                 if st.button("💾 Actualizar Stock", key="btn_add_inv"):
                     if prod_to_load != "--- SELECCIONAR PRODUCTO ---":
                         cod_load = prod_to_load.split(" | ")[0]
-                        # Usar id_solpro real, no el CODIGO del display
-                        mask = df_i['CODIGO'] == cod_load
-                        id_para_db = df_i.loc[mask, 'id_solpro'].values[0] if mask.any() else cod_load
-                        if add_inventory(id_para_db, cant_to_load):
+                        try:
+                            mask = df_i['CODIGO'] == cod_load
+                            id_para_db = df_i.loc[mask, 'id_solpro'].values[0] if (mask.any() and 'id_solpro' in df_i.columns) else cod_load
+                        except Exception as e:
+                            id_para_db = cod_load
+                            st.warning(f"⚠️ No se pudo leer id_solpro: {e}. Usando código: {cod_load}")
+                        
+                        ok, err = add_inventory(id_para_db, cant_to_load)
+                        if ok:
                             accion = "sumaron" if cant_to_load > 0 else "restaron"
                             st.success(f"✅ Se {accion} {abs(cant_to_load)} unidades al producto {cod_load}.")
                             st.rerun()
                         else:
-                            st.error("Hubo un problema al actualizar el inventario.")
+                            st.error(f"❌ Error al actualizar stock: {err}")
                     else:
-                        st.warning("Por favor, selecciona un producto.")
+                        st.warning("Seleccioná un producto primero.")
 
             filtro = st.text_input("🔍 Filtrar Inventario", placeholder="Buscar por código o nombre...")
 
@@ -1740,8 +1759,8 @@ def run_facturador_app():
                     from datetime import datetime
                     sync_tipo_cambio({
                         "dolar_mercado": nuevo_dolar,
-                        "banda_piso": nueva_banda_piso,
-                        "banda_techo": nueva_banda_techo,
+                        "banda_piso": nuevo_dolar + 150,
+                        "banda_techo": nuevo_dolar + 350,
                         "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     })
                 except:

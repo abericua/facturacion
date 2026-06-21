@@ -112,16 +112,18 @@ class FacturadorApp:
             messagebox.showwarning("Faltan datos", "Completa Nro Factura y Nombre.")
             return
 
-        base_path = r"C:\Users\solpr\Desktop\Creador de Facturas"
+        base_path = os.path.dirname(os.path.abspath(__file__))
         save_path = os.path.join(base_path, "Facturas_Emitidas")
         if not os.path.exists(save_path): os.makedirs(save_path)
-        
+
         pdf_name = f"Factura_002-001-{self.nro_factura.get()}.pdf"
         pdf_path = os.path.join(save_path, pdf_name)
 
         w, h = 2362 * 0.28, 2180 * 0.28
         c = canvas.Canvas(pdf_path, pagesize=(w, h))
-        c.drawImage(os.path.join(base_path, "factura solpro 2026.png"), 0, 0, width=w, height=h)
+        plantilla = os.path.join(base_path, "factura solpro 2026.png")
+        if os.path.exists(plantilla):
+            c.drawImage(plantilla, 0, 0, width=w, height=h)
 
         # --- CABECERA (Ajustada según PDF de prueba) ---
         c.setFont("Courier-Bold", 14)
@@ -163,7 +165,14 @@ class FacturadorApp:
 
         c.save()
         messagebox.showinfo("Guardado", f"Factura guardada en:\n{pdf_path}")
-        os.startfile(save_path)
+        # os.startfile es solo Windows; usar subprocess para compatibilidad
+        import subprocess, platform
+        if platform.system() == "Windows":
+            os.startfile(save_path)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", save_path])
+        else:
+            subprocess.Popen(["xdg-open", save_path])
 
 if __name__ == "__main__":
     root = tk.Tk(); app = FacturadorApp(root); root.mainloop()

@@ -326,29 +326,15 @@ async def sync_clientes(request: Request, x_api_key: Optional[str] = Header(None
     elif isinstance(body, dict):
         records = body.get("records", list(body.values()))
     else:
-        raise HTTPException(status_code=400, detail="Formato de payload inválido.")
+        records = []
 
-    creados = actualizados = 0
-    errors = []
-
-    for cliente in records:
-        key = str(cliente.get('ruc') or cliente.get('RUC') or cliente.get('id_solpro', ''))
-        if not key:
-            continue
-        if not cliente.get('id_solpro'):
-            cliente['id_solpro'] = key
-        try:
-            db_sgsp.upsert_cliente(cliente)
-            creados += 1
-        except Exception as e:
-            errors.append(str(e))
-            actualizados += 1  # puede ser update fallido — contar de todas formas
+    result = db_sgsp.bulk_upsert_clientes(records)
 
     return {
         "status":       "synced",
-        "creados":      creados,
-        "actualizados": actualizados,
-        "errors":       errors,
+        "creados":      result.get('insertados', 0),
+        "actualizados": 0,
+        "errors":       result.get('errors', []),
         "ts":           datetime.utcnow().isoformat(),
     }
 
@@ -365,12 +351,6 @@ def get_productos_bridge(x_api_key: Optional[str] = Header(None)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error BD: {e}")
     return {"records": records, "total": len(records)}
-
-
-@router.get("/ventas/csv")
-def _ventas_csv_dup(x_api_key: Optional[str] = Header(None)):
-    # alias — ya definido arriba, FastAPI usará el primero
-    pass
 
 
 @router.get("/productos/csv")
@@ -407,27 +387,17 @@ def get_productos_csv(x_api_key: Optional[str] = Header(None)):
 
 @router.post("/productos/sync")
 def sync_productos(payload: SyncPayload, x_api_key: Optional[str] = Header(None)):
-    """Actualiza el catálogo de productos en PostgreSQL."""
+    """Actualiza el catálogo de productos en PostgreSQL (bulk transaction)."""
     _check_key(x_api_key)
     if not payload.records:
         raise HTTPException(status_code=400, detail="Sin registros.")
 
-    count = 0
-    errors = []
-    for p in payload.records:
-        # Asegura id_solpro
-        if not p.get('id_solpro'):
-            p['id_solpro'] = p.get('ID_Ref') or p.get('nombre_canonico') or p.get('Nombre', '')
-        try:
-            db_sgsp.upsert_producto(p)
-            count += 1
-        except Exception as e:
-            errors.append(str(e))
+    result = db_sgsp.bulk_upsert_productos(payload.records)
 
     return {
         "status": "synced",
-        "total":  count,
-        "errors": errors,
+        "total":  result.get('insertados', 0),
+        "errors": result.get('errors', []),
         "ts":     datetime.utcnow().isoformat(),
     }
 
@@ -680,7 +650,7 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
         if not gemini_key:
             raise HTTPException(status_code=500, detail="GEMINI_API_KEY no configurada en el servidor.")
 
-        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-2.0-flash").strip()
+        modelo = (os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash").strip()
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{modelo}:generateContent?key={gemini_key}"
