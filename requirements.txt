@@ -11,4 +11,4 @@ fastapi
 uvicorn
 pyotp
 qrcode
-PyJWT
+PyJWTPillow
