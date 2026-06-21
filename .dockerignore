@@ -14,6 +14,7 @@ scratch/
 PerfilUsuarioContraseña.txt
 TALONARIOS DE FACTURAS HABILITADAS.txt
 temp_log.txt
-LOGO*.png
-ISOLOGO*.png
-factura*.png
+# PNGs de plantilla requeridos para PDF — NO excluir del build
+# LOGO*.png
+# ISOLOGO*.png
+# factura*.png
