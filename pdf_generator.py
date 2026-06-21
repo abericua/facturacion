@@ -41,6 +41,7 @@ def numero_a_letras(n, moneda):
 def _dibujar_canvas(c, data, moneda):
     """
     Dibuja todos los campos sobre el canvas.
+    Coordenadas calibradas desde generador_facturas.py (versión que generaba correctamente).
     data debe tener:
         nro_factura, fecha, condicion, nombre, ruc,
         telefono, direccion, productos, moneda
@@ -50,49 +51,47 @@ def _dibujar_canvas(c, data, moneda):
     if os.path.exists(RUTA_PLANTILLA):
         c.drawImage(RUTA_PLANTILLA, 0, 0, width=PAGE_W, height=PAGE_H)
 
-    # CABECERA
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(550, 490, data['nro_factura'])
+    # CABECERA — coordenadas exactas de generador_facturas.py
+    c.setFont("Courier-Bold", 14)
+    c.drawString(450, 488, data['nro_factura'])
 
     c.setFont("Helvetica", 11)
-    c.drawString(190, 456, data['fecha'])
-    x_cond = 533 if data['condicion'] == "CONTADO" else 601
-    c.drawString(x_cond, 456, "X")
+    c.drawString(135, 444, data['fecha'])
+    x_cond = 556 if data['condicion'] == "CONTADO" else 624
+    c.drawString(x_cond, 444, "X")
 
-    c.drawString(220, 436, data['nombre'].upper())
-    c.drawString(120, 416, data['ruc'])
-    c.drawString(470, 416, data['telefono'])
-    c.drawString(120, 396, data['direccion'].upper())
+    c.drawString(145, 424, data['nombre'].upper())
+    c.drawString(100, 404, data['ruc'])
+    c.drawString(465, 404, data['telefono'])
+    c.drawString(100, 384, data['direccion'].upper())
 
     # PRODUCTOS
-    y         = 345
+    y          = 352
     total_suma = 0
 
     for p in data['productos']:
         c.setFont("Helvetica", 10)
-        c.drawCentredString(35,  y, f"{float(p['c']):g}")
-        c.drawString(73,         y, p['d'])
-        c.drawRightString(405,   y, format_money(float(p['p']), moneda))
-        c.drawRightString(615,   y, format_money(float(p['t']), moneda))
+        c.drawCentredString(55,  y, f"{float(p['c']):g}")
+        c.drawString(105,        y, p['d'])
+        c.drawRightString(415,   y, format_money(float(p['p']), moneda))
+        c.drawRightString(625,   y, format_money(float(p['t']), moneda))
         total_suma += float(p['t'])
         y -= 18.5
 
     # TOTALES
     c.setFont("Helvetica", 10)
-    c.drawRightString(615, 100, format_money(total_suma, moneda))
-    c.drawRightString(615, 82,  format_money(total_suma, moneda))
+    c.drawRightString(625, 102, format_money(total_suma, moneda))   # Sub-Totales
 
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(615, 63, format_money(total_suma, moneda))
+    c.drawRightString(625, 80, format_money(total_suma, moneda))    # TOTAL A PAGAR
 
-    c.setFont("Helvetica", 8)
-    palabras = numero_a_letras(total_suma, moneda).replace("TOTAL A PAGAR: ", "")
-    c.drawString(40, 63, palabras)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(50, 60, numero_a_letras(total_suma, moneda))       # En letras
 
     iva_10 = total_suma / 11
     c.setFont("Helvetica", 10)
-    c.drawRightString(445, 50, format_money(iva_10, moneda))
-    c.drawRightString(615, 50, format_money(iva_10, moneda))
+    c.drawRightString(460, 38, format_money(iva_10, moneda))        # IVA 5%
+    c.drawRightString(590, 38, format_money(iva_10, moneda))        # Total IVA 10%
 
     c.save()
 
