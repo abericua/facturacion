@@ -612,7 +612,8 @@ def run_facturador_app():
             id_prod = item.get('id_producto_solpro', '')
             cantidad = float(item.get('cantidad', 0))
             if id_prod and cantidad > 0:
-                _db.descontar_stock_producto(id_prod, cantidad)
+                # update_stock_producto usa delta: negativo = descuento
+                _db.update_stock_producto(id_prod, -cantidad)
 
     def reservar_stock(items):
         import db_sgsp as _db

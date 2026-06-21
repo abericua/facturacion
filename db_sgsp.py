@@ -744,33 +744,6 @@ def update_stock_producto(id_solpro: str, delta: float, costo_usd: float = 0) ->
         conn.close()
 
 
-def descontar_stock_producto(id_solpro: str, cantidad: float) -> bool:
-    """Descuenta la cantidad del stock_actual y stock_disponible."""
-    return update_stock_producto(id_solpro, -float(cantidad))
-
-
-def reservar_stock_producto(id_solpro: str, cantidad: float) -> bool:
-    """Resta de stock_disponible y suma a stock_reservado sin afectar stock_actual."""
-    conn = get_conn()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            UPDATE sgsp_productos
-            SET stock_disponible = stock_disponible - %s,
-                stock_reservado = stock_reservado + %s
-            WHERE id_solpro = %s OR codigo_proveedor = %s
-        """, (float(cantidad), float(cantidad), id_solpro, id_solpro))
-        conn.commit()
-        return cur.rowcount > 0
-    except Exception as e:
-        conn.rollback()
-        print(f"[DB] reservar_stock_producto error: {e}")
-        return False
-    finally:
-        cur.close()
-        conn.close()
-
-
 # ══════════════════════════════════════════════════════════════════════════
 # COMPRAS
 # ══════════════════════════════════════════════════════════════════════════
