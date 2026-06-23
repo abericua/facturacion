@@ -451,7 +451,13 @@ def run_facturador_app():
             traceback.print_exc()
             pass
             
-        return pd.DataFrame(productos) if productos else pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])
+        if not productos:
+            return pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])
+        df = pd.DataFrame(productos)
+        # Deduplicar por CODIGO manteniendo el registro con mayor STOCK
+        # (previene que duplicados en DB aparezcan en el dropdown)
+        df = df.sort_values('STOCK', ascending=False).drop_duplicates(subset=['CODIGO'], keep='first')
+        return df.reset_index(drop=True)
 
     @st.cache_data(ttl=30)
     def load_clients():
@@ -565,17 +571,27 @@ def run_facturador_app():
         if not inventory_log:
             return True, ""
         try:
-            import db_sgsp
+            import db_sgsp, json as _json
             productos = db_sgsp.get_productos(solo_activos=False)
             stock_map = {}
             for p in productos:
-                id_s = str(p.get('id_solpro', '') or '').strip()
                 stock_disp = float(p.get('stock_disponible', 0) or 0)
-                if id_s:
-                    stock_map[id_s] = stock_disp
-                cod_prov = str(p.get('codigo_proveedor', '') or '').strip()
-                if cod_prov:
-                    stock_map[cod_prov] = stock_disp
+                # Para cada clave posible, guardar el MÁXIMO stock disponible
+                # (evita que un duplicado con stock=0 sobreescriba uno con stock>0)
+                for key in [
+                    str(p.get('id_solpro', '') or '').strip(),
+                    str(p.get('codigo_proveedor', '') or '').strip(),
+                ]:
+                    if key:
+                        stock_map[key] = max(stock_map.get(key, 0), stock_disp)
+                # También indexar por id_maestro (que es el CODIGO en df_products)
+                ids_ext = p.get('ids_externos') or {}
+                if isinstance(ids_ext, str):
+                    try: ids_ext = _json.loads(ids_ext)
+                    except: ids_ext = {}
+                id_maestro = str(ids_ext.get('id_maestro', '') or '').strip()
+                if id_maestro:
+                    stock_map[id_maestro] = max(stock_map.get(id_maestro, 0), stock_disp)
         except Exception as e:
             print(f"[validate_stock] Error al consultar DB: {e}", file=sys.stderr)
             # No bloquear la venta por error de conectividad
