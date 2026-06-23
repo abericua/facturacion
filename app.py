@@ -1154,13 +1154,14 @@ def run_facturador_app():
         
         if c2.button("Sincronizar Productos"):
             import json as _json
+            st.cache_data.clear()       # re-lee el CSV para incluir productos nuevos
             df_prod = load_products()
             records = _json.loads(df_prod.to_json(orient='records', force_ascii=False))
             res = sync_productos_bulk(records)
             if "error" in res:
                 st.error(f"Error: {res['error']}")
             else:
-                st.success(f"Sync OK: {res.get('creados', 0)} creados, {res.get('actualizados', 0)} actualizados.")
+                st.success(f"Sync OK: {res.get('total', res.get('creados', 0))} productos procesados.")
 
         st.divider()
         if st.button("🚪 CERRAR SESIÓN"):

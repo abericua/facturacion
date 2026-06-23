@@ -1051,9 +1051,8 @@ def bulk_upsert_productos(records: list) -> dict:
                         proveedor         = EXCLUDED.proveedor,
                         costo             = EXCLUDED.costo,
                         margen_pct        = EXCLUDED.margen_pct,
-                        stock_actual      = EXCLUDED.stock_actual,
-                        stock_reservado   = EXCLUDED.stock_reservado,
-                        stock_disponible  = EXCLUDED.stock_disponible,
+                        -- El stock NO se toca en sincronización de catálogo.
+                        -- Sólo se actualiza via /stock/sync, Tab STOCK y operaciones de venta/anulación.
                         credito_habilitado= EXCLUDED.credito_habilitado,
                         activo            = EXCLUDED.activo,
                         codigo_proveedor  = EXCLUDED.codigo_proveedor,

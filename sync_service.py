@@ -17,6 +17,8 @@ def clean_keys(data):
         return {k.replace('ñ', 'n'): clean_keys(v) for k, v in data.items()}
     elif isinstance(data, list):
         return [clean_keys(item) for item in data]
+    elif hasattr(data, 'isoformat'):   # datetime, date, time → string ISO
+        return data.isoformat()
     return data
 
 
@@ -77,10 +79,10 @@ def sync_clientes_bulk(clientes_list):
 def sync_productos_bulk(productos_list):
     try:
         payload = {"records": clean_keys(productos_list)}
-        with httpx.Client(timeout=30.0) as c:
+        with httpx.Client(timeout=120.0) as c:
             r = c.post(f"{API_BASE_URL}/productos/sync", json=payload, headers=_headers())
         if r.status_code == 200:
             return r.json()
-        return {"error": f"HTTP {r.status_code}"}
+        return {"error": f"HTTP {r.status_code}: {r.text[:200]}"}
     except Exception as e:
         return {"error": str(e)}

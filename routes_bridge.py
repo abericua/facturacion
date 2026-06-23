@@ -700,9 +700,8 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
             resp_json = resp.json()
             texto = resp_json["choices"][0]["message"]["content"]
         except Exception:
-            texto = ""
-            
-        anthropic_shape = {
+            texto = resp.text or "Error al parsear respuesta del modelo."
+        return {
             "id": "local-proxy",
             "type": "message",
             "role": "assistant",
@@ -710,7 +709,7 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
             "content": [{"type": "text", "text": texto}],
             "stop_reason": "end_turn",
         }
-        return PlainTextResponse(json.dumps(anthropic_shape), media_type="application/json")
+ainTextResponse(json.dumps(anthropic_shape), media_type="application/json")
 
     # ── GEMINI ────────────────────────────────────────────────────────────
     if proveedor == "gemini":
