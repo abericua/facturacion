@@ -495,11 +495,14 @@ def run_facturador_app():
                 continue
             if not p_db.get('activo', True):
                 continue
+            nombre_db = str(p_db.get('nombre_canonico', '') or '').strip()
+            # Filtrar entradas fantasma (sin nombre real o nombre == código)
+            if not nombre_db or nombre_db == id_db:
+                continue
             costo_db  = float(p_db.get('costo', 0) or 0)
             moneda_db = str(p_db.get('moneda_costo', 'USD') or 'USD').strip()
             margen_db = float(p_db.get('margen_pct', 23) or 23)
             linea_db  = str(p_db.get('linea', '') or '').strip()
-            nombre_db = str(p_db.get('nombre_canonico', id_db) or id_db).strip()
             precios_db = calcular(costo_db, moneda_db, margen_db, linea_db, dolar_mercado=dolar_mercado)
             stock_db   = stock_map.get(id_db, 0)
             productos.append({
