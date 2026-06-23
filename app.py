@@ -432,6 +432,7 @@ def run_facturador_app():
 
         # 2. Consultar stock desde PostgreSQL, indexado por todos los códigos posibles
         stock_map = {}
+        prods_db = []   # también se usa en paso 4; si falla la DB queda vacío
         try:
             import db_sgsp
             prods_db = db_sgsp.get_productos(solo_activos=False)
@@ -485,6 +486,39 @@ def run_facturador_app():
                 'COSTO':            costo,
                 'MARGEN_PCT':       margen,
             })
+
+        # 4. Incluir productos de DB que NO están en el CSV (agregados via Calculadora → Guardar en Servidor)
+        csv_codigos = {p['CODIGO'] for p in productos}
+        for p_db in prods_db:
+            id_db = str(p_db.get('id_solpro', '') or '').strip()
+            if not id_db or id_db in csv_codigos:
+                continue
+            if not p_db.get('activo', True):
+                continue
+            costo_db  = float(p_db.get('costo', 0) or 0)
+            moneda_db = str(p_db.get('moneda_costo', 'USD') or 'USD').strip()
+            margen_db = float(p_db.get('margen_pct', 23) or 23)
+            linea_db  = str(p_db.get('linea', '') or '').strip()
+            nombre_db = str(p_db.get('nombre_canonico', id_db) or id_db).strip()
+            precios_db = calcular(costo_db, moneda_db, margen_db, linea_db, dolar_mercado=dolar_mercado)
+            stock_db   = stock_map.get(id_db, 0)
+            productos.append({
+                'id_solpro':         id_db,
+                'CODIGO':            id_db,
+                'DESCRIPCION':       nombre_db,
+                'LINEA':             linea_db,
+                'PRECIO_CONTADO':    precios_db['precio_contado'],
+                'PRECIO_QR':         precios_db['precio_qr'],
+                'PRECIO_CREDITO':    precios_db['precio_credito'],
+                'CREDITO_BLOQUEADO': precios_db['credito_bloqueado'],
+                'STOCK':             stock_db,
+                'MONEDA':            moneda_db,
+                'BANDA_PISO':        precios_db['banda_piso'],
+                'BANDA_TECHO':       precios_db['banda_techo'],
+                'COSTO':             costo_db,
+                'MARGEN_PCT':        margen_db,
+            })
+            csv_codigos.add(id_db)
 
         if not productos:
             return pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])

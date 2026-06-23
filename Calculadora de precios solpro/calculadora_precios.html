@@ -200,6 +200,7 @@
             <div class="top-actions">
                 <button class="btn-elite" id="btn_save_config"><i data-lucide="save"></i> Guardar Todo</button>
                 <button class="btn-elite btn-secondary" id="btn_export"><i data-lucide="download"></i> Exportar CSV</button>
+                <button class="btn-elite" id="btn_save_server" style="background:linear-gradient(135deg,#00c6ff,#0072ff);"><i data-lucide="cloud-upload"></i> Guardar en Servidor</button>
                 <button class="btn-elite btn-secondary" id="btn_clear" style="color:var(--danger); border-color:var(--danger);"><i data-lucide="refresh-ccw"></i> Reset</button>
             </div>
         </header>
@@ -966,6 +967,44 @@ SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
         document.getElementById('btn_save_config').onclick = saveParams;
         document.getElementById('btn_clear').onclick = () => { if(confirm('¿BORRAR TODO?')) { localStorage.clear(); location.reload(); } };
 
+        document.getElementById('btn_save_server').onclick = async () => {
+            const BRIDGE_URL = 'https://facturacion-production-3916.up.railway.app/api/bridge/productos/sync';
+            const BRIDGE_KEY = 'sgsp-bridge-2026';
+            const btn = document.getElementById('btn_save_server');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader"></i> Guardando...';
+            lucide.createIcons();
+            try {
+                const records = db.map(p => ({
+                    id_solpro:       p.id,
+                    nombre_canonico: p.nombre,
+                    proveedor:       p.prov  || '',
+                    linea:           p.linea || '',
+                    costo:           parseFloat(p.costo)  || 0,
+                    moneda_costo:    p.moneda || 'USD',
+                    margen_pct:      parseFloat(p.margen) || 23,
+                    activo:          true
+                }));
+                const resp = await fetch(BRIDGE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': BRIDGE_KEY },
+                    body: JSON.stringify({ records })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    alert(`✅ ${records.length} productos guardados en el servidor.\nYa podés hacer clic en "Sincronizar Productos" desde Facturación.`);
+                } else {
+                    alert('❌ Error del servidor: ' + (data.detail || JSON.stringify(data)));
+                }
+            } catch (e) {
+                alert('❌ Error de conexión: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="cloud-upload"></i> Guardar en Servidor';
+                lucide.createIcons();
+            }
+        };
+
         function parseMasterLine(line) {
             // Format: ID,NOMBRE,LINEA,COSTO,MONEDA
             // Split on comma but only take 5 fields (name may have no commas in MASTER_DATA)
@@ -987,54 +1026,4 @@ SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
             db = lines.map(parseMasterLine).filter(x => x !== null);
             // Re-apply any saved margenes
             if (savedMargenes) {
-                savedMargenes.forEach(s => {
-                    const p = db.find(x => x.id === s.id);
-                    if (p) p.margen = s.margen;
-                });
-            }
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-        }
-
-        const MASTER_COUNT = MASTER_DATA.trim().split('\n').length;
-        const MASTER_IDS = new Set(MASTER_DATA.trim().split('\n').map(l => l.split(',')[0].trim()));
-
-        window.onload = () => {
-            const saved = localStorage.getItem(DB_KEY);
-            let savedDb = [];
-            try { savedDb = saved ? JSON.parse(saved) : []; } catch(e) { savedDb = []; }
-
-            // Extraer márgenes personalizados y productos adicionales del usuario
-            const savedMargenes = {};
-            const customProducts = [];
-            savedDb.forEach(p => {
-                savedMargenes[p.id] = p.margen;
-                if (!MASTER_IDS.has(p.id)) customProducts.push(p); // producto añadido por el usuario
-            });
-
-            // SIEMPRE cargar desde MASTER_DATA (datos limpios y correctos)
-            const lines = MASTER_DATA.trim().split('\n');
-            db = lines.map(parseMasterLine).filter(x => x !== null);
-
-            // Reaplica márgenes que el usuario haya editado
-            db.forEach(p => {
-                if (savedMargenes[p.id] !== undefined) p.margen = savedMargenes[p.id];
-            });
-
-            // Agrega productos que el usuario haya creado
-            customProducts.forEach(p => db.push(p));
-
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-
-            // Restaurar parámetros guardados
-            const params = JSON.parse(localStorage.getItem(PARAMS_KEY) || '{}');
-            if (params.dolar) document.getElementById('p_dolar').value = params.dolar;
-            if (params.buffer) document.getElementById('p_buffer').value = params.buffer;
-            if (params.margen) document.getElementById('p_margen').value = params.margen;
-
-            calculateAll();
-            suggestID();
-        };
-    </script>
-</body>
-</html>
-
+   
