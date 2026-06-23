@@ -11,6 +11,8 @@
     "sleepApplication": false,
     "useLegacyStacker": false,
     "ipv6EgressEnabled": false,
+    "healthcheckPath": "/_stcore/health",
+    "healthcheckTimeout": 30,
     "multiRegionConfig": {
       "us-west2": {
         "numReplicas": 1

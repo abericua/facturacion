@@ -7,8 +7,6 @@ requests
 xlsxwriter
 httpx
 psycopg2-binary
-fastapi
-uvicorn
 pyotp
 qrcode
 PyJWT
