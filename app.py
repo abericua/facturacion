@@ -401,10 +401,16 @@ def run_facturador_app():
 
     @st.cache_data(ttl=30)
     def load_products(dolar_mercado=None):
-        import json, sys
+        """
+        Fuente de verdad del catálogo: productos_maestros.csv (Calculadora de Precios).
+        PostgreSQL se consulta SOLO para obtener el stock actual.
+        Nunca aparecen en el dropdown productos que no estén en el CSV.
+        """
+        import json, sys, csv as _csv
         sys.path.insert(0, BASE_DIR)
         from calcular_precio_final import calcular
-        master_path = os.path.join(SGSP_DATABASE, 'master_productos.json')
+
+        CSV_PATH = os.path.join(BASE_DIR, 'Calculadora de precios solpro', 'productos_maestros.csv')
 
         if dolar_mercado is None:
             tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
@@ -413,51 +419,76 @@ def run_facturador_app():
                 dolar_mercado = tc.get('dolar_mercado', 0) or 6250
             except: dolar_mercado = 6250
 
-        productos = []
+        # 1. Leer catálogo EXCLUSIVAMENTE desde productos_maestros.csv
+        try:
+            csv_rows = []
+            with open(CSV_PATH, newline='', encoding='utf-8') as f:
+                reader = _csv.DictReader(f)
+                for row in reader:
+                    csv_rows.append(row)
+        except Exception as e:
+            print(f"[ERROR load_products] No se pudo leer {CSV_PATH}: {e}", file=sys.stderr)
+            return pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])
+
+        # 2. Consultar stock desde PostgreSQL, indexado por todos los códigos posibles
+        stock_map = {}
         try:
             import db_sgsp
-            prods = db_sgsp.get_productos(solo_activos=True)
-            for p in prods:
-                # db_sgsp ya filtra los inactivos si usamos solo_activos=True
-                precios = calcular(p['costo'], p['moneda_costo'], p['margen_pct'], p['linea'], dolar_mercado=dolar_mercado)
-                
-                # Extraer ids_externos (psycopg2 lo devuelve como dict, pero por seguridad)
+            prods_db = db_sgsp.get_productos(solo_activos=False)
+            for p in prods_db:
+                stock_disp = max(0, float(p.get('stock_actual', 0) or 0) - float(p.get('stock_reservado', 0) or 0))
                 ids_ext = p.get('ids_externos') or {}
                 if isinstance(ids_ext, str):
-                    try:
-                        ids_ext = json.loads(ids_ext)
-                    except:
-                        ids_ext = {}
-                
-                productos.append({
-                    'id_solpro': p.get('id_solpro',''),
-                    'CODIGO': ids_ext.get('id_maestro', p.get('id_solpro','')),
-                    'DESCRIPCION': p.get('nombre_canonico', ''),
-                    'LINEA': p.get('linea', ''),
-                    'PRECIO_CONTADO': precios['precio_contado'],
-                    'PRECIO_QR': precios['precio_qr'],
-                    'PRECIO_CREDITO': precios['precio_credito'],
-                    'CREDITO_BLOQUEADO': precios['credito_bloqueado'],
-                    'STOCK': max(0, p.get('stock_actual', 0) - p.get('stock_reservado', 0)),
-                    'MONEDA': p.get('moneda_costo', ''),
-                    'BANDA_PISO': precios['banda_piso'],
-                    'BANDA_TECHO': precios['banda_techo'],
-                    'COSTO': p.get('costo', 0),
-                    'MARGEN_PCT': p.get('margen_pct', 0)
-                })
+                    try: ids_ext = json.loads(ids_ext)
+                    except: ids_ext = {}
+                for key in [
+                    str(p.get('id_solpro', '') or '').strip(),
+                    str(p.get('codigo_proveedor', '') or '').strip(),
+                    str(ids_ext.get('id_maestro', '') or '').strip(),
+                ]:
+                    if key:
+                        stock_map[key] = max(stock_map.get(key, 0), stock_disp)
         except Exception as e:
-            import traceback
-            print(f"[ERROR load_products] {e}", file=sys.stderr)
-            traceback.print_exc()
-            pass
-            
+            print(f"[WARN load_products] No se pudo consultar stock en DB: {e}", file=sys.stderr)
+
+        # 3. Construir DataFrame — solo productos del CSV, stock desde DB
+        productos = []
+        for row in csv_rows:
+            codigo = str(row.get('ID_Ref', '')).strip()
+            nombre = str(row.get('Nombre', '')).strip()
+            linea  = str(row.get('Linea', '')).strip()
+            moneda = str(row.get('Moneda_Costo', 'USD')).strip()
+            try: costo  = float(row.get('Costo_Compra', 0) or 0)
+            except: costo = 0.0
+            try: margen = float(row.get('Margen_Pct', 23) or 23)
+            except: margen = 23.0
+
+            if not codigo or not nombre:
+                continue
+
+            precios = calcular(costo, moneda, margen, linea, dolar_mercado=dolar_mercado)
+            stock   = stock_map.get(codigo, 0)
+
+            productos.append({
+                'id_solpro':        codigo,          # mismo que CODIGO; usado por operaciones de stock
+                'CODIGO':           codigo,
+                'DESCRIPCION':      nombre,
+                'LINEA':            linea,
+                'PRECIO_CONTADO':   precios['precio_contado'],
+                'PRECIO_QR':        precios['precio_qr'],
+                'PRECIO_CREDITO':   precios['precio_credito'],
+                'CREDITO_BLOQUEADO': precios['credito_bloqueado'],
+                'STOCK':            stock,
+                'MONEDA':           moneda,
+                'BANDA_PISO':       precios['banda_piso'],
+                'BANDA_TECHO':      precios['banda_techo'],
+                'COSTO':            costo,
+                'MARGEN_PCT':       margen,
+            })
+
         if not productos:
             return pd.DataFrame(columns=['CODIGO', 'LINEA', 'DESCRIPCION', 'PRECIO_CONTADO', 'STOCK'])
-        df = pd.DataFrame(productos)
-        # Deduplicar por CODIGO manteniendo el registro con mayor STOCK
-        # (previene que duplicados en DB aparezcan en el dropdown)
-        df = df.sort_values('STOCK', ascending=False).drop_duplicates(subset=['CODIGO'], keep='first')
-        return df.reset_index(drop=True)
+        return pd.DataFrame(productos)
 
     @st.cache_data(ttl=30)
     def load_clients():
@@ -820,7 +851,7 @@ def run_facturador_app():
                         try:
                             import json
                             items_to_restore = json.loads(raw_items_str)
-                            df_inv = get_inventory_data()
+                            df_inv = load_products()
                             for item in items_to_restore:
                                 cod = item.get('COD_PRODUCTO', '')
                                 id_para_db = cod
