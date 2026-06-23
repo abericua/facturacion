@@ -943,16 +943,158 @@ def run_facturador_app():
             except: pass
         return pd.DataFrame()
 
-    def call_ai(prompt, system_prompt, api_url):
+    def call_ai_smart(prompt: str, system_prompt: str, history: list = None) -> str:
+        """LLM inteligente: Anthropic (Railway) → Gemini (fallback) → Gemma local (dev)."""
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+        gemini_key    = os.environ.get("GEMINI_API_KEY", "").strip()
+        local_url     = os.environ.get("LOCAL_API_BASE", "http://127.0.0.1:1234/v1").strip()
+
+        msgs = list(history or [])
+        msgs.append({"role": "user", "content": prompt})
+
+        # ── 1. Anthropic (claude-haiku — rápido y barato) ──────────────────
+        if anthropic_key:
+            try:
+                headers = {
+                    "x-api-key": anthropic_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                }
+                payload = {
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 1500,
+                    "system": system_prompt,
+                    "messages": msgs,
+                }
+                r = requests.post("https://api.anthropic.com/v1/messages",
+                                  headers=headers, json=payload, timeout=30)
+                if r.status_code == 200:
+                    return r.json()["content"][0]["text"]
+            except Exception:
+                pass
+
+        # ── 2. Gemini Flash (fallback) ──────────────────────────────────────
+        if gemini_key:
+            try:
+                url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+                       f"gemini-2.0-flash:generateContent?key={gemini_key}")
+                g_contents = [
+                    {"role": "user",  "parts": [{"text": f"[SISTEMA]: {system_prompt}"}]},
+                    {"role": "model", "parts": [{"text": "Entendido."}]},
+                ]
+                for m in msgs:
+                    g_role = "user" if m["role"] == "user" else "model"
+                    g_contents.append({"role": g_role, "parts": [{"text": m["content"]}]})
+                r = requests.post(url, json={"contents": g_contents}, timeout=30)
+                if r.status_code == 200:
+                    return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            except Exception:
+                pass
+
+        # ── 3. LM Studio / Gemma 4 local ───────────────────────────────────
         try:
             payload = {
-                "model": "local-model", 
-                "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}],
-                "temperature": 0.7
+                "model": "google/gemma-4-12b-qat",
+                "messages": [{"role": "system", "content": system_prompt}] + msgs,
+                "temperature": 0.5,
+                "max_tokens": 1000,
             }
-            response = requests.post(f"{api_url.strip().rstrip('/')}/chat/completions", json=payload, timeout=30)
-            return response.json()['choices'][0]['message']['content'] if response.status_code == 200 else f"Error: {response.text}"
-        except Exception as e: return f"Error de conexión: {str(e)}"
+            r = requests.post(f"{local_url.rstrip('/')}/chat/completions",
+                              json=payload, timeout=45)
+            if r.status_code == 200:
+                return r.json()["choices"][0]["message"]["content"]
+            return f"Error LM Studio: {r.status_code} — {r.text[:200]}"
+        except Exception as e:
+            keys = (f"Anthropic: {'✓' if anthropic_key else '✗'} | "
+                    f"Gemini: {'✓' if gemini_key else '✗'} | "
+                    f"Local: {local_url}")
+            return f"❌ Sin respuesta de ningún LLM.\n{keys}\nError: {str(e)}"
+
+    # Alias para compatibilidad con código antiguo
+    def call_ai(prompt, system_prompt, api_url):
+        return call_ai_smart(prompt, system_prompt)
+
+    def auditar_sistema_solpro() -> dict:
+        """Auditoría automática: precios, stock, fantasmas DB, sincronía de CSVs."""
+        res = {"errores": [], "advertencias": [], "ok": []}
+        try:
+            df = load_products()
+
+            # 1. Productos sin precio
+            if 'Precio_Venta' in df.columns:
+                sin_precio = df[pd.to_numeric(df['Precio_Venta'], errors='coerce').fillna(0) == 0]
+                if not sin_precio.empty:
+                    for _, p in sin_precio.iterrows():
+                        res["errores"].append(f"❌ Sin precio: **{p.get('Nombre','?')}** ({p.get('ID_Ref','?')})")
+                else:
+                    res["ok"].append(f"✅ {len(df)} productos con precio definido")
+
+            # 2. Stock negativo
+            if 'stock_total' in df.columns:
+                neg = df[pd.to_numeric(df['stock_total'], errors='coerce').fillna(0) < 0]
+                if not neg.empty:
+                    for _, p in neg.iterrows():
+                        res["advertencias"].append(f"⚠️ Stock negativo: **{p.get('Nombre','?')}** = {p.get('stock_total','?')}")
+                else:
+                    res["ok"].append("✅ Sin stock negativo")
+
+            # 3. Entradas fantasma en DB
+            try:
+                db_url = os.environ.get("DATABASE_URL", "")
+                if db_url:
+                    from db_sgsp import SGSPDatabase
+                    _db = SGSPDatabase(db_url)
+                    prods_db = _db.get_productos(solo_activos=False)
+                    codigos_csv = set(str(c) for c in df['ID_Ref'].tolist())
+                    fantasmas, huerfanos = [], []
+                    for p in prods_db:
+                        id_p    = str(p.get('id_solpro', '') or '').strip()
+                        nombre_p = str(p.get('nombre_canonico', '') or '').strip()
+                        if nombre_p == id_p and id_p:
+                            fantasmas.append(id_p)
+                        elif p.get('activo', True) and id_p not in codigos_csv and nombre_p and nombre_p != id_p:
+                            huerfanos.append(f"{nombre_p} ({id_p})")
+                    if fantasmas:
+                        res["advertencias"].append(f"⚠️ {len(fantasmas)} entradas fantasma: {', '.join(fantasmas[:8])}")
+                    else:
+                        res["ok"].append("✅ Sin entradas fantasma en DB")
+                    if huerfanos:
+                        res["advertencias"].append(f"⚠️ {len(huerfanos)} en DB sin CSV: {', '.join(huerfanos[:5])}")
+                    else:
+                        res["ok"].append("✅ DB ↔ CSV sincronizados")
+            except Exception as e_db:
+                res["advertencias"].append(f"⚠️ No se pudo auditar DB: {str(e_db)[:80]}")
+
+            # 4. Sincronía entre los 3 CSVs
+            csv_paths = {
+                "Calculadora":      os.path.join(BASE_DIR, "Calculadora de precios solpro", "productos_maestros.csv"),
+                "Creador Facturas": os.path.join(BASE_DIR, "Creador de Facturas", "productos_maestros.csv"),
+                "Database":         os.path.join(BASE_DIR, "database", "productos_maestros.csv"),
+            }
+            csv_sets = {}
+            for nom, path in csv_paths.items():
+                if os.path.exists(path):
+                    try:
+                        df_c = pd.read_csv(path)
+                        id_col = 'ID_Ref' if 'ID_Ref' in df_c.columns else df_c.columns[1]
+                        csv_sets[nom] = set(str(x) for x in df_c[id_col].dropna())
+                    except Exception as e_csv:
+                        res["advertencias"].append(f"⚠️ Error leyendo CSV {nom}: {str(e_csv)[:60]}")
+            if len(csv_sets) == 3:
+                ns = list(csv_sets.keys())
+                vs = list(csv_sets.values())
+                for i in range(len(vs)):
+                    for j in range(i + 1, len(vs)):
+                        diff = vs[i].symmetric_difference(vs[j])
+                        if diff:
+                            res["advertencias"].append(
+                                f"⚠️ Diferencia {ns[i]} ↔ {ns[j]}: {', '.join(sorted(diff)[:6])}"
+                            )
+                        else:
+                            res["ok"].append(f"✅ {ns[i]} ↔ {ns[j]}: OK ({len(vs[i])} productos)")
+        except Exception as e_global:
+            res["errores"].append(f"❌ Error crítico: {str(e_global)}")
+        return res
 
     # --- INTERFAZ DE LOGIN ---
     if not st.session_state.get('logged_in', False) or st.session_state.get('user_data') is None:
@@ -1699,217 +1841,37 @@ def run_facturador_app():
                 st.info("Aún no se han generado facturas en PDF.")
 
         with tab5:
-            st.header("🤖 ASISTENTE AI")
-            if "chat_history" not in st.session_state: st.session_state.chat_history = []
-            for msg in st.session_state.chat_history:
-                with st.chat_message(msg["role"]): st.markdown(msg["content"])
-            if prompt := st.chat_input("Consulta corporativa..."):
-                st.session_state.chat_history.append({"role": "user", "content": prompt})
-                with st.chat_message("user"): st.markdown(prompt)
-                with st.chat_message("assistant"):
-                    ctx = f"Catálogo: {len(load_products())} items. Ventas: {len(load_sales())}."
-                    res = call_ai(prompt, f"Asistente SOLPRO. Contexto: {ctx}", ai_url)
-                    st.markdown(res)
-                    st.session_state.chat_history.append({"role": "assistant", "content": res})
+            st.header("🤖 ASISTENTE IA — SOLPRO")
 
-    if True:
-        with tab6:
-            st.header("📦 PEDIDOS PENDIENTES")
-            pedidos_path = os.path.join(SGSP_DATABASE, 'pedidos.json')
-            if os.path.exists(pedidos_path):
-                import json
-                with open(pedidos_path, 'r', encoding='utf-8') as f:
-                    pedidos_all = json.load(f)
-                
-                pedidos_pendientes = [p for p in pedidos_all if p.get('estado') in ['señado', 'reservado']]
-                
-                if not pedidos_pendientes:
-                    st.info("No hay pedidos pendientes.")
-                else:
-                    for p in pedidos_pendientes:
-                        st.markdown(f"### {p['id_pedido']} - {p['nombre_cliente_factura']}")
-                        st.write(f"**Fecha:** {p['fecha_pedido']} | **Vendedor:** {p['vendedor']}")
-                        st.write(f"**Total:** Gs {p['precio_total_gs']:,.0f} | **Señado:** Gs {p.get('monto_señado_gs',0):,.0f} | **Saldo:** Gs {p.get('saldo_pendiente_gs',0):,.0f}")
-                        
-                        if st.button(f"✅ Registrar entrega y liquidar saldo", key=f"liq_{p['id_pedido']}"):
-                            st.session_state.liquidar_pedido = p
-                            st.rerun()
+            # ── Fila de acciones rápidas ─────────────────────────────────────
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                if st.button("🔍 Auditar Sistema", key="btn_audit_tab5", use_container_width=True):
+                    with st.spinner("Auditando sistema..."):
+                        st.session_state["ultimo_audit_tab5"] = auditar_sistema_solpro()
+            with col_b:
+                if st.button("➕ Guiar Nuevo Producto", key="btn_nuevo_tab5", use_container_width=True):
+                    guia_nuevo = (
+                        "Para agregar un producto correctamente en los 3 CSVs del sistema, "
+                        "necesito que me digas:\n\n"
+                        "1. **Nombre completo** del producto\n"
+                        "2. **Código** (ej: SC-145)\n"
+                        "3. **Proveedor** (ej: Sol Control)\n"
+                        "4. **Línea** (INSUMOS / ACCESORIOS / INDUSTRIAL / SERVICIO)\n"
+                        "5. **Costo de compra** y **moneda** (USD o GS)\n"
+                        "6. **Margen %** (default 22%)\n\n"
+                        "Con esa info te genero las líneas exactas para pegar en `Calculadora de precios solpro/productos_maestros.csv`, "
+                        "`Creador de Facturas/productos_maestros.csv` y `database/productos_maestros.csv`."
+                    )
+                    if "chat_history" not in st.session_state:
+                        st.session_state.chat_history = []
+                    st.session_state.chat_history.append({"role": "assistant", "content": guia_nuevo})
+                    st.rerun()
+            with col_c:
+                if st.button("🗑️ Limpiar Chat", key="btn_clear_tab5", use_container_width=True):
+                    st.session_state.chat_history = []
+                    st.rerun()
 
-                    if 'liquidar_pedido' in st.session_state:
-                        p_liq = st.session_state.liquidar_pedido
-                        st.divider()
-                        st.subheader(f"Liquidando saldo de {p_liq['id_pedido']}")
-                        with st.form("form_liquidar"):
-                            saldo_cobrado = st.number_input("Saldo cobrado", value=int(p_liq.get('saldo_pendiente_gs',0)))
-                            forma_pago_liq = st.radio("Forma de Pago", ["CONTADO", "TRANSFERENCIA", "TARJETA"])
-                            if st.form_submit_button("Confirmar Entrega y Factura Final"):
-                                p_liq['estado'] = 'entregado'
-                                p_liq['saldo_pendiente_gs'] = max(0, p_liq.get('saldo_pendiente_gs',0) - saldo_cobrado)
-                                p_liq['monto_señado_gs'] = p_liq.get('monto_señado_gs',0) + saldo_cobrado
-                                p_liq['nro_factura_final'] = get_next_invoice_number()
-
-                                with open(pedidos_path, 'w', encoding='utf-8') as f:
-                                    json.dump(pedidos_all, f, indent=2, ensure_ascii=False)
-
-                                items_path = os.path.join(SGSP_DATABASE, 'pedido_items.json')
-                                items_all = []
-                                if os.path.exists(items_path):
-                                    with open(items_path, 'r', encoding='utf-8') as f: items_all = json.load(f)
-                                items_del_pedido = [i for i in items_all if i['id_pedido'] == p_liq['id_pedido']]
-                                descontar_stock(items_del_pedido)
-
-                                pagos_path = os.path.join(SGSP_DATABASE, 'pagos.json')
-                                pagos_all = []
-                                if os.path.exists(pagos_path):
-                                    with open(pagos_path, 'r', encoding='utf-8') as f: pagos_all = json.load(f)
-                                from datetime import datetime
-                                pagos_all.append({
-                                    'id_pago': f"PAG-{len(pagos_all)+1:04d}",
-                                    'id_pedido': p_liq['id_pedido'],
-                                    'fecha_pago': datetime.now().isoformat(),
-                                    'tipo': 'saldo_final',
-                                    'monto_gs': saldo_cobrado,
-                                    'forma_pago': forma_pago_liq,
-                                    'nro_documento': p_liq['nro_factura_final']
-                                })
-                                with open(pagos_path, 'w', encoding='utf-8') as f:
-                                    json.dump(pagos_all, f, indent=2, ensure_ascii=False)
-
-                                st.success("Pedido liquidado y stock actualizado.")
-                                del st.session_state.liquidar_pedido
-                                st.rerun()
-            else:
-                st.info("No hay base de pedidos inicializada.")
-
-
-    with tab7:
-        st.header("💱 Tipo de Cambio")
-        
-        is_admin = st.session_state.user_data and st.session_state.user_data.get('rol') == 'admin'
-        
-        if not is_admin:
-            st.warning("⚠️ Acceso restringido. Solo Administración puede modificar el tipo de cambio.")
-        else:
-            tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
-            tc = {}
-            if os.path.exists(tc_path):
-                with open(tc_path, 'r', encoding='utf-8') as f:
-                    try: tc = json.load(f)
-                    except: pass
-            
-            dolar_actual = tc.get('dolar_mercado', 6250)
-            piso_actual = tc.get('banda_piso', dolar_actual + 150)
-            techo_actual = tc.get('banda_techo', dolar_actual + 350)
-            ult_act = tc.get('ultima_actualizacion', 'N/A')
-            act_por = tc.get('actualizado_por', 'N/A')
-            historico = tc.get('historico', [])
-            
-            st.subheader("Estado Actual")
-            st.info(f"""
-            **Dólar mercado actual:** Gs {dolar_actual:,}
-            🟢 **Banda Piso (Contado/QR):** Gs {piso_actual:,}
-            🔵 **Banda Techo (Crédito Industrial):** Gs {techo_actual:,}
-            
-            *Última actualización:* {ult_act} por {act_por}
-            """)
-            
-            st.subheader("Actualizar Tipo de Cambio")
-            nuevo_dolar = st.number_input("Nuevo dólar mercado (Gs)", min_value=1000, max_value=50000, value=int(dolar_actual), step=50)
-            
-            st.info(f"""
-            🟢 **Banda Piso:** Gs {nuevo_dolar + 150:,}
-            🔵 **Banda Techo:** Gs {nuevo_dolar + 350:,}
-            """)
-            
-            if st.button("💾 GUARDAR TIPO DE CAMBIO"):
-                from datetime import datetime
-                historico.insert(0, {
-                    "fecha": ult_act,
-                    "dolar_mercado": dolar_actual,
-                    "banda_piso": piso_actual,
-                    "banda_techo": techo_actual,
-                    "actualizado_por": act_por
-                })
-                
-                # Keep last 10
-                historico = historico[:10]
-                
-                tc['dolar_mercado'] = nuevo_dolar
-                tc['banda_piso'] = nuevo_dolar + 150
-                tc['banda_techo'] = nuevo_dolar + 350
-                tc['ultima_actualizacion'] = datetime.now().strftime('%Y-%m-%d')
-                tc['actualizado_por'] = 'Administrador SOLPRO'
-                tc['historico'] = historico
-                
-                with open(tc_path, 'w', encoding='utf-8') as f:
-                    json.dump(tc, f, indent=2, ensure_ascii=False)
-                
-                try:
-                    from datetime import datetime
-                    sync_tipo_cambio({
-                        "dolar_mercado": nuevo_dolar,
-                        "banda_piso": nuevo_dolar + 150,
-                        "banda_techo": nuevo_dolar + 350,
-                        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    })
-                except:
-                    pass
-                
-                load_products.clear()
-                st.success(f"✅ Tipo de cambio actualizado a Gs {nuevo_dolar:,}. Bandas recalculadas. Los precios se actualizarán al recargar.")
-                st.rerun()
-                
-            st.subheader("Historial de Cambios")
-            if historico:
-                hist_data = []
-                for h in historico:
-                    hist_data.append([
-                        h.get('fecha', ''),
-                        f"Gs {h.get('dolar_mercado', 0):,}",
-                        f"Gs {h.get('banda_piso', 0):,}",
-                        f"Gs {h.get('banda_techo', 0):,}",
-                        h.get('actualizado_por', '')
-                    ])
-                df_hist = pd.DataFrame(hist_data, columns=["Fecha", "Dólar", "Banda Piso", "Banda Techo", "Actualizado por"])
-                st.dataframe(df_hist, use_container_width=True)
-            else:
-                st.write("No hay historial disponible.")
-
-    if es_admin:
-        with tab_calc:
-            render_calculadora()
-
-
-if __name__ == "__main__":
-
-    st.set_page_config(
-        page_title="SOLPRO - Facturación Corporativa",
-        layout="wide",
-        page_icon="📄",
-        initial_sidebar_state="expanded"
-    )
-    run_facturador_app()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            # ── Resultados de auditoría ──────────────────────────────────────
+            if "ultimo_audit_tab5" in st.session_state:
+                audit = st.session_state["ultimo_audit_tab5"]
