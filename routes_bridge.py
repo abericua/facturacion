@@ -582,8 +582,13 @@ def get_dashboard_resumen(x_api_key: Optional[str] = Header(None)):
 
 def _resolver_proveedor() -> str:
     forzado = (os.environ.get("LLM_PROVIDER") or "").strip().lower()
-    if forzado in ("gemini", "anthropic"):
+    if forzado in ("local", "gemini", "anthropic"):
         return forzado
+    
+    # Si detectamos entorno local de PC sin RAILWAY, usamos LM Studio
+    if not os.environ.get("RAILWAY_ENVIRONMENT"):
+        return "local"
+        
     if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
         return "gemini"
     return "anthropic"
@@ -643,6 +648,69 @@ async def proxy_llm(request: Request, x_api_key: Optional[str] = Header(None)):
     body = await request.json()
     proveedor = _resolver_proveedor()
     import requests
+
+    # ── LOCAL (LM Studio / OpenAI compatible) ──────────────────────────────
+    if proveedor == "local":
+        modelo = (os.environ.get("LOCAL_MODEL") or "google/gemma-4-12b-qat").strip()
+        base_url = (os.environ.get("LOCAL_API_BASE") or "http://127.0.0.1:1234/v1").strip()
+        if not base_url.endswith("/v1") and not base_url.endswith("/v1/"):
+            base_url = base_url.rstrip("/") + "/v1"
+            
+        url = f"{base_url}/chat/completions"
+        
+        openai_req = {
+            "model": modelo,
+            "messages": [],
+            "temperature": body.get("temperature", 0.0)
+        }
+        if body.get("max_tokens"):
+            openai_req["max_tokens"] = int(body["max_tokens"])
+            
+        system = body.get("system")
+        if system:
+            openai_req["messages"].append({"role": "system", "content": str(system)})
+            
+        for msg in body.get("messages", []):
+            role = msg.get("role")
+            content = msg.get("content", "")
+            if isinstance(content, list):
+                text = "".join(b.get("text", "") for b in content if isinstance(b, dict))
+            else:
+                text = str(content)
+            openai_req["messages"].append({"role": role, "content": text})
+            
+        try:
+            resp = requests.post(url, json=openai_req, headers={"content-type": "application/json"}, timeout=120)
+        except requests.RequestException as e:
+            return PlainTextResponse(
+                json.dumps({"error": {"message": f"Error de red hacia modelo Local: {e}"}}),
+                status_code=502, media_type="application/json")
+                
+        if resp.status_code != 200:
+            try:
+                err = resp.json().get("error", {})
+                msg = err.get("message", resp.text)
+            except Exception:
+                msg = resp.text
+            return PlainTextResponse(
+                json.dumps({"error": {"message": f"Local LLM: {msg}"}}),
+                status_code=resp.status_code, media_type="application/json")
+                
+        try:
+            resp_json = resp.json()
+            texto = resp_json["choices"][0]["message"]["content"]
+        except Exception:
+            texto = ""
+            
+        anthropic_shape = {
+            "id": "local-proxy",
+            "type": "message",
+            "role": "assistant",
+            "model": modelo,
+            "content": [{"type": "text", "text": texto}],
+            "stop_reason": "end_turn",
+        }
+        return PlainTextResponse(json.dumps(anthropic_shape), media_type="application/json")
 
     # ── GEMINI ────────────────────────────────────────────────────────────
     if proveedor == "gemini":
