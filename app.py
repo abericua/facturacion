@@ -945,8 +945,8 @@ def run_facturador_app():
 
     def call_ai_smart(prompt: str, system_prompt: str, history: list = None) -> str:
         """LLM inteligente: Anthropic (Railway) → Gemini (fallback) → Gemma local (dev)."""
-        anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-        gemini_key    = os.environ.get("GEMINI_API_KEY", "").strip()
+        anthropic_key = (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("VITE_ANTHROPIC_API_KEY", "")).strip()
+        gemini_key    = (os.environ.get("GEMINI_API_KEY") or os.environ.get("VITE_GEMINI_API_KEY", "")).strip()
         local_url     = os.environ.get("LOCAL_API_BASE", "http://127.0.0.1:1234/v1").strip()
 
         msgs = list(history or [])
