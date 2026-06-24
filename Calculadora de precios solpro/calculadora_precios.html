@@ -1028,18 +1028,10 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             db = lines.map(parseMasterLine).filter(x => x !== null);
             // Re-apply any saved margenes
             if (savedMargenes) {
-                savedMargenes.forEach(s => {
-                    const p = db.find(x => x.id === s.id);
-                    if (p) p.margen = s.margen;
-                });
-            }
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-        }
-
         const MASTER_COUNT = MASTER_DATA.trim().split('\n').length;
         const MASTER_IDS = new Set(MASTER_DATA.trim().split('\n').map(l => l.split(',')[0].trim()));
 
-        window.onload = () => {
+        window.onload = async () => {
             const saved = localStorage.getItem(DB_KEY);
             let savedDb = [];
             try { savedDb = saved ? JSON.parse(saved) : []; } catch(e) { savedDb = []; }
@@ -1063,6 +1055,34 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
 
             // Agrega productos que el usuario haya creado
             customProducts.forEach(p => db.push(p));
+            
+            // FETCH DESDE EL SERVIDOR (Para evitar que se pierdan los productos al limpiar localStorage)
+            try {
+                const BRIDGE_URL = 'https://facturacion-production-3916.up.railway.app/api/bridge/productos';
+                const BRIDGE_KEY = 'sgsp-bridge-2026';
+                const res = await fetch(BRIDGE_URL, { headers: { 'x-api-key': BRIDGE_KEY } });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.records) {
+                        const existingIds = new Set(db.map(p => p.id));
+                        data.records.forEach(r => {
+                            if (!existingIds.has(r.id_solpro)) {
+                                db.push({
+                                    id: r.id_solpro,
+                                    nombre: r.nombre_canonico,
+                                    prov: r.proveedor || '',
+                                    linea: r.linea || '',
+                                    costo: r.costo || 0,
+                                    moneda: r.moneda_costo || 'USD',
+                                    margen: r.margen_pct || 23
+                                });
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.log('Error sincronizando con servidor en carga inicial:', err);
+            }
 
             localStorage.setItem(DB_KEY, JSON.stringify(db));
 
@@ -1078,4 +1098,3 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
     </script>
 </body>
 </html>
-

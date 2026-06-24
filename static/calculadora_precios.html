@@ -200,6 +200,7 @@
             <div class="top-actions">
                 <button class="btn-elite" id="btn_save_config"><i data-lucide="save"></i> Guardar Todo</button>
                 <button class="btn-elite btn-secondary" id="btn_export"><i data-lucide="download"></i> Exportar CSV</button>
+                <button class="btn-elite" id="btn_save_server" style="background:linear-gradient(135deg,#00c6ff,#0072ff);"><i data-lucide="cloud-upload"></i> Guardar en Servidor</button>
                 <button class="btn-elite btn-secondary" id="btn_clear" style="color:var(--danger); border-color:var(--danger);"><i data-lucide="refresh-ccw"></i> Reset</button>
             </div>
         </header>
@@ -720,7 +721,9 @@ TC-044,EPSON F570+100X80+MULTI+OVERLOCK+COLLARETA FLIAR,INDUSTRIAL,30819955.16,G
 TC-045,MAQUINA DE COSER RECTA IND WILPEX,INDUSTRIAL,2120000.0,GS
 TC-046,MAQUIINA DE COSER OVERLOCK IND WILPEX,INDUSTRIAL,3200000.0,GS
 TC-047,MAQUINA DE COSER COLLARETA IND WILPEX,INDUSTRIAL,4100000.0,GS
-SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
+SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD
+SC-143,LIQUIDO MANTENIMIENTO G6070,INSUMOS,375001,GS
+SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
 
                         const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
@@ -966,6 +969,44 @@ SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
         document.getElementById('btn_save_config').onclick = saveParams;
         document.getElementById('btn_clear').onclick = () => { if(confirm('¿BORRAR TODO?')) { localStorage.clear(); location.reload(); } };
 
+        document.getElementById('btn_save_server').onclick = async () => {
+            const BRIDGE_URL = 'https://facturacion-production-3916.up.railway.app/api/bridge/productos/sync';
+            const BRIDGE_KEY = 'sgsp-bridge-2026';
+            const btn = document.getElementById('btn_save_server');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader"></i> Guardando...';
+            lucide.createIcons();
+            try {
+                const records = db.map(p => ({
+                    id_solpro:       p.id,
+                    nombre_canonico: p.nombre,
+                    proveedor:       p.prov  || '',
+                    linea:           p.linea || '',
+                    costo:           parseFloat(p.costo)  || 0,
+                    moneda_costo:    p.moneda || 'USD',
+                    margen_pct:      parseFloat(p.margen) || 23,
+                    activo:          true
+                }));
+                const resp = await fetch(BRIDGE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': BRIDGE_KEY },
+                    body: JSON.stringify({ records })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    alert(`✅ ${records.length} productos guardados en el servidor.\nYa podés hacer clic en "Sincronizar Productos" desde Facturación.`);
+                } else {
+                    alert('❌ Error del servidor: ' + (data.detail || JSON.stringify(data)));
+                }
+            } catch (e) {
+                alert('❌ Error de conexión: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="cloud-upload"></i> Guardar en Servidor';
+                lucide.createIcons();
+            }
+        };
+
         function parseMasterLine(line) {
             // Format: ID,NOMBRE,LINEA,COSTO,MONEDA
             // Split on comma but only take 5 fields (name may have no commas in MASTER_DATA)
@@ -987,18 +1028,10 @@ SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
             db = lines.map(parseMasterLine).filter(x => x !== null);
             // Re-apply any saved margenes
             if (savedMargenes) {
-                savedMargenes.forEach(s => {
-                    const p = db.find(x => x.id === s.id);
-                    if (p) p.margen = s.margen;
-                });
-            }
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-        }
-
         const MASTER_COUNT = MASTER_DATA.trim().split('\n').length;
         const MASTER_IDS = new Set(MASTER_DATA.trim().split('\n').map(l => l.split(',')[0].trim()));
 
-        window.onload = () => {
+        window.onload = async () => {
             const saved = localStorage.getItem(DB_KEY);
             let savedDb = [];
             try { savedDb = saved ? JSON.parse(saved) : []; } catch(e) { savedDb = []; }
@@ -1022,6 +1055,34 @@ SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
 
             // Agrega productos que el usuario haya creado
             customProducts.forEach(p => db.push(p));
+            
+            // FETCH DESDE EL SERVIDOR (Para evitar que se pierdan los productos al limpiar localStorage)
+            try {
+                const BRIDGE_URL = 'https://facturacion-production-3916.up.railway.app/api/bridge/productos';
+                const BRIDGE_KEY = 'sgsp-bridge-2026';
+                const res = await fetch(BRIDGE_URL, { headers: { 'x-api-key': BRIDGE_KEY } });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.records) {
+                        const existingIds = new Set(db.map(p => p.id));
+                        data.records.forEach(r => {
+                            if (!existingIds.has(r.id_solpro)) {
+                                db.push({
+                                    id: r.id_solpro,
+                                    nombre: r.nombre_canonico,
+                                    prov: r.proveedor || '',
+                                    linea: r.linea || '',
+                                    costo: r.costo || 0,
+                                    moneda: r.moneda_costo || 'USD',
+                                    margen: r.margen_pct || 23
+                                });
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.log('Error sincronizando con servidor en carga inicial:', err);
+            }
 
             localStorage.setItem(DB_KEY, JSON.stringify(db));
 
@@ -1037,4 +1098,3 @@ SC-142,IMP EPSON F6470 IMPARABLES SIN TINTAS,INDUSTRIAL,6474.0,USD`;
     </script>
 </body>
 </html>
-
