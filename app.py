@@ -1875,3 +1875,212 @@ def run_facturador_app():
             # ── Resultados de auditoría ──────────────────────────────────────
             if "ultimo_audit_tab5" in st.session_state:
                 audit = st.session_state["ultimo_audit_tab5"]
+                st.markdown("### 📋 Resultados de la Auditoría")
+                if audit.get("errores"):
+                    for err in audit["errores"]:
+                        st.error(err)
+                if audit.get("advertencias"):
+                    for adv in audit["advertencias"]:
+                        st.warning(adv)
+                if audit.get("ok"):
+                    for ok_msg in audit["ok"]:
+                        st.success(ok_msg)
+
+            # ── Historial de Chat ───────────────────────────────────────────
+            st.markdown("---")
+            if "chat_history" not in st.session_state:
+                st.session_state.chat_history = []
+
+            for msg in st.session_state.chat_history:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+
+            # ── Entrada de Chat ──────────────────────────────────────────────
+            if prompt := st.chat_input("Consulta corporativa..."):
+                st.session_state.chat_history.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+                with st.chat_message("assistant"):
+                    with st.spinner("Pensando..."):
+                        ctx = f"Catálogo: {len(load_products())} items. Ventas: {len(load_sales())}."
+                        res = call_ai_smart(prompt, f"Asistente SOLPRO. Contexto: {ctx}", history=st.session_state.chat_history[:-1])
+                        st.markdown(res)
+                        st.session_state.chat_history.append({"role": "assistant", "content": res})
+                        st.rerun()
+
+    if True:
+        with tab6:
+            st.header("📦 PEDIDOS PENDIENTES")
+            pedidos_path = os.path.join(SGSP_DATABASE, 'pedidos.json')
+            if os.path.exists(pedidos_path):
+                import json
+                with open(pedidos_path, 'r', encoding='utf-8') as f:
+                    pedidos_all = json.load(f)
+                
+                pedidos_pendientes = [p for p in pedidos_all if p.get('estado') in ['señado', 'reservado']]
+                
+                if not pedidos_pendientes:
+                    st.info("No hay pedidos pendientes.")
+                else:
+                    for p in pedidos_pendientes:
+                        st.markdown(f"### {p['id_pedido']} - {p['nombre_cliente_factura']}")
+                        st.write(f"**Fecha:** {p['fecha_pedido']} | **Vendedor:** {p['vendedor']}")
+                        st.write(f"**Total:** Gs {p['precio_total_gs']:,.0f} | **Señado:** Gs {p.get('monto_señado_gs',0):,.0f} | **Saldo:** Gs {p.get('saldo_pendiente_gs',0):,.0f}")
+                        
+                        if st.button(f"✅ Registrar entrega y liquidar saldo", key=f"liq_{p['id_pedido']}"):
+                            st.session_state.liquidar_pedido = p
+                            st.rerun()
+
+                    if 'liquidar_pedido' in st.session_state:
+                        p_liq = st.session_state.liquidar_pedido
+                        st.divider()
+                        st.subheader(f"Liquidando saldo de {p_liq['id_pedido']}")
+                        with st.form("form_liquidar"):
+                            saldo_cobrado = st.number_input("Saldo cobrado", value=int(p_liq.get('saldo_pendiente_gs',0)))
+                            forma_pago_liq = st.radio("Forma de Pago", ["CONTADO", "TRANSFERENCIA", "TARJETA"])
+                            if st.form_submit_button("Confirmar Entrega y Factura Final"):
+                                p_liq['estado'] = 'entregado'
+                                p_liq['saldo_pendiente_gs'] = max(0, p_liq.get('saldo_pendiente_gs',0) - saldo_cobrado)
+                                p_liq['monto_señado_gs'] = p_liq.get('monto_señado_gs',0) + saldo_cobrado
+                                p_liq['nro_factura_final'] = get_next_invoice_number()
+
+                                with open(pedidos_path, 'w', encoding='utf-8') as f:
+                                    json.dump(pedidos_all, f, indent=2, ensure_ascii=False)
+
+                                items_path = os.path.join(SGSP_DATABASE, 'pedido_items.json')
+                                items_all = []
+                                if os.path.exists(items_path):
+                                    with open(items_path, 'r', encoding='utf-8') as f: items_all = json.load(f)
+                                items_del_pedido = [i for i in items_all if i['id_pedido'] == p_liq['id_pedido']]
+                                descontar_stock(items_del_pedido)
+
+                                pagos_path = os.path.join(SGSP_DATABASE, 'pagos.json')
+                                pagos_all = []
+                                if os.path.exists(pagos_path):
+                                    with open(pagos_path, 'r', encoding='utf-8') as f: pagos_all = json.load(f)
+                                from datetime import datetime
+                                pagos_all.append({
+                                    'id_pago': f"PAG-{len(pagos_all)+1:04d}",
+                                    'id_pedido': p_liq['id_pedido'],
+                                    'fecha_pago': datetime.now().isoformat(),
+                                    'tipo': 'saldo_final',
+                                    'monto_gs': saldo_cobrado,
+                                    'forma_pago': forma_pago_liq,
+                                    'nro_documento': p_liq['nro_factura_final']
+                                })
+                                with open(pagos_path, 'w', encoding='utf-8') as f:
+                                    json.dump(pagos_all, f, indent=2, ensure_ascii=False)
+
+                                st.success("Pedido liquidado y stock actualizado.")
+                                del st.session_state.liquidar_pedido
+                                st.rerun()
+            else:
+                st.info("No hay base de pedidos inicializada.")
+
+
+    with tab7:
+        st.header("💱 Tipo de Cambio")
+        
+        is_admin = st.session_state.user_data and st.session_state.user_data.get('rol') == 'admin'
+        
+        if not is_admin:
+            st.warning("⚠️ Acceso restringido. Solo Administración puede modificar el tipo de cambio.")
+        else:
+            tc_path = os.path.join(SGSP_DATABASE, 'master_tipo_cambio.json')
+            tc = {}
+            if os.path.exists(tc_path):
+                with open(tc_path, 'r', encoding='utf-8') as f:
+                    try: tc = json.load(f)
+                    except: pass
+            
+            dolar_actual = tc.get('dolar_mercado', 6250)
+            piso_actual = tc.get('banda_piso', dolar_actual + 150)
+            techo_actual = tc.get('banda_techo', dolar_actual + 350)
+            ult_act = tc.get('ultima_actualizacion', 'N/A')
+            act_por = tc.get('actualizado_por', 'N/A')
+            historico = tc.get('historico', [])
+            
+            st.subheader("Estado Actual")
+            st.info(f"""
+            **Dólar mercado actual:** Gs {dolar_actual:,}
+            🟢 **Banda Piso (Contado/QR):** Gs {piso_actual:,}
+            🔵 **Banda Techo (Crédito Industrial):** Gs {techo_actual:,}
+            
+            *Última actualización:* {ult_act} por {act_por}
+            """)
+            
+            st.subheader("Actualizar Tipo de Cambio")
+            nuevo_dolar = st.number_input("Nuevo dólar mercado (Gs)", min_value=1000, max_value=50000, value=int(dolar_actual), step=50)
+            
+            st.info(f"""
+            🟢 **Banda Piso:** Gs {nuevo_dolar + 150:,}
+            🔵 **Banda Techo:** Gs {nuevo_dolar + 350:,}
+            """)
+            
+            if st.button("💾 GUARDAR TIPO DE CAMBIO"):
+                from datetime import datetime
+                historico.insert(0, {
+                    "fecha": ult_act,
+                    "dolar_mercado": dolar_actual,
+                    "banda_piso": piso_actual,
+                    "banda_techo": techo_actual,
+                    "actualizado_por": act_por
+                })
+                
+                # Keep last 10
+                historico = historico[:10]
+                
+                tc['dolar_mercado'] = nuevo_dolar
+                tc['banda_piso'] = nuevo_dolar + 150
+                tc['banda_techo'] = nuevo_dolar + 350
+                tc['ultima_actualizacion'] = datetime.now().strftime('%Y-%m-%d')
+                tc['actualizado_por'] = 'Administrador SOLPRO'
+                tc['historico'] = historico
+                
+                with open(tc_path, 'w', encoding='utf-8') as f:
+                    json.dump(tc, f, indent=2, ensure_ascii=False)
+                
+                try:
+                    from datetime import datetime
+                    sync_tipo_cambio({
+                        "dolar_mercado": nuevo_dolar,
+                        "banda_piso": nuevo_dolar + 150,
+                        "banda_techo": nuevo_dolar + 350,
+                        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    })
+                except:
+                    pass
+                
+                load_products.clear()
+                st.success(f"✅ Tipo de cambio actualizado a Gs {nuevo_dolar:,}. Bandas recalculadas. Los precios se actualizarán al recargar.")
+                st.rerun()
+                
+            st.subheader("Historial de Cambios")
+            if historico:
+                hist_data = []
+                for h in historico:
+                    hist_data.append([
+                        h.get('fecha', ''),
+                        f"Gs {h.get('dolar_mercado', 0):,}",
+                        f"Gs {h.get('banda_piso', 0):,}",
+                        f"Gs {h.get('banda_techo', 0):,}",
+                        h.get('actualizado_por', '')
+                    ])
+                df_hist = pd.DataFrame(hist_data, columns=["Fecha", "Dólar", "Banda Piso", "Banda Techo", "Actualizado por"])
+                st.dataframe(df_hist, use_container_width=True)
+            else:
+                st.write("No hay historial disponible.")
+
+    if es_admin:
+        with tab_calc:
+            render_calculadora()
+
+
+if __name__ == "__main__":
+    st.set_page_config(
+        page_title="SOLPRO - Facturación Corporativa",
+        layout="wide",
+        page_icon="📄",
+        initial_sidebar_state="expanded"
+    )
+    run_facturador_app()
