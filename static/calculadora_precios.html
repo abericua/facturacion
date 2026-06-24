@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -159,7 +159,7 @@
             <h2 style="color:var(--solpro-yellow); margin-bottom:10px;">Calculadora de ROI</h2>
             <p id="roi_product_name" style="color:var(--text-muted); margin-bottom:25px;"></p>
             <div class="form-group">
-                <label>Inversión Total (Gs)</label>
+                <label>InversiÃ³n Total (Gs)</label>
                 <input type="text" id="roi_total_inv" readonly>
             </div>
             <div class="form-group">
@@ -167,13 +167,13 @@
                 <input type="number" id="roi_profit_unit" value="50000" oninput="calculateROI()">
             </div>
             <div class="form-group">
-                <label>Producción diaria estimada</label>
+                <label>ProducciÃ³n diaria estimada</label>
                 <input type="number" id="roi_daily_prod" value="10" oninput="calculateROI()">
             </div>
             <div style="background:rgba(46, 204, 113, 0.1); padding:20px; border-radius:15px; text-align:center; margin-top:20px;">
                 <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Retorno estimado en</span>
                 <div style="font-size:3rem; font-weight:900; color:var(--success);" id="roi_result_days">0</div>
-                <span style="font-size:0.8rem; color:var(--success); font-weight:800;">DÍAS DE TRABAJO</span>
+                <span style="font-size:0.8rem; color:var(--success); font-weight:800;">DÃAS DE TRABAJO</span>
             </div>
             <button class="btn-elite" style="width:100%; justify-content:center; margin-top:20px;" onclick="document.getElementById('roiModal').style.display='none'">CERRAR</button>
         </div>
@@ -208,18 +208,18 @@
         <div class="main-layout">
             <aside class="admin-sidebar">
                 <div class="bento-card">
-                    <h2><i data-lucide="settings"></i> Parámetros</h2>
+                    <h2><i data-lucide="settings"></i> ParÃ¡metros</h2>
                     <div class="params-grid">
                         <div class="form-group">
-                            <label>Dólar Mercado</label>
+                            <label>DÃ³lar Mercado</label>
                             <input type="number" id="p_dolar" value="6250" oninput="calculateAll()">
                         </div>
                         <div class="form-group">
                             <label>Buffer Piso</label>
                             <input type="number" id="p_buffer" value="0" oninput="calculateAll()">
                             <div id="bandas_display" style="margin-top:10px; font-size:0.75rem; color:var(--text-muted); font-weight:700; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; border:1px solid var(--card-border);">
-                            <div id="lbl_banda_piso">🟢 Banda Piso: -</div>
-                            <div id="lbl_banda_techo" style="margin-top:5px;">🔵 Banda Techo: -</div>
+                            <div id="lbl_banda_piso">ðŸŸ¢ Banda Piso: -</div>
+                            <div id="lbl_banda_techo" style="margin-top:5px;">ðŸ”µ Banda Techo: -</div>
                         </div>
                         </div>
                     </div>
@@ -241,11 +241,11 @@
                             <option value="Sol Control">Sol Control (SC)</option>
                             <option value="Importacion SOLPRO">Importacion SOLPRO (IM)</option>
                             <option value="Todo Costura">Todo Costura (TC)</option>
-                            <option value="COMBO">📦 COMBO (CMB)</option>
+                            <option value="COMBO">ðŸ“¦ COMBO (CMB)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Línea</label>
+                        <label>LÃ­nea</label>
                         <select id="new_linea">
                             <option value="COMERCIAL">COMERCIAL</option>
                             <option value="INDUSTRIAL">INDUSTRIAL</option>
@@ -268,10 +268,10 @@
                 <div class="filter-shelf">
                     <div class="search-main">
                         <i data-lucide="search"></i>
-                        <input type="text" id="main_search" placeholder="Busca por nombre, ID o categoría..." oninput="renderTable()">
+                        <input type="text" id="main_search" placeholder="Busca por nombre, ID o categorÃ­a..." oninput="renderTable()">
                     </div>
                     <select id="filter_linea" class="select-filter" onchange="renderTable()">
-                        <option value="">Línea: Todas</option>
+                        <option value="">LÃ­nea: Todas</option>
                         <option value="COMERCIAL">Comercial</option>
                         <option value="INDUSTRIAL">Industrial</option>
                         <option value="ACCESORIOS">Accesorios</option>
@@ -282,7 +282,7 @@
                     <select id="filter_prov" class="select-filter" onchange="renderTable()">
                         <option value="">Prov: Todos</option>
                         <option value="Sol Control">Sol Control</option>
-                        <option value="Importacion SOLPRO">Importación</option>
+                        <option value="Importacion SOLPRO">ImportaciÃ³n</option>
                         <option value="Todo Costura">Todo Costura</option>
                         <option value="COMBO">Combos</option>
                     </select>
@@ -297,7 +297,7 @@
                                 <th>Costo Base</th>
                                 <th>Profit</th>
                                 <th>Precio Lista (MSRP)</th>
-                                <th>Precio Crédito</th>
+                                <th>Precio CrÃ©dito</th>
                                 <th>Precio Contado</th>
                                 <th>Precio QR</th>
                                 <th style="text-align:right">Acciones</th>
@@ -313,21 +313,21 @@
 
     <script>
         'use strict';
-// ═══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SOLPRO PRICING ENGINE v1.0.0
 // Fuente: database/solpro_pricing.js
-// NO editar aquí — editar en solpro_pricing.js
+// NO editar aquÃ­ â€” editar en solpro_pricing.js
 // y sincronizar manualmente.
-// ═══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const SolproPricing = (() => {
 /**
  * solpro_pricing.js
- * Módulo de Lógica Unificada para Precios SOLPRO
- * Versión 1.0.0
+ * MÃ³dulo de LÃ³gica Unificada para Precios SOLPRO
+ * VersiÃ³n 1.0.0
  */
 
 /**
- * Calcula las bandas de tipo de cambio del día.
+ * Calcula las bandas de tipo de cambio del dÃ­a.
  * @param {number} dolarMercado
  * @returns {{ bandaPiso: number, bandaTecho: number }}
  */
@@ -387,7 +387,7 @@ function calcularPrecioContado(costo, monedaCosto, margenPct, bandaPiso) {
 
 /**
  * Precio QR/Digital = Contado / 0.96
- * El 4% cubre comisión procesadora.
+ * El 4% cubre comisiÃ³n procesadora.
  * @param {number} precioContado
  * @returns {number} precio en GS
  */
@@ -397,7 +397,7 @@ function calcularPrecioQR(precioContado) {
 }
 
 /**
- * Precio crédito. Solo Línea Industrial.
+ * Precio crÃ©dito. Solo LÃ­nea Industrial.
  * Calculado con banda_techo.
  * @param {number} costo
  * @param {'USD'|'GS'} monedaCosto
@@ -428,7 +428,7 @@ function calcularPrecioCredito(costo, monedaCosto, margenPct, bandaTecho, linea)
 
 /**
  * Profit real sin buffers de banda.
- * Para análisis interno exclusivamente.
+ * Para anÃ¡lisis interno exclusivamente.
  * @param {number} precioVenta
  * @param {number} costo
  * @param {'USD'|'GS'} monedaCosto
@@ -442,8 +442,8 @@ function calcularProfit(precioVenta, costo, monedaCosto, dolarMercado) {
 
 /**
  * Combos mixtos USD + GS.
- * Items USD → multiplicar por banda_piso.
- * Items GS → valor nominal.
+ * Items USD â†’ multiplicar por banda_piso.
+ * Items GS â†’ valor nominal.
  * @param {Array<{costo: number, moneda: string}>} items
  * @param {number} bandaPiso
  * @returns {number} total en GS
@@ -461,7 +461,7 @@ function calcularComboMixto(items, bandaPiso) {
 }
 
 /**
- * Detecta si un precio aplicado está dentro,
+ * Detecta si un precio aplicado estÃ¡ dentro,
  * por encima o por debajo del margen esperado.
  * @param {number} precioAplicado
  * @param {number} precioEsperado
@@ -677,7 +677,7 @@ SC-141,T46C120 YHDK F63/F94,INSUMOS,69.0,USD
 TC-001,PRENSA TERMICA 60X40,COMERCIAL,2000000.0,GS
 TC-002,PRENSA TERMICA 38X38,COMERCIAL,1300000.0,GS
 TC-003,GRABADORA LASER 20W,COMERCIAL,4800000.0,GS
-TC-004,EJE ROTATIVO ESTÁNDAR,COMERCIAL,700000.0,GS
+TC-004,EJE ROTATIVO ESTÃNDAR,COMERCIAL,700000.0,GS
 TC-005,GRABADORA LASER 10W,COMERCIAL,3000000.0,GS
 TC-006,PATITAS BASE,ACCESORIOS,200000.0,GS
 TC-007,COMPRESOR DE AIRE,ACCESORIOS,450000.0,GS
@@ -727,7 +727,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
 
                         const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-        // Normaliza texto para comparación: quita tildes, mayúsculas, caracteres especiales
+        // Normaliza texto para comparaciÃ³n: quita tildes, mayÃºsculas, caracteres especiales
         const normalize = s => s.toUpperCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -743,7 +743,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
                 const match = db.find(x => x.id !== p.id && normalize(x.nombre) === normPart)
                            || db.find(x => x.id !== p.id && normalize(x.nombre).includes(normPart))
                            || db.find(x => x.id !== p.id && normPart.includes(normalize(x.nombre)) && normalize(x.nombre).length > 8);
-                if (!match) return 0; // componente no encontrado → no calcular
+                if (!match) return 0; // componente no encontrado â†’ no calcular
                 total += match.moneda === 'USD' ? match.costo * bandaPiso : match.costo;
             }
             return total;
@@ -761,8 +761,8 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             
             const lblPiso = document.getElementById('lbl_banda_piso');
             const lblTecho = document.getElementById('lbl_banda_techo');
-            if(lblPiso) lblPiso.innerText = `🟢 Banda Piso: Gs ${bandaPiso.toLocaleString('es-PY')} (Contado / QR)`;
-            if(lblTecho) lblTecho.innerText = `🔵 Banda Techo: Gs ${bandaTecho.toLocaleString('es-PY')} (Crédito Industrial)`;
+            if(lblPiso) lblPiso.innerText = `ðŸŸ¢ Banda Piso: Gs ${bandaPiso.toLocaleString('es-PY')} (Contado / QR)`;
+            if(lblTecho) lblTecho.innerText = `ðŸ”µ Banda Techo: Gs ${bandaTecho.toLocaleString('es-PY')} (CrÃ©dito Industrial)`;
 
             db.forEach(p => {
                 const mPct = p.margen / 100;
@@ -816,7 +816,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
                                 ? `<span style="color:var(--text-muted); font-size:0.8rem;">${p.moneda} ${p.costo.toLocaleString('es-PY')}</span>`
                                 : (p.costoCalculado > 0
                                     ? `<span style="color:var(--text-muted); font-size:0.75rem;">Gs. ${Math.round(p.costoCalculado).toLocaleString('es-PY')} <span style="font-size:0.55rem; color:var(--solpro-yellow); background:rgba(241,196,15,0.1); padding:2px 5px; border-radius:4px;">AUTO</span></span>`
-                                    : `<span style="color:var(--text-muted);">—</span>`)
+                                    : `<span style="color:var(--text-muted);">â€”</span>`)
                             }
                         </td>
                         <td>${(p.costo > 0 || p.costoCalculado > 0) && p.vC > 0
@@ -839,7 +839,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             });
             document.getElementById('main_body').innerHTML = rows.join('');
             lucide.createIcons();
-            document.getElementById('txt_status').innerText = `SOLPRO ECOSYSTEM • ${filtered.length} EQUIPOS CARGADOS`;
+            document.getElementById('txt_status').innerText = `SOLPRO ECOSYSTEM â€¢ ${filtered.length} EQUIPOS CARGADOS`;
         }
 
         function saveNewProduct() {
@@ -872,7 +872,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
         }
 
         function deleteProduct(id) {
-            if (confirm('¿Eliminar producto?')) {
+            if (confirm('Â¿Eliminar producto?')) {
                 db = db.filter(x => x.id !== id);
                 localStorage.setItem(DB_KEY, JSON.stringify(db));
                 calculateAll();
@@ -897,7 +897,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             const daily = parseFloat(document.getElementById('roi_daily_prod').value) || 0;
             const res = document.getElementById('roi_result_days');
             if (profit > 0 && daily > 0) res.innerText = Math.ceil(inv / (profit * daily)).toLocaleString('es-PY');
-            else res.innerText = '∞';
+            else res.innerText = 'âˆž';
         }
 
         function openEditModal(id) {
@@ -925,13 +925,13 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             const p = db.find(x => x.id === id);
             if (!p) return;
             const sym = p.mon === 'USD' ? 'U$D' : 'Gs.';
-            const msg = `🚀 *SOLPRO ELITE - COTIZACIÓN*\n\n` +
-                        `📦 *Producto:* ${p.nombre}\n` +
-                        `🆔 *Ref:* ${p.id}\n\n` +
-                        `💵 *Precio Contado:* ${sym} ${p.vC.toLocaleString('es-PY')}\n` +
-                        `💳 *Precio Tarjeta/QR:* ${sym} ${p.vQ.toLocaleString('es-PY')}\n\n` +
-                        `👉 _Validez por 24hs. Consultar disponibilidad._\n` +
-                        `🌐 *www.solpro.com.py*`;
+            const msg = `ðŸš€ *SOLPRO ELITE - COTIZACIÃ“N*\n\n` +
+                        `ðŸ“¦ *Producto:* ${p.nombre}\n` +
+                        `ðŸ†” *Ref:* ${p.id}\n\n` +
+                        `ðŸ’µ *Precio Contado:* ${sym} ${p.vC.toLocaleString('es-PY')}\n` +
+                        `ðŸ’³ *Precio Tarjeta/QR:* ${sym} ${p.vQ.toLocaleString('es-PY')}\n\n` +
+                        `ðŸ‘‰ _Validez por 24hs. Consultar disponibilidad._\n` +
+                        `ðŸŒ *www.solpro.com.py*`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -944,14 +944,14 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             const p = { dolar: document.getElementById('p_dolar').value, buffer: document.getElementById('p_buffer').value, margen: document.getElementById('p_margen').value };
             localStorage.setItem(PARAMS_KEY, JSON.stringify(p));
             localStorage.setItem(DB_KEY, JSON.stringify(db));
-            alert('✅ Base de Datos Sincronizada');
+            alert('âœ… Base de Datos Sincronizada');
         }
 
         document.getElementById('btn_export').onclick = () => {
             const fmtGs  = v => `Gs. ${Math.round(v).toLocaleString('es-PY')}`;
             const fmtUsd = v => `U$D ${Math.round(v).toLocaleString('es-PY')}`;
 
-            const headers = 'ID REF;LÍNEA;PRODUCTO;P. CONTADO;P. DIGITAL (QR)\n';
+            const headers = 'ID REF;LÃNEA;PRODUCTO;P. CONTADO;P. DIGITAL (QR)\n';
             const rows = db.filter(p => p.vC > 0).map(p => {
                 const nombre = p.nombre.replace(/;/g, ',');
                 const pC = p.mon === 'USD' ? fmtUsd(p.vC) : fmtGs(p.vC);
@@ -967,7 +967,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
         };
 
         document.getElementById('btn_save_config').onclick = saveParams;
-        document.getElementById('btn_clear').onclick = () => { if(confirm('¿BORRAR TODO?')) { localStorage.clear(); location.reload(); } };
+        document.getElementById('btn_clear').onclick = () => { if(confirm('Â¿BORRAR TODO?')) { localStorage.clear(); location.reload(); } };
 
         document.getElementById('btn_save_server').onclick = async () => {
             const BRIDGE_URL = 'https://facturacion-production-3916.up.railway.app/api/bridge/productos/sync';
@@ -994,12 +994,12 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
                 });
                 const data = await resp.json();
                 if (resp.ok) {
-                    alert(`✅ ${records.length} productos guardados en el servidor.\nYa podés hacer clic en "Sincronizar Productos" desde Facturación.`);
+                    alert(`âœ… ${records.length} productos guardados en el servidor.\nYa podÃ©s hacer clic en "Sincronizar Productos" desde FacturaciÃ³n.`);
                 } else {
-                    alert('❌ Error del servidor: ' + (data.detail || JSON.stringify(data)));
+                    alert('âŒ Error del servidor: ' + (data.detail || JSON.stringify(data)));
                 }
             } catch (e) {
-                alert('❌ Error de conexión: ' + e.message);
+                alert('âŒ Error de conexiÃ³n: ' + e.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i data-lucide="cloud-upload"></i> Guardar en Servidor';
@@ -1036,25 +1036,27 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
             let savedDb = [];
             try { savedDb = saved ? JSON.parse(saved) : []; } catch(e) { savedDb = []; }
 
-            // Extraer márgenes personalizados y productos adicionales del usuario
+            // Extraer mÃ¡rgenes personalizados y productos adicionales del usuario
             const savedMargenes = {};
             const customProducts = [];
             savedDb.forEach(p => {
                 savedMargenes[p.id] = p.margen;
-                if (!MASTER_IDS.has(p.id)) customProducts.push(p); // producto añadido por el usuario
+                if (!MASTER_IDS.has(p.id)) customProducts.push(p); // producto aÃ±adido por el usuario
             });
 
             // SIEMPRE cargar desde MASTER_DATA (datos limpios y correctos)
             const lines = MASTER_DATA.trim().split('\n');
             db = lines.map(parseMasterLine).filter(x => x !== null);
 
-            // Reaplica márgenes que el usuario haya editado
+            // Reaplica mÃ¡rgenes que el usuario haya editado
             db.forEach(p => {
                 if (savedMargenes[p.id] !== undefined) p.margen = savedMargenes[p.id];
             });
 
             // Agrega productos que el usuario haya creado
-            customProducts.forEach(p => db.push(p));
+            customProducts.forEach(p => {
+                if (p && p.id) db.push(p);
+            });
             
             // RENDER INICIAL INMEDIATO
             calculateAll();
@@ -1099,7 +1101,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
 
             localStorage.setItem(DB_KEY, JSON.stringify(db));
 
-            // Restaurar parámetros guardados
+            // Restaurar parÃ¡metros guardados
             const params = JSON.parse(localStorage.getItem(PARAMS_KEY) || '{}');
             if (params.dolar) document.getElementById('p_dolar').value = params.dolar;
             if (params.buffer) document.getElementById('p_buffer').value = params.buffer;
