@@ -1,22 +1,23 @@
 [
   {
     "usuario": "admin",
-    "password": "5497feda4f88c5ebadc4de1587dd3828ca535bf85f4b5e91aa7e8a8c13178622",
+    "password": "d5d14ea82cd62d47890556f37a8969714df43c9a396ccc511744186e04802f26",
     "rol": "admin",
     "nombre": "Administrador SOLPRO",
-    "totp_secret": "SEOIPPOHUIXSL7HRBUPMKFNGAS3JAXYA"
+    "totp_secret": ""
   },
   {
     "usuario": "vendedor1",
     "password": "7fcd87ad1a0873db76110b6c0a0b76640160736bf2ab726d7ca5013b269f2041",
     "rol": "vendedor",
     "nombre": "ALBERTO",
-    "totp_secret": "5CVH6Q5VMR3644KXFBVZUMOHQDYJVYX7"
+    "totp_secret": ""
   },
   {
     "usuario": "vendedor2",
     "password": "a42b99b142a58eb744d967e030f22b83e8dfd072145afdf78a1e4f4e2ce34157",
     "rol": "vendedor",
-    "nombre": "MAURO"
+    "nombre": "MAURO",
+    "totp_secret": ""
   }
 ]
