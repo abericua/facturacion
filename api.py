@@ -28,7 +28,7 @@ import db_sgsp
 
 # ── Configuración ──────────────────────────────────────────────────────────
 JWT_SECRET    = os.environ.get("JWT_SECRET", "sgsp-dev-secret-cambiar-en-produccion")
-SYSTEM_PEPPER = os.environ.get("SYSTEM_PEPPER", "")
+SYSTEM_PEPPER = os.environ.get("SYSTEM_PEPPER", "SOLPRO_ULTRA_SECRET_2026_#!")
 ALGORITMO     = "HS256"
 TOKEN_HORAS   = 12
 
