@@ -1031,7 +1031,7 @@ SC-144,WIPER F9570,ACCESORIOS,858001,GS`;
         const MASTER_COUNT = MASTER_DATA.trim().split('\n').length;
         const MASTER_IDS = new Set(MASTER_DATA.trim().split('\n').map(l => l.split(',')[0].trim()));
 
-        window.onload = async () => {
+        window.onload = () => {
             const saved = localStorage.getItem(DB_KEY);
             let savedDb = [];
             try { savedDb = saved ? JSON.parse(saved) : []; } catch(e) { savedDb = []; }
