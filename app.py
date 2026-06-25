@@ -1737,11 +1737,28 @@ def run_facturador_app():
                             try:
                                 # Asegurar formato string para el PDF si fecha es datetime
                                 fecha_str = fecha.strftime("%d/%m/%Y") if hasattr(fecha, 'strftime') else str(fecha).replace('-', '/')
+                                # El historial guarda la descripción como "2 PROD A, 3 PROD B, ..."
+                                # (ver log_sales: ", ".join(f"{cant} {desc}")). La separamos de
+                                # vuelta en un renglón por producto. No hay precio por línea guardado,
+                                # así que esas celdas quedan en blanco y el total real va por total_override.
+                                import re as _re
+                                productos_regen = []
+                                for seg in [s.strip() for s in str(desc).split(",") if s.strip()]:
+                                    m = _re.match(r'^\s*(\d+)\s+(.*)$', seg)
+                                    if m:
+                                        cant_seg, desc_seg = int(m.group(1)), m.group(2).strip()
+                                    else:
+                                        cant_seg, desc_seg = 1, seg
+                                    productos_regen.append({"c": cant_seg, "d": desc_seg, "p": 0, "t": 0})
+                                if not productos_regen:
+                                    productos_regen = [{"c": 1, "d": str(desc), "p": 0, "t": 0}]
+
                                 generate_invoice_pdf({
                                     "nro_factura": str(regen_nro), "fecha": fecha_str,
                                     "nombre": str(cliente), "ruc": "", "direccion": "", "telefono": "",
                                     "condicion": condicion, "moneda": moneda,
-                                    "productos": [{"c": 1, "d": desc, "p": total, "t": total}]
+                                    "productos": productos_regen,
+                                    "total_override": total
                                 }, pdf_path)
                                 st.success(f"Factura {regen_nro} generada exitosamente. Revisa el repositorio de abajo.")
                                 st.rerun()

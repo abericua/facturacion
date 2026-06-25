@@ -102,8 +102,13 @@ def _dibujar_canvas(c, data, moneda):
         c.drawCentredString(55,  y, f"{float(p['c']):g}")
         
         desc_lines = wrap_text(c, p['d'], 290, "Helvetica", 10)
-        c.drawRightString(415,   y, format_money(float(p['p']), moneda))
-        c.drawRightString(621,   y, format_money(float(p['t']), moneda))
+        # Solo dibujar precio/total de la línea si tienen valor (>0).
+        # En facturas regeneradas desde el historial no hay precio por línea,
+        # así que esas celdas quedan en blanco y el total real se toma de 'total_override'.
+        if float(p['p']) > 0:
+            c.drawRightString(415,   y, format_money(float(p['p']), moneda))
+        if float(p['t']) > 0:
+            c.drawRightString(621,   y, format_money(float(p['t']), moneda))
         
         y_desc = y
         for idx, line in enumerate(desc_lines):
@@ -113,6 +118,10 @@ def _dibujar_canvas(c, data, moneda):
                 
         total_suma += float(p['t'])
         y -= (18.5 + (len(desc_lines) - 1) * 12)
+
+    # Permite forzar el total cuando no hay precio por línea (regeneración histórica)
+    if data.get('total_override'):
+        total_suma = float(data['total_override'])
 
     # TOTALES
     c.setFont("Helvetica", 10)
