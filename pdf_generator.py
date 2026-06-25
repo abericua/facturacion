@@ -22,6 +22,34 @@ PAGE_H = 2180 * 0.28
 
 
 # ── Helpers compartidos ────────────────────────────────────────────────────
+def wrap_text(c, text, max_width, font_name="Helvetica", font_size=10):
+    if not text:
+        return [""]
+    words = text.split()
+    lines = []
+    current_line = []
+    for word in words:
+        test_line = " ".join(current_line + [word])
+        if c.stringWidth(test_line, font_name, font_size) <= max_width:
+            current_line.append(word)
+        else:
+            if current_line:
+                lines.append(" ".join(current_line))
+                current_line = [word]
+            else:
+                part = ""
+                for char in word:
+                    if c.stringWidth(part + char, font_name, font_size) <= max_width:
+                        part += char
+                    else:
+                        lines.append(part)
+                        part = char
+                if part:
+                    current_line = [part]
+    if current_line:
+        lines.append(" ".join(current_line))
+    return lines
+
 def format_money(val, moneda):
     if moneda == "PYG":
         return f"{val:,.0f}".replace(",", ".")
@@ -72,11 +100,19 @@ def _dibujar_canvas(c, data, moneda):
     for p in data['productos']:
         c.setFont("Helvetica", 10)
         c.drawCentredString(55,  y, f"{float(p['c']):g}")
-        c.drawString(105,        y, p['d'])
+        
+        desc_lines = wrap_text(c, p['d'], 290, "Helvetica", 10)
         c.drawRightString(415,   y, format_money(float(p['p']), moneda))
         c.drawRightString(621,   y, format_money(float(p['t']), moneda))
+        
+        y_desc = y
+        for idx, line in enumerate(desc_lines):
+            c.drawString(105, y_desc, line)
+            if idx < len(desc_lines) - 1:
+                y_desc -= 12
+                
         total_suma += float(p['t'])
-        y -= 18.5
+        y -= (18.5 + (len(desc_lines) - 1) * 12)
 
     # TOTALES
     c.setFont("Helvetica", 10)
