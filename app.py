@@ -1042,8 +1042,7 @@ def run_facturador_app():
             try:
                 db_url = os.environ.get("DATABASE_URL", "")
                 if db_url:
-                    from db_sgsp import SGSPDatabase
-                    _db = SGSPDatabase(db_url)
+                    import db_sgsp as _db
                     prods_db = _db.get_productos(solo_activos=False)
                     codigos_csv = set(str(c) for c in df['ID_Ref'].tolist())
                     fantasmas, huerfanos = [], []
